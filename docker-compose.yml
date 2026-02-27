@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: next-day-delivery-postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      TZ: Asia/Seoul
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - delivery_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: next-day-delivery-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: >
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - delivery_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: next-day-delivery-postgres-data
+  redis_data:
+    name: next-day-delivery-redis-data
+
+networks:
+  delivery_network:
+    name: next-day-delivery-network
+    driver: bridge
