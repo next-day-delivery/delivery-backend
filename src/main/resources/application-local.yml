@@ -1,0 +1,38 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB:next_day_delivery_db}
+    username: ${POSTGRES_USER:root}
+    password: ${POSTGRES_PASSWORD:delivery_db_password_123!}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: Local-HikariCP
+      maximum-pool-size: 10
+      minimum-idle: 10
+      connection-timeout: 3000
+      max-lifetime: 580000
+
+  data:
+    redis:
+      host: localhost
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:delivery_redis_password_123!}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        highlight_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
