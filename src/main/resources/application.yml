@@ -1,19 +1,16 @@
 spring:
-  application:
-    name: delivery-backend
+    application:
+        name: delivery-backend
 
-  profiles:
-    active: local
+    jpa:
+        open-in-view: false
+        hibernate:
+            ddl-auto: validate
+        properties:
+            hibernate:
+                format_sql: true
+                default_batch_fetch_size: 1000
 
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: true
-        default_batch_fetch_size: 1000
-
-  liquibase:
-    enabled: true
-    change-log: classpath:db/db.changelog-master.yaml
+    liquibase:
+        enabled: true
+        change-log: classpath:db/db.changelog-master.yaml
