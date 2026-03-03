@@ -38,3 +38,8 @@ out/
 
 ### .env files ###
 **/.env
+
+### Generated files ###
+/src/main/generated/
+/src/test/generated/
+/generated/
