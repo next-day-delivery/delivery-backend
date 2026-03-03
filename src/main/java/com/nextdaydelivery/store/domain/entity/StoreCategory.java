@@ -1,8 +1,6 @@
-package com.nextdaydelivery.store_category.domain.entity;
+package com.nextdaydelivery.store.domain.entity;
 
-import com.nextdaydelivery.category.domain.entity.Category;
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
-import com.nextdaydelivery.store.domain.entity.Store;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
