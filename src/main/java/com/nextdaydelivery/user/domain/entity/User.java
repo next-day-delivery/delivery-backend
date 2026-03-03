@@ -42,10 +42,9 @@ public class User extends BaseEntity {
     private String password; // 비밀번호
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, length = 20)
     private UserRole role; // 역할 (CUSTOMER, OWNER, MANAGER, MASTER)
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic; // 공개 여부 (BOOLEAN)
-
 }
