@@ -1,40 +1,40 @@
 spring:
-    config:
-        activate:
-            on-profile: local
+  config:
+    activate:
+      on-profile: local
 
-    datasource:
-        url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
-        username: ${POSTGRES_USER}
-        password: ${POSTGRES_PASSWORD}
-        driver-class-name: org.postgresql.Driver
-        hikari:
-            pool-name: Local-HikariCP
-            maximum-pool-size: 10
-            minimum-idle: 10
-            connection-timeout: 3000
-            max-lifetime: 580000
+  datasource:
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: Local-HikariCP
+      maximum-pool-size: 10
+      minimum-idle: 10
+      connection-timeout: 3000
+      max-lifetime: 580000
 
-    data:
-        redis:
-            host: localhost
-            port: ${REDIS_PORT}
-            password: ${REDIS_PASSWORD}
-            lettuce:
-                pool:
-                    max-active: 8
-                    max-idle: 8
-                    min-idle: 2
+  data:
+    redis:
+      host: localhost
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
 
-    jpa:
-      properties:
-            hibernate:
-                show_sql: true
-                highlight_sql: true
+  jpa:
+    properties:
       hibernate:
-        ddl-auto:
+        show_sql: true
+        highlight_sql: true
+    hibernate:
+      ddl-auto:
 
 logging:
-    level:
-        org.hibernate.SQL: DEBUG
-        org.hibernate.orm.jdbc.bind: TRACE
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
