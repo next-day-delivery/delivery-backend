@@ -1,12 +1,16 @@
 package com.nextdaydelivery.payment.domain.entity;
 
-import com.nextdaydelivery._domainName_sample.domain.entity.BaseEntity;
+import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.order.domain.entity.Order;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -30,8 +34,9 @@ public class Payment extends BaseEntity {
     @Column(name = "payment_id", updatable = false, nullable = false)
     private UUID paymentId; // 결제 PK
 
-    @Column(name = "order_id", nullable = false)
-    private UUID orderId; // 주문 PK
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order; // 결제에서 주문을 참조
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)

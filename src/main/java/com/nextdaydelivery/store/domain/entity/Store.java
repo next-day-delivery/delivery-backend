@@ -1,10 +1,15 @@
 package com.nextdaydelivery.store.domain.entity;
 
-import com.nextdaydelivery._domainName_sample.domain.entity.BaseEntity;
+import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.store_address.domain.entity.StoreAddress;
+import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -28,11 +33,13 @@ public class Store extends BaseEntity {
     @Column(name = "store_id", updatable = false, nullable = false)
     private UUID storeId; // 가게 PK
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; // 회원 PK (Owner)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "store_address_id", nullable = false)
-    private Long storeAddressId; // 가게 주소 PK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_address_id", nullable = false)
+    private StoreAddress storeAddress; // 가게 위치 정보 (p_store_address 참조)
 
     @Column(name = "name", length = 100, nullable = false)
     private String name; // 가게명

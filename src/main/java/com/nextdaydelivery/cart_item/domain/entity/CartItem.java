@@ -1,10 +1,15 @@
 package com.nextdaydelivery.cart_item.domain.entity;
 
-import com.nextdaydelivery._domainName_sample.domain.entity.BaseEntity;
+import com.nextdaydelivery.cart.domain.entity.Cart;
+import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -31,9 +36,11 @@ public class CartItem extends BaseEntity {
     @Column(name = "quantity", nullable = false)
     private Long quantity; // 수량 (BIGINT)
 
-    @Column(name = "cart_id", nullable = false)
-    private UUID cartId; // 장바구니 PK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id", nullable = false)
+    private Cart cart; // 어떤 장바구니에 담겼는가 (단방향)
 
-    @Column(name = "product_id", nullable = false)
-    private UUID productId; // 상품 PK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product; // 상품 PK
 }

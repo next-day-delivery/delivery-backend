@@ -1,12 +1,17 @@
 package com.nextdaydelivery.cart.domain.entity;
 
-import com.nextdaydelivery._domainName_sample.domain.entity.BaseEntity;
+import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.store.domain.entity.Store;
+import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -30,11 +35,13 @@ public class Cart extends BaseEntity {
     @Column(name = "cart_id", updatable = false, nullable = false)
     private UUID cartId; // 장바구니 PK
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; // 회원 PK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "store_id", nullable = false)
-    private UUID storeId; // 가게 PK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store; // 가게 PK
 
     @Enumerated(EnumType.STRING) // DB에 문자열(ACTIVE 등)로 저장
     @Column(name = "status", nullable = false)
