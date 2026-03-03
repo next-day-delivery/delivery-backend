@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -44,8 +45,8 @@ public class Store extends BaseEntity {
     @Column(name = "name", length = 100, nullable = false)
     private String name; // 가게명
 
-    @Column(name = "rating_avg")
-    private Double ratingAvg; // 가게 평점 (DECIMAL 2,1)
+    @Column(name = "rating_avg", precision = 2, scale = 1)
+    private BigDecimal ratingAvg; // 가게 평점 (DECIMAL 2,1)
 
     @Column(name = "review_count")
     private Integer reviewCount; // 리뷰 수 (INT)

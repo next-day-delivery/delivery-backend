@@ -2,6 +2,8 @@ package com.nextdaydelivery.payment.domain.entity;
 
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
+import com.nextdaydelivery.payment.domain.entity.enums.PaymentMethod;
+import com.nextdaydelivery.payment.domain.entity.enums.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,19 +48,4 @@ public class Payment extends BaseEntity {
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus; // 결제 상태 (CANCEL, COMPLETE, FAILED)
 
-    /**
-     * 결제 방법을 위한 ENUM
-     */
-    public enum PaymentMethod {
-        CARD
-    }
-
-    /**
-     * 결제 상태를 위한 ENUM
-     */
-    public enum PaymentStatus {
-        CANCEL,
-        COMPLETE,
-        FAILED
-    }
 }

@@ -2,6 +2,7 @@ package com.nextdaydelivery.review.domain.entity;
 
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
+import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -43,7 +44,7 @@ public class Review extends BaseEntity {
 
     // Review 엔티티 내부
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", unique = true) // DB 테이블의 FK 컬럼명과 일치시킵니다.
+    @JoinColumn(name = "order_id", unique = true, nullable = false) // DB 테이블의 FK 컬럼명과 일치시킵니다.
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -60,11 +61,4 @@ public class Review extends BaseEntity {
     @Column(name = "review_status", nullable = false)
     private ReviewStatus reviewStatus; // 리뷰 상태 (VISIBLE, HIDDEN)
 
-    /**
-     * 리뷰 상태 관리를 위한 ENUM
-     */
-    public enum ReviewStatus {
-        VISIBLE, // 표시
-        HIDDEN   // 숨김
-    }
 }

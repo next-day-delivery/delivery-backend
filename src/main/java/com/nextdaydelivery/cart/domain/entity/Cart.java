@@ -1,5 +1,6 @@
 package com.nextdaydelivery.cart.domain.entity;
 
+import com.nextdaydelivery.cart.domain.enums.CartStatus;
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
@@ -47,8 +48,4 @@ public class Cart extends BaseEntity {
     @Column(name = "status", nullable = false)
     private CartStatus status; // 상태 (ACTIVE, INACTIVE, COMPLETED)
 
-    // 장바구니 상태를 위한 ENUM
-    public enum CartStatus {
-        ACTIVE, INACTIVE, COMPLETED
-    }
 }

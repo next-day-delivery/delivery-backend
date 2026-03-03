@@ -1,6 +1,7 @@
 package com.nextdaydelivery.order.domain.entity;
 
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,17 +43,7 @@ public class Order extends BaseEntity {
     @Column(name = "order_status", nullable = false)
     private OrderStatus orderStatus; // 주문 상태 (ENUM)
 
-    @Column(name = "address", columnDefinition = "TEXT")
+    @Column(name = "address")
     private String address; // 배송지 (VARCHAR)
 
-    /**
-     * 주문 상태 관리를 위한 ENUM -> 추후 파일 분리
-     */
-    public enum OrderStatus {
-        ORDER_REQUESTED,  // 주문 요청
-        ORDER_REJECTED,   // 주문 거절
-        ORDER_CANCELED,   // 주문 취소
-        ORDER_ACCEPTED,   // 주문 접수
-        ORDER_COMPLETED   // 주문 완료
-    }
 }

@@ -1,5 +1,6 @@
 package com.nextdaydelivery.delivery.domain.entity;
 
+import com.nextdaydelivery.delivery.domain.enums.DeliveryStatus;
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import jakarta.persistence.Column;
@@ -36,18 +37,10 @@ public class Delivery extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    private Order order; // 결제에서 주문을 참조
+    private Order order; // 배달에서 주문을 참조
 
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false)
     private DeliveryStatus deliveryStatus; // 배달 상태 (PENDING, ING, COMPLETED)
 
-    /**
-     * 배달 상태 관리를 위한 ENUM
-     */
-    public enum DeliveryStatus {
-        DELIVERY_PENDING,   // 배달 대기
-        DELIVERY_ING,       // 배달 중
-        DELIVERY_COMPLETED  // 배달 완료
-    }
 }

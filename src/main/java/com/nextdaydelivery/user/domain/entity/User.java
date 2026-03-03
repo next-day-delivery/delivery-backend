@@ -1,6 +1,7 @@
 package com.nextdaydelivery.user.domain.entity;
 
 import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -47,13 +48,4 @@ public class User extends BaseEntity {
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic; // 공개 여부 (BOOLEAN)
 
-    /**
-     * 회원 역할을 위한 ENUM -> 추후 파일 분리
-     */
-    public enum UserRole {
-        CUSTOMER, // 일반 고객
-        OWNER,    // 가게 주인
-        MANAGER,  // 매니저
-        MASTER    // 시스템 관리자
-    }
 }
