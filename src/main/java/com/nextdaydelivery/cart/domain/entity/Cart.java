@@ -1,7 +1,6 @@
 package com.nextdaydelivery.cart.domain.entity;
 
 import com.nextdaydelivery.cart.domain.enums.CartStatus;
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -28,7 +27,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Cart extends BaseEntity {
+public class Cart {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -47,5 +46,4 @@ public class Cart extends BaseEntity {
     @Enumerated(EnumType.STRING) // DB에 문자열(ACTIVE 등)로 저장
     @Column(name = "status", nullable = false)
     private CartStatus status; // 상태 (ACTIVE, INACTIVE, COMPLETED)
-
 }

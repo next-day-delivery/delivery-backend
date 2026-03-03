@@ -1,7 +1,6 @@
 package com.nextdaydelivery.cart_item.domain.entity;
 
 import com.nextdaydelivery.cart.domain.entity.Cart;
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +24,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class CartItem extends BaseEntity {
+public class CartItem {
 
     @Id
     @GeneratedValue(generator = "UUID")
