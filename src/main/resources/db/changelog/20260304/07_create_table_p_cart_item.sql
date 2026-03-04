@@ -4,7 +4,6 @@
 CREATE TABLE p_cart_item
 (
     cart_item_id UUID PRIMARY KEY,
-
     cart_id      UUID   NOT NULL,
     product_id   UUID   NOT NULL,
     quantity     BIGINT NOT NULL,

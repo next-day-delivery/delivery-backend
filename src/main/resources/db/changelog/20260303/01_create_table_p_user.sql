@@ -10,6 +10,7 @@ CREATE TABLE p_user
     password   VARCHAR(255) NOT NULL,
     role       VARCHAR(20)  NOT NULL,
     is_public  BOOLEAN      NOT NULL DEFAULT TRUE,
+    
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(100) NOT NULL,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
