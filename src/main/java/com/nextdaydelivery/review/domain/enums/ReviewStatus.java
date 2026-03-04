@@ -1,4 +1,4 @@
-package com.nextdaydelivery.review.domain.entity.enums;
+package com.nextdaydelivery.review.domain.enums;
 
 /**
  * 리뷰 상태 관리를 위한 ENUM

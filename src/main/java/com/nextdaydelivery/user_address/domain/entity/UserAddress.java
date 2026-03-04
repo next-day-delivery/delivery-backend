@@ -1,6 +1,6 @@
 package com.nextdaydelivery.user_address.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.BaseAuditEntity;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class UserAddress extends BaseEntity {
+public class UserAddress extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -38,4 +39,10 @@ public class UserAddress extends BaseEntity {
 
     @Column(name = "address", length = 255, nullable = false)
     private String address; // 배송주소 (VARCHAR 255)
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 레코드 삭제 시간
+
+    @Column(name = "deleted_by", length = 100)
+    private String deletedBy; // 레코드 삭제자
 }

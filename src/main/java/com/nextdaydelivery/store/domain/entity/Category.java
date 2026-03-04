@@ -1,11 +1,12 @@
 package com.nextdaydelivery.store.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.BaseAuditEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Category extends BaseEntity {
+public class Category extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -30,4 +31,10 @@ public class Category extends BaseEntity {
 
     @Column(name = "category_name", length = 100, nullable = false)
     private String categoryName; // 카테고리명
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 레코드 삭제 시간
+
+    @Column(name = "deleted_by", length = 100)
+    private String deletedBy; // 레코드 삭제자
 }

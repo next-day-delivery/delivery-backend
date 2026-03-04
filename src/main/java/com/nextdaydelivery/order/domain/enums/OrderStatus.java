@@ -1,4 +1,4 @@
-package com.nextdaydelivery.order.domain.entity.enums;
+package com.nextdaydelivery.order.domain.enums;
 
 /**
  * 주문 상태 관리를 위한 ENUM -> 추후 파일 분리

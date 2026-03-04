@@ -1,9 +1,9 @@
 package com.nextdaydelivery.payment.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
-import com.nextdaydelivery.payment.domain.entity.enums.PaymentMethod;
-import com.nextdaydelivery.payment.domain.entity.enums.PaymentStatus;
+import com.nextdaydelivery.payment.domain.enums.PaymentMethod;
+import com.nextdaydelivery.payment.domain.enums.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,7 +28,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Payment extends BaseEntity {
+public class Payment extends CreatedAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -47,5 +47,4 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus; // 결제 상태 (CANCEL, COMPLETE, FAILED)
-
 }

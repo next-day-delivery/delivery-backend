@@ -1,7 +1,7 @@
 package com.nextdaydelivery.order.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
-import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
+import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +27,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Order extends BaseEntity {
+public class Order extends CreatedAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -45,5 +45,4 @@ public class Order extends BaseEntity {
 
     @Column(name = "address")
     private String address; // 배송지 (VARCHAR)
-
 }
