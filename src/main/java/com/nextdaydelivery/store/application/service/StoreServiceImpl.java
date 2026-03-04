@@ -60,7 +60,7 @@ public class StoreServiceImpl implements StoreService {
                 .detailAddress(request.detailAddress())
                 .build();
 
-        Store savedStore = storeRepository.save(store);
+        storeRepository.save(store);
 
         // 3. 카테고리 처리 (이름 기반 getOrCreateCategory 사용)
         List<UUID> savedCategoryIds = new ArrayList<>();

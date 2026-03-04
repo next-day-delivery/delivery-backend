@@ -4,7 +4,6 @@ import com.nextdaydelivery.store.domain.entity.StoreCategory;
 import com.nextdaydelivery.store.domain.repository.StoreCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 @Repository // @Service 대신 @Repository 사용
 @RequiredArgsConstructor
