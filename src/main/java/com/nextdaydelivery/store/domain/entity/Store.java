@@ -58,9 +58,12 @@ public class Store extends BaseAuditEntity {
     private String deletedBy; // 레코드 삭제자
 
     @Builder
-    private Store(StoreAddress storeAddress, String name, String detailAddress) {
+    private Store(User user, StoreAddress storeAddress, String name, String detailAddress) {
+        this.user = user; // NotNull 제약조건 대응
         this.storeAddress = storeAddress;
         this.name = name;
         this.detailAddress = detailAddress;
+        this.ratingAvg = BigDecimal.ZERO; // 초기값 0.0
+        this.reviewCount = 0;             // 초기값 0
     }
 }
