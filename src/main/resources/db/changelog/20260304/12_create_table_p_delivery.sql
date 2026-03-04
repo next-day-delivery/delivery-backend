@@ -17,7 +17,7 @@ CREATE TABLE p_delivery
     CONSTRAINT fk_delivery_order
         FOREIGN KEY (order_id)
             REFERENCES p_order (order_id)
-            ON DELETE CASCADE,
+            ON DELETE RESTRICT,
 
     -- 주문당 배달 1개 보장 (@OneToOne)
     CONSTRAINT uk_delivery_order
