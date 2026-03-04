@@ -31,8 +31,6 @@ spring:
       hibernate:
         show_sql: true
         highlight_sql: true
-    hibernate:
-      ddl-auto:
 
 logging:
   level:
