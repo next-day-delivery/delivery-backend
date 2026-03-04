@@ -14,7 +14,7 @@ CREATE TABLE p_order
     CONSTRAINT fk_order_user
         FOREIGN KEY (user_id)
             REFERENCES p_user (user_id)
-            ON DELETE CASCADE,
+            ON DELETE RESTRICT,
 
     CONSTRAINT ck_order_status
         CHECK (order_status IN (
