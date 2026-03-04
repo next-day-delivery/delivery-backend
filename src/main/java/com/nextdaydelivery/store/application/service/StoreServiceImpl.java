@@ -39,15 +39,30 @@ public class StoreServiceImpl implements StoreService {
                 request.dong()
         );
 
-        User dummyUser = User.builder()
-                .username("test_owner")
-                .nickname("임시사장님")
-                .email("test@test.com")
-                .password("1234")
-                .role(UserRole.OWNER)
-                .isPublic(true)
-                .build();
-        em.persist(dummyUser); // DB에 강제로 유저 저장 (NOT NULL 제약조건 해결)
+        // 2. [수정] 임시 유저 조회 또는 생성
+        String testUsername = "test_owner";
+        User dummyUser;
+
+        // JPQL을 사용하여 기존 유저가 있는지 확인
+        List<User> existingUsers = em.createQuery("select u from User u where u.username = :username", User.class)
+                .setParameter("username", testUsername)
+                .getResultList();
+
+        if (existingUsers.isEmpty()) {
+            // 없으면 새로 생성 후 저장
+            dummyUser = User.builder()
+                    .username(testUsername)
+                    .nickname("임시사장님")
+                    .email("test@test.com")
+                    .password("1234")
+                    .role(UserRole.OWNER)
+                    .isPublic(true)
+                    .build();
+            em.persist(dummyUser);
+        } else {
+            // 있으면 기존 유저 사용
+            dummyUser = existingUsers.get(0);
+        }
 
 //        // 가게에 기본정보 저장
 //        Store store = storeRepository.save(request.toEntity(storeAddress));
