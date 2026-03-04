@@ -1,7 +1,7 @@
 package com.nextdaydelivery.product.application;
 
 import com.nextdaydelivery.ai_response.application.AiEventPublisher;
-import com.nextdaydelivery.ai_response.application.AiGenerator;
+import com.nextdaydelivery.ai_response.application.AiClient;
 import com.nextdaydelivery.ai_response.application.event.AiUsedEvent;
 import com.nextdaydelivery.ai_response.infrastructure.dto.AiGenerationResult;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-    private final AiGenerator aiGenerator;
+    private final AiClient aiClient;
     private final AiEventPublisher aiEventPublisher;
 
     @Transactional
@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
         String productDetail = createRequest.productDetail();
 
         if (createRequest.useAi()) {
-            AiGenerationResult result = aiGenerator.generateProductDetail(createRequest.productName());
+            AiGenerationResult result = aiClient.generateProductDetail(createRequest.productName());
             productDetail = result.content();
 
             aiEventPublisher.publishEvent(AiUsedEvent.from(result));
