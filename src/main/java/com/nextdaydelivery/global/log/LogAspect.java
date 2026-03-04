@@ -46,11 +46,15 @@ public class LogAspect {
 
             return result;
 
-        } catch (Exception e) {
+        } catch (Throwable t) {
             long duration = System.currentTimeMillis() - startTime;
-            log.warn("[{}] {}.{} | FAIL ({}) | {}ms", layer, className, methodName, e.getClass().getSimpleName(),
-                    duration);
-            throw e;
+            log.warn("[{}] {}.{} | FAIL ({}) | {}ms",
+                    layer,
+                    className,
+                    methodName,
+                    t.getClass().getSimpleName(),
+                    duration, t);
+            throw t;
         }
     }
 
