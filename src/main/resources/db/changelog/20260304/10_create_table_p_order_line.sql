@@ -33,17 +33,4 @@ CREATE TABLE p_order_line
         CHECK (price >= 0)
 );
 
--- 주문 기준 조회 (주문 상세 조회 시 필수)
-CREATE INDEX idx_order_line_order_id
-    ON p_order_line (order_id);
-
--- 상품 기준 통계/집계 대비
-CREATE INDEX idx_order_line_product_id
-    ON p_order_line (product_id);
-
--- Soft delete 고려 조회 최적화
-CREATE INDEX idx_order_line_active
-    ON p_order_line (order_id)
-    WHERE deleted_at IS NULL;
-
 -- rollback DROP TABLE p_order_line;
