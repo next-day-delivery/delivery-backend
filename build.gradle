@@ -51,6 +51,9 @@ dependencies {
     // Liquibase
     implementation 'org.liquibase:liquibase-core'
 
+    // ai
+    implementation 'com.google.genai:google-genai:1.0.0'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
