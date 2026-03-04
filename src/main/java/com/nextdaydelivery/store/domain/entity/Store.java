@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,8 +23,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "p_store")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Store extends BaseAuditEntity {
 
     @Id
@@ -59,4 +56,11 @@ public class Store extends BaseAuditEntity {
 
     @Column(name = "deleted_by", length = 100)
     private String deletedBy; // 레코드 삭제자
+
+    @Builder
+    private Store(StoreAddress storeAddress, String name, String detailAddress) {
+        this.storeAddress = storeAddress;
+        this.name = name;
+        this.detailAddress = detailAddress;
+    }
 }

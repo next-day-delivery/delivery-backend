@@ -1,0 +1,34 @@
+package com.nextdaydelivery.store.infrastructure.repository;
+
+import com.nextdaydelivery.store.domain.entity.Store;
+import com.nextdaydelivery.store.domain.repository.StoreRepository;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@RequiredArgsConstructor
+public class StoreRepositoryImpl implements StoreRepository {
+    private final StoreJpaRepository storeJpaRepository;
+
+    @Override
+    public Store save(Store store) {
+        return storeJpaRepository.save(store);
+    }
+
+    @Override
+    public Optional<Store> findById(Long id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+
+    }
+
+    @Override
+    public List<Store> findAll() {
+        return List.of();
+    }
+}
