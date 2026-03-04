@@ -17,7 +17,4 @@ CREATE TABLE p_category
         UNIQUE (category_name)
 );
 
-CREATE INDEX idx_category_name
-    ON p_category (category_name);
-
 -- rollback DROP TABLE p_category;
