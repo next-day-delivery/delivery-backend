@@ -16,7 +16,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,8 +25,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "p_payment")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Payment extends CreatedAuditEntity {
 
     @Id
@@ -47,4 +44,30 @@ public class Payment extends CreatedAuditEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus; // 결제 상태 (CANCEL, COMPLETE, FAILED)
+
+    @Builder
+    Payment(PaymentMethod method, PaymentStatus status) {
+        this.paymentMethod = method;
+        this.paymentStatus = status;
+    }
+
+
+    public static Payment from(PaymentMethod method) {
+        return Payment.builder()
+                .method(method)
+                .status(PaymentStatus.PENDING)
+                .build();
+    }
+
+    public void processPayment() {
+        this.paymentStatus = PaymentStatus.COMPLETED;
+    }
+
+    public void validatePendingStatus() {
+        if (this.paymentStatus != PaymentStatus.PENDING) {
+            throw new IllegalStateException("결제 가능한 상태가 아닙니다.");
+        }
+    }
+
+
 }
