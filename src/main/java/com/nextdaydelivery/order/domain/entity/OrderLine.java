@@ -1,7 +1,6 @@
-package com.nextdaydelivery.order_line.domain.entity;
+package com.nextdaydelivery.order.domain.entity;
 
 import com.nextdaydelivery.global.domain.BaseAuditEntity;
-import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
