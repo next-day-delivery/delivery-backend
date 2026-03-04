@@ -26,9 +26,9 @@ CREATE TABLE p_delivery
     -- Enum 무결성 보장
     CONSTRAINT ck_delivery_status
         CHECK (delivery_status IN (
-                                   'PENDING',
-                                   'ING',
-                                   'COMPLETED'
+                                   'DELIVERY_PENDING',
+                                   'DELIVERY_ING',
+                                   'DELIVERY_COMPLETED'
             ))
 );
 
