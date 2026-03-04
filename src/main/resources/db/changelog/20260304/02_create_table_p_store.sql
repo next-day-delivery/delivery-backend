@@ -29,7 +29,10 @@ CREATE TABLE p_store
             ON DELETE RESTRICT,
 
     CONSTRAINT ck_store_rating_range
-        CHECK (rating_avg BETWEEN 0 AND 5)
+        CHECK (rating_avg BETWEEN 0 AND 5),
+
+    CONSTRAINT ck_store_review_count_non_negative
+        CHECK (review_count >= 0)
 );
 
 -- rollback DROP TABLE p_store;
