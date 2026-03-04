@@ -1,6 +1,6 @@
 package com.nextdaydelivery.ai_response.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.CreatedAuditEntity;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +24,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class AiResponse extends BaseEntity {
+public class AiResponse extends CreatedAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")

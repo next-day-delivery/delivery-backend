@@ -1,8 +1,8 @@
 package com.nextdaydelivery.review.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
-import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
+import com.nextdaydelivery.review.domain.enums.ReviewStatus;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -30,7 +30,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Review extends BaseEntity {
+public class Review extends CreatedAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -60,5 +60,4 @@ public class Review extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "review_status", nullable = false)
     private ReviewStatus reviewStatus; // 리뷰 상태 (VISIBLE, HIDDEN)
-
 }

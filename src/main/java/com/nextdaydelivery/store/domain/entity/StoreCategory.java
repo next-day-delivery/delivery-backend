@@ -1,6 +1,5 @@
 package com.nextdaydelivery.store.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,7 +22,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class StoreCategory extends BaseEntity {
+public class StoreCategory {
 
     @Id
     @GeneratedValue(generator = "UUID")

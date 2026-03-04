@@ -1,6 +1,6 @@
 package com.nextdaydelivery.user.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.BaseAuditEntity;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntity {
+public class User extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,10 +43,15 @@ public class User extends BaseEntity {
     private String password; // 비밀번호
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, length = 20)
     private UserRole role; // 역할 (CUSTOMER, OWNER, MANAGER, MASTER)
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic; // 공개 여부 (BOOLEAN)
+    
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 레코드 삭제 시간
 
+    @Column(name = "deleted_by", length = 100)
+    private String deletedBy; // 레코드 삭제자
 }

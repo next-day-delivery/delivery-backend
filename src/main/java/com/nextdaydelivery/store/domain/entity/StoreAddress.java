@@ -1,6 +1,5 @@
 package com.nextdaydelivery.store.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class StoreAddress extends BaseEntity {
+public class StoreAddress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

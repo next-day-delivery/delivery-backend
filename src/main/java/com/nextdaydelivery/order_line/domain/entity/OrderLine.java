@@ -1,6 +1,6 @@
 package com.nextdaydelivery.order_line.domain.entity;
 
-import com.nextdaydelivery.global.baseEntity.BaseEntity;
+import com.nextdaydelivery.global.domain.BaseAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class OrderLine extends BaseEntity {
+public class OrderLine extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -46,4 +47,10 @@ public class OrderLine extends BaseEntity {
 
     @Column(name = "price", nullable = false)
     private Long price; // 가격 (BIGINT)
+    
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 레코드 삭제 시간
+
+    @Column(name = "deleted_by", length = 100)
+    private String deletedBy; // 레코드 삭제자
 }
