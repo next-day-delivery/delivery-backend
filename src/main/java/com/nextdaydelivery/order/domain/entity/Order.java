@@ -52,6 +52,9 @@ public class Order extends CreatedAuditEntity {
     private LocalDateTime reviewed_at;
 
     public void changeStatus(OrderStatus status) {
+        if (!this.orderStatus.canChangeTo(status)) {
+            throw new IllegalStateException("변경이 불가능한 상태입니다.");
+        }
         this.orderStatus = status;
     }
 }
