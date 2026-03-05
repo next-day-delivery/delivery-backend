@@ -66,4 +66,15 @@ public class Store extends BaseAuditEntity {
         this.ratingAvg = BigDecimal.ZERO; // 초기값 0.0
         this.reviewCount = 0;             // 초기값 0
     }
+
+    public void update(String name, String detailAddress, StoreAddress address) {
+        this.name = name;
+        this.detailAddress = detailAddress;
+        this.storeAddress = address;
+    }
+
+    public void delete(String deletedBy) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedBy;
+    }
 }

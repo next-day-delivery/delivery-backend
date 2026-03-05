@@ -4,6 +4,8 @@ import com.nextdaydelivery.store.domain.entity.Category;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.entity.StoreCategory;
 import com.nextdaydelivery.store.domain.repository.StoreCategoryRepository;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -23,5 +25,20 @@ public class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
     @Override
     public boolean existsByStoreAndCategory(Store store, Category category) {
         return storeCategoryJpaRepository.existsByStoreAndCategory(store, category);
+    }
+
+    @Override
+    public List<StoreCategory> findAllByStore(Store store) {
+        return List.of();
+    }
+
+    @Override
+    public Optional<StoreCategory> findFirstByStore(Store store) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void deleteByStore(Store store) {
+
     }
 }

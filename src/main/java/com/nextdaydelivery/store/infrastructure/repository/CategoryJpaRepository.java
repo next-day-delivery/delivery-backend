@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CategoryJpaRepository extends JpaRepository<Category, UUID> {
     Optional<Category> findByCategoryName(String categoryName);
+
+    boolean existsByCategoryName(String categoryName);
 }

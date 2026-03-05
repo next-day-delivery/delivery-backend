@@ -3,6 +3,7 @@ package com.nextdaydelivery.store.application.service;
 import com.nextdaydelivery.store.domain.entity.Category;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.entity.StoreAddress;
+import com.nextdaydelivery.store.domain.repository.StoreCategoryRepository;
 import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.store.domain.service.CategoryService;
 import com.nextdaydelivery.store.domain.service.StoreAddressService;
@@ -10,6 +11,10 @@ import com.nextdaydelivery.store.domain.service.StoreCategoryService;
 import com.nextdaydelivery.store.domain.service.StoreService;
 import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
 import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.StoreResponse;
+import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
+import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import jakarta.persistence.EntityManager;
@@ -18,6 +23,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
+    private final StoreCategoryRepository storeCategoryRepository;
     private final StoreAddressService storeAddressService;
     private final CategoryService categoryService;         // 카테고리 조회용
     private final StoreCategoryService storeCategoryService; // 연결용
@@ -100,5 +108,64 @@ public class StoreServiceImpl implements StoreService {
         }
 
         return StoreCreationResponse.from(store, savedCategoryIds);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public StoreResponse getStore(UUID storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다. ID: " + storeId));
+
+        // [단방향 지향] Repository를 통해 카테고리 목록 조회
+        List<String> categoryNames = storeCategoryRepository.findAllByStore(store).stream()
+                .map(sc -> sc.getCategory().getCategoryName())
+                .toList();
+
+        return StoreResponse.from(store, store.getUser().getNickname(), categoryNames);
+    }
+
+    @Transactional
+    @Override
+    public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("수정할 가게가 존재하지 않습니다."));
+
+        StoreAddress newAddress = storeAddressService.getOrCreateAddress(
+                request.sigungu(), request.sido(), request.dong()
+        );
+
+        store.update(request.name(), request.detailAddress(), newAddress);
+
+        if (request.categoryIds() != null) {
+            storeCategoryService.updateStoreCategories(store, request.categoryIds());
+        }
+
+        return getStore(storeId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteStore(UUID storeId, String deletedBy) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("삭제할 가게가 존재하지 않습니다."));
+        store.delete(deletedBy);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<StoreListResponse> getStoreList(StoreSearchCondition condition, Pageable pageable) {
+        // 1. 가게 목록 조회
+        Page<Store> storePage = storeRepository.searchStores(condition, pageable);
+
+        // 2. 단방향 원칙 준수: Store 엔티티 내부가 아닌 외부에서 정보를 조합
+        return storePage.map(store -> {
+            // [수정] 대표 카테고리를 찾기 위해 Repository 호출
+            // 주의: 이 방식은 목록 조회 시 N+1을 유발할 수 있음 (아래 팁 참고)
+            String mainCategory = storeCategoryRepository.findFirstByStore(store)
+                    .map(sc -> sc.getCategory().getCategoryName())
+                    .orElse("미지정");
+
+            return StoreListResponse.from(store, mainCategory);
+        });
     }
 }
