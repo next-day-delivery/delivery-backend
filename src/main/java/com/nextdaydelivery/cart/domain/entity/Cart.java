@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -43,12 +44,13 @@ public class Cart {
     @Column(name = "status", nullable = false)
     private CartStatus status; // 상태 (ACTIVE, INACTIVE, COMPLETED)
 
+    @Builder
     public static Cart createActive(User user, Store store, CartStatus status) {
-        Cart cart = new Cart();
-        cart.user = user;
-        cart.store = store;
-        cart.status = status;
-        return cart;
+        return Cart.builder()
+            .user(user)
+            .store(store)
+            .status(status)
+            .build();
     }
 
     public void markInactive() {

@@ -7,7 +7,7 @@ import java.util.UUID;
 public record ResGetCartItemsDto(
     UUID cartId,
     UUID storeId,
-    CartStatus status,
+    CartStatus cartStatus,
     List<CartItemDetail> items
 ) {
     public record CartItemDetail(

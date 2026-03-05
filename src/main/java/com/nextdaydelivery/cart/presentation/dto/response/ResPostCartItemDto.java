@@ -8,6 +8,6 @@ public record ResPostCartItemDto(
     UUID storeId,
     UUID productId,
     Long quantity,
-    CartStatus status
+    CartStatus cartStatus
 ) {
 }

@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -39,12 +40,13 @@ public class CartItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product; // 상품 PK
 
+    @Builder
     public static CartItem create(Cart cart, Product product, Long quantity) {
-        CartItem cartItem = new CartItem();
-        cartItem.cart = cart;
-        cartItem.product = product;
-        cartItem.quantity = quantity;
-        return cartItem;
+        return CartItem.builder()
+            .cart(cart)
+            .product(product)
+            .quantity(quantity)
+            .build();
     }
 
     public void increaseQuantity(Long quantity) {
