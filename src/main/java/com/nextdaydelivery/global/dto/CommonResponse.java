@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.nextdaydelivery.global.domain.error.ErrorCode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 
@@ -33,6 +34,8 @@ public record CommonResponse<T>(
     }
 
     public static <T> CommonResponse<T> onSuccess(HttpStatus status, T data) {
+        Objects.requireNonNull(status, "HTTP 상태 코드는 null이 될 수 없습니다.");
+
         if (!status.is2xxSuccessful()) {
             throw new IllegalArgumentException("성공 응답은 2xx 상태 코드여야 합니다.");
         }
