@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 public class GeminiAiClient implements AiClient {
 
     private static final String PROMPT = "고객의 관심을 이끌 수 있도록 다음 상품의 한 줄 설명을 한 가지 옵션으로 50자 이내로 생성 후 생성 문구만 답변해주세요.";
+    private static final int MINIMUM_LENGTH = 0;
+    private static final int MAXIMUM_LENGTH = 255;
+
     private final Client geminiClient;
 
     @Override
@@ -24,10 +27,20 @@ public class GeminiAiClient implements AiClient {
                         null
                 );
 
+        String content = normalizeContent(response.text());
+
         return new AiGenerationResult(
                 productName,
                 prompt,
-                response.text()
+                content
         );
+    }
+
+    private String normalizeContent(String content) {
+        String rawContent = content == null ? "" : content.trim();
+
+        return rawContent.length() > MAXIMUM_LENGTH
+                ? rawContent.substring(MINIMUM_LENGTH, MAXIMUM_LENGTH)
+                : rawContent;
     }
 }
