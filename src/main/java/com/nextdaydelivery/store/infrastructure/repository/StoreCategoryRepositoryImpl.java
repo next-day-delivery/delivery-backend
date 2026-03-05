@@ -1,5 +1,7 @@
 package com.nextdaydelivery.store.infrastructure.repository;
 
+import com.nextdaydelivery.store.domain.entity.Category;
+import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.entity.StoreCategory;
 import com.nextdaydelivery.store.domain.repository.StoreCategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,5 +18,10 @@ public class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
     public StoreCategory save(StoreCategory storeCategory) {
         // JPA의 save 메서드를 호출하여 실제 DB에 영속화합니다.
         return storeCategoryJpaRepository.save(storeCategory);
+    }
+
+    @Override
+    public boolean existsByStoreAndCategory(Store store, Category category) {
+        return storeCategoryJpaRepository.existsByStoreAndCategory(store, category);
     }
 }
