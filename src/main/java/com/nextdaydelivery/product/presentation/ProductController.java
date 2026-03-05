@@ -4,6 +4,7 @@ import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
 import com.nextdaydelivery.product.application.dto.response.ProductResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,13 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@RequestBody ProductCreateRequest createRequest) {
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductCreateRequest createRequest) {
         return new ResponseEntity<>(productService.create(createRequest), HttpStatus.CREATED);
     }
 
     @PatchMapping
     public ResponseEntity<ProductResponse> update(
-            @RequestBody ProductUpdateRequest updateRequest) {
+            @Valid @RequestBody ProductUpdateRequest updateRequest) {
         return new ResponseEntity<>(productService.update(updateRequest), HttpStatus.OK);
     }
 
@@ -48,7 +49,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<UUID> deleteById(@PathVariable UUID id) {
-        return new ResponseEntity<>(productService.deleteById(id), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(productService.deleteById(id), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")

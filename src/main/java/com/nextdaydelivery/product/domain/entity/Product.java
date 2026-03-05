@@ -68,6 +68,10 @@ public class Product extends BaseAuditEntity {
     }
 
     public void updatePrice(int price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("가격은 양수여야 합니다.");
+        }
+
         this.price = price;
     }
 
