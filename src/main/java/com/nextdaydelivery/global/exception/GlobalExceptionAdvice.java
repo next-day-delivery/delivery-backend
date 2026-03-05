@@ -1,6 +1,8 @@
 package com.nextdaydelivery.global.exception;
 
+import com.nextdaydelivery.global.domain.AuthErrorCode;
 import com.nextdaydelivery.global.domain.ErrorCode;
+import com.nextdaydelivery.global.domain.GlobalErrorCode;
 import com.nextdaydelivery.global.dto.CommonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -23,47 +25,75 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionAdvice {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<CommonResponse<Void>> handleBusinessException(BusinessException ex,
-                                                                        HttpServletRequest request) {
-        log.warn("[BUS] {} {} | {}: {}", request.getMethod(), request.getRequestURI(), ex.getErrorCode().getCode(),
+    public ResponseEntity<CommonResponse<Void>> handleBusinessException(
+            BusinessException ex,
+            HttpServletRequest request
+    ) {
+
+        ErrorCode errorCode = ex.getErrorCode();
+
+        log.warn("[BUS] {} {} | {}: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                errorCode.getCode(),
                 ex.getMessage());
+
         return ResponseEntity
-                .status(ex.getErrorCode().getStatus())
-                .body(CommonResponse.onFailure(ex.getErrorCode()));
+                .status(errorCode.getStatus())
+                .body(CommonResponse.onFailure(errorCode));
     }
 
     @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<CommonResponse<List<CommonResponse.ValidationErrorDetail>>> handleValidationException(
-            BindException ex, HttpServletRequest request) {
-        log.warn("[VAL] {} {} | Validation Failed", request.getMethod(), request.getRequestURI());
+            BindException ex,
+            HttpServletRequest request
+    ) {
 
-        List<CommonResponse.ValidationErrorDetail> details = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> new CommonResponse.ValidationErrorDetail(
-                        error.getField(),
-                        error.getDefaultMessage()
-                ))
-                .collect(Collectors.toList());
+        log.warn("[VAL] {} {} | Validation Failed",
+                request.getMethod(),
+                request.getRequestURI());
+
+        List<CommonResponse.ValidationErrorDetail> details =
+                ex.getBindingResult()
+                        .getFieldErrors()
+                        .stream()
+                        .map(error -> new CommonResponse.ValidationErrorDetail(
+                                error.getField(),
+                                error.getDefaultMessage()
+                        ))
+                        .collect(Collectors.toList());
+
+        ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
 
         return ResponseEntity
-                .status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
-                .body(CommonResponse.onFailure(ErrorCode.INVALID_INPUT_VALUE, details));
+                .status(errorCode.getStatus())
+                .body(CommonResponse.onFailure(errorCode, details));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<CommonResponse<List<CommonResponse.ValidationErrorDetail>>> handleConstraintViolationException(
-            ConstraintViolationException ex, HttpServletRequest request) {
-        log.warn("[VAL] {} {} | Constraint Violated", request.getMethod(), request.getRequestURI());
+            ConstraintViolationException ex,
+            HttpServletRequest request
+    ) {
 
-        List<CommonResponse.ValidationErrorDetail> details = ex.getConstraintViolations().stream()
-                .map(violation -> new CommonResponse.ValidationErrorDetail(
-                        violation.getPropertyPath().toString(),
-                        violation.getMessage()
-                ))
-                .collect(Collectors.toList());
+        log.warn("[VAL] {} {} | Constraint Violated",
+                request.getMethod(),
+                request.getRequestURI());
+
+        List<CommonResponse.ValidationErrorDetail> details =
+                ex.getConstraintViolations()
+                        .stream()
+                        .map(violation -> new CommonResponse.ValidationErrorDetail(
+                                violation.getPropertyPath().toString(),
+                                violation.getMessage()
+                        ))
+                        .collect(Collectors.toList());
+
+        ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
 
         return ResponseEntity
-                .status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
-                .body(CommonResponse.onFailure(ErrorCode.INVALID_INPUT_VALUE, details));
+                .status(errorCode.getStatus())
+                .body(CommonResponse.onFailure(errorCode, details));
     }
 
     @ExceptionHandler({
@@ -73,16 +103,23 @@ public class GlobalExceptionAdvice {
             HttpRequestMethodNotSupportedException.class,
             IllegalArgumentException.class
     })
-    public ResponseEntity<CommonResponse<Void>> handleBadRequest(Exception ex, HttpServletRequest request) {
-        log.warn("[BAD] {} {} | {}: {}", request.getMethod(), request.getRequestURI(), ex.getClass().getSimpleName(),
+    public ResponseEntity<CommonResponse<Void>> handleBadRequest(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+
+        log.warn("[BAD] {} {} | {}: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getClass().getSimpleName(),
                 ex.getMessage());
 
         ErrorCode errorCode = switch (ex) {
-            case NoHandlerFoundException ignored -> ErrorCode.NOT_FOUND;
-            case HttpRequestMethodNotSupportedException ignored -> ErrorCode.METHOD_NOT_ALLOWED;
-            case IllegalArgumentException ignored -> ErrorCode.INVALID_INPUT_VALUE;
-            case MethodArgumentTypeMismatchException ignored -> ErrorCode.INVALID_INPUT_VALUE;
-            default -> ErrorCode.BAD_REQUEST;
+            case NoHandlerFoundException ignored -> GlobalErrorCode.NOT_FOUND;
+            case HttpRequestMethodNotSupportedException ignored -> GlobalErrorCode.METHOD_NOT_ALLOWED;
+            case IllegalArgumentException ignored -> GlobalErrorCode.INVALID_INPUT_VALUE;
+            case MethodArgumentTypeMismatchException ignored -> GlobalErrorCode.INVALID_INPUT_VALUE;
+            default -> GlobalErrorCode.BAD_REQUEST;
         };
 
         return ResponseEntity
@@ -91,20 +128,38 @@ public class GlobalExceptionAdvice {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<CommonResponse<Void>> handleAccessDeniedException(AccessDeniedException ex,
-                                                                            HttpServletRequest request) {
-        log.warn("[DENY] {} {} | {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+    public ResponseEntity<CommonResponse<Void>> handleAccessDeniedException(
+            AccessDeniedException ex,
+            HttpServletRequest request
+    ) {
+
+        log.warn("[DENY] {} {} | {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getMessage());
+
+        ErrorCode errorCode = AuthErrorCode.FORBIDDEN;
+
         return ResponseEntity
-                .status(ErrorCode.FORBIDDEN.getStatus())
-                .body(CommonResponse.onFailure(ErrorCode.FORBIDDEN));
+                .status(errorCode.getStatus())
+                .body(CommonResponse.onFailure(errorCode));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<CommonResponse<Void>> handleException(Exception ex, HttpServletRequest request) {
-        log.error("[FATAL] {} {} | Unhandled Exception: ", request.getMethod(), request.getRequestURI(), ex);
+    public ResponseEntity<CommonResponse<Void>> handleException(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+
+        log.error("[FATAL] {} {} | Unhandled Exception",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex);
+
+        ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
 
         return ResponseEntity
-                .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
-                .body(CommonResponse.onFailure(ErrorCode.INTERNAL_SERVER_ERROR));
+                .status(errorCode.getStatus())
+                .body(CommonResponse.onFailure(errorCode));
     }
 }
