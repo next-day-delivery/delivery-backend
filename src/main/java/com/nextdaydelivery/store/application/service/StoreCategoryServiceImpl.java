@@ -18,6 +18,9 @@ public class StoreCategoryServiceImpl implements StoreCategoryService {
     @Override
     @Transactional // 부모 서비스에서 트랜잭션이 시작되었겠지만, 안전을 위해 붙여줍니다.
     public void createStoreCategory(Store store, Category category) {
+        if (storeCategoryRepository.existsByStoreAndCategory(store, category)) {
+            return;
+        }
         // 빌더를 사용하여 중간 테이블 엔티티 생성
         StoreCategory storeCategory = StoreCategory.builder()
                 .store(store)

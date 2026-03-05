@@ -18,8 +18,8 @@ public record StoreCreationResponse(
         return new StoreCreationResponse(
                 store.getStoreId(),
                 store.getName(),
-                store.getStoreAddress().getSido(),
                 store.getStoreAddress().getSigungu(),
+                store.getStoreAddress().getSido(),
                 store.getStoreAddress().getDong(),
                 store.getDetailAddress(),
                 categoryIds

@@ -14,6 +14,7 @@ import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -80,9 +81,12 @@ public class StoreServiceImpl implements StoreService {
         // 3. 카테고리 처리 (이름 기반 getOrCreateCategory 사용)
         List<UUID> savedCategoryIds = new ArrayList<>();
 
-        // request에 categoryNames(List<String>)가 들어온다고 가정합니다.
         if (request.categoryNames() != null && !request.categoryNames().isEmpty()) {
-            for (String categoryName : request.categoryNames()) {
+            for (String rawCategoryName : new LinkedHashSet<>(request.categoryNames())) {
+                if (rawCategoryName == null || rawCategoryName.isBlank()) {
+                    throw new IllegalArgumentException("categoryNames에는 빈 값을 포함할 수 없습니다.");
+                }
+                String categoryName = rawCategoryName.trim();
                 // [핵심] 보내주신 서비스 메서드 사용: 이름으로 조회하거나 없으면 생성함
                 Category category = categoryService.getOrCreateCategory(categoryName);
 

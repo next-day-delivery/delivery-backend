@@ -4,6 +4,7 @@ import com.nextdaydelivery.store.domain.entity.StoreAddress;
 import com.nextdaydelivery.store.domain.repository.StoreAddressRepository;
 import com.nextdaydelivery.store.domain.service.StoreAddressService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,12 +16,19 @@ public class StoreAddressServiceImpl implements StoreAddressService {
     @Transactional
     public StoreAddress getOrCreateAddress(String sigungu, String sido, String dong) {
         return storeAddressRepository.findBySigunguAndSidoAndDong(sigungu, sido, dong)
-                .orElseGet(() -> storeAddressRepository.save(
-                        StoreAddress.builder()
-                                .sigungu(sigungu)
-                                .sido(sido)
-                                .dong(dong)
-                                .build()
-                ));
+                .orElseGet(() -> {
+                    try {
+                        return storeAddressRepository.save(
+                                StoreAddress.builder()
+                                        .sigungu(sigungu)
+                                        .sido(sido)
+                                        .dong(dong)
+                                        .build()
+                        );
+                    } catch (DataIntegrityViolationException ex) {
+                        return storeAddressRepository.findBySigunguAndSidoAndDong(sigungu, sido, dong)
+                                .orElseThrow(() -> ex);
+                    }
+                });
     }
 }
