@@ -33,6 +33,10 @@ public record CommonResponse<T>(
     }
 
     public static <T> CommonResponse<T> onSuccess(HttpStatus status, T data) {
+        if (!status.is2xxSuccessful()) {
+            throw new IllegalArgumentException("성공 응답은 2xx 상태 코드여야 합니다.");
+        }
+
         return new CommonResponse<>(Result.SUCCESS, String.valueOf(status.value()), status.getReasonPhrase(), data,
                 LocalDateTime.now());
     }
