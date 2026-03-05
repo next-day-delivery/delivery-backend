@@ -32,7 +32,7 @@ public class User extends BaseAuditEntity {
     @Column(name = "username", length = 100, nullable = false, unique = true)
     private String username; // 회원 ID
 
-    @Column(name = "nickname", length = 100, nullable = false)
+    @Column(name = "nickname", length = 100, nullable = false, unique = true)
     private String nickname; // 닉네임
 
     @Column(name = "email", length = 255, nullable = false, unique = true)
