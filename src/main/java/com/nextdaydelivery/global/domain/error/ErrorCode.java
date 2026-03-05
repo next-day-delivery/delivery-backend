@@ -1,4 +1,4 @@
-package com.nextdaydelivery.global.domain;
+package com.nextdaydelivery.global.domain.error;
 
 import org.springframework.http.HttpStatus;
 

@@ -1,6 +1,6 @@
 package com.nextdaydelivery.global.exception;
 
-import com.nextdaydelivery.global.domain.ErrorCode;
+import com.nextdaydelivery.global.domain.error.ErrorCode;
 import lombok.Getter;
 
 @Getter

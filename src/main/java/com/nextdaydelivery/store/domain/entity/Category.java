@@ -1,6 +1,6 @@
 package com.nextdaydelivery.store.domain.entity;
 
-import com.nextdaydelivery.global.domain.BaseAuditEntity;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

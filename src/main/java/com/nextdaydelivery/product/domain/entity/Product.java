@@ -1,6 +1,6 @@
 package com.nextdaydelivery.product.domain.entity;
 
-import com.nextdaydelivery.global.domain.BaseAuditEntity;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import com.nextdaydelivery.store.domain.entity.Store;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,7 +48,7 @@ public class Product extends BaseAuditEntity {
 
     @Column(name = "is_hidden", nullable = false)
     private Boolean isHidden; // 숨김 여부 (BOOLEAN)
-    
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt; // 레코드 삭제 시간
 

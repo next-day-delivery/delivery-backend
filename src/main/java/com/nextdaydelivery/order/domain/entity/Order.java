@@ -1,6 +1,6 @@
 package com.nextdaydelivery.order.domain.entity;
 
-import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;

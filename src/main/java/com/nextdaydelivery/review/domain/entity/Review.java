@@ -1,6 +1,6 @@
 package com.nextdaydelivery.review.domain.entity;
 
-import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.review.domain.enums.ReviewStatus;
 import com.nextdaydelivery.store.domain.entity.Store;

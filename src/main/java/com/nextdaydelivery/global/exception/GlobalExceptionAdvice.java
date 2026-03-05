@@ -1,8 +1,8 @@
 package com.nextdaydelivery.global.exception;
 
-import com.nextdaydelivery.global.domain.AuthErrorCode;
-import com.nextdaydelivery.global.domain.ErrorCode;
-import com.nextdaydelivery.global.domain.GlobalErrorCode;
+import com.nextdaydelivery.global.domain.error.AuthErrorCode;
+import com.nextdaydelivery.global.domain.error.ErrorCode;
+import com.nextdaydelivery.global.domain.error.GlobalErrorCode;
 import com.nextdaydelivery.global.dto.CommonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
