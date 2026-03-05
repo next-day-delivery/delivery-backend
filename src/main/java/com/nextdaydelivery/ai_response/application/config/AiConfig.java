@@ -1,4 +1,4 @@
-package com.nextdaydelivery.global.config;
+package com.nextdaydelivery.ai_response.application.config;
 import com.google.genai.Client;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
