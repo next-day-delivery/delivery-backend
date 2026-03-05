@@ -12,8 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -22,8 +20,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "p_cart_item")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class CartItem {
 
     @Id
@@ -42,4 +38,20 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product; // 상품 PK
+
+    public static CartItem create(Cart cart, Product product, Long quantity) {
+        CartItem cartItem = new CartItem();
+        cartItem.cart = cart;
+        cartItem.product = product;
+        cartItem.quantity = quantity;
+        return cartItem;
+    }
+
+    public void increaseQuantity(Long quantity) {
+        this.quantity += quantity;
+    }
+
+    public void changeQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
 }
