@@ -78,28 +78,27 @@ public class StoreServiceImpl implements StoreService {
 
         storeRepository.save(store);
 
-        // 3. 카테고리 처리 (이름 기반 getOrCreateCategory 사용)
+        // 4. [개선됨] 카테고리 처리: 정규화(trim) 후 중복 제거(Set)
         List<UUID> savedCategoryIds = new ArrayList<>();
 
         if (request.categoryNames() != null && !request.categoryNames().isEmpty()) {
-            for (String rawCategoryName : new LinkedHashSet<>(request.categoryNames())) {
+            // 먼저 공백 제거 및 중복 제거 수행
+            LinkedHashSet<String> normalizedCategoryNames = new LinkedHashSet<>();
+            for (String rawCategoryName : request.categoryNames()) {
                 if (rawCategoryName == null || rawCategoryName.isBlank()) {
                     throw new IllegalArgumentException("categoryNames에는 빈 값을 포함할 수 없습니다.");
                 }
-                String categoryName = rawCategoryName.trim();
-                // [핵심] 보내주신 서비스 메서드 사용: 이름으로 조회하거나 없으면 생성함
+                normalizedCategoryNames.add(rawCategoryName.trim());
+            }
+
+            // 정제된 이름들에 대해서만 로직 수행
+            for (String categoryName : normalizedCategoryNames) {
                 Category category = categoryService.getOrCreateCategory(categoryName);
-
-                // 중간 테이블(StoreCategory)에 저장
                 storeCategoryService.createStoreCategory(store, category);
-
-                // 응답에 담아줄 ID 수집
                 savedCategoryIds.add(category.getCategoryId());
             }
         }
 
-        // 4. 최종 응답 반환
         return StoreCreationResponse.from(store, savedCategoryIds);
-
     }
 }

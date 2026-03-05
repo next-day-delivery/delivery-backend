@@ -6,6 +6,7 @@ import com.nextdaydelivery.store.domain.entity.StoreCategory;
 import com.nextdaydelivery.store.domain.repository.StoreCategoryRepository;
 import com.nextdaydelivery.store.domain.service.StoreCategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,17 @@ public class StoreCategoryServiceImpl implements StoreCategoryService {
         if (storeCategoryRepository.existsByStoreAndCategory(store, category)) {
             return;
         }
-        // 빌더를 사용하여 중간 테이블 엔티티 생성
-        StoreCategory storeCategory = StoreCategory.builder()
-                .store(store)
-                .category(category)
-                .build();
-
-        // 도메인 레포지토리를 통해 저장
-        storeCategoryRepository.save(storeCategory);
+        try {
+            StoreCategory storeCategory = StoreCategory.builder()
+                    .store(store)
+                    .category(category)
+                    .build();
+            storeCategoryRepository.save(storeCategory);
+        } catch (DataIntegrityViolationException ex) {
+            // 동시성 경합으로 이미 생성된 경우 멱등 처리
+            if (!storeCategoryRepository.existsByStoreAndCategory(store, category)) {
+                throw ex;
+            }
+        }
     }
 }

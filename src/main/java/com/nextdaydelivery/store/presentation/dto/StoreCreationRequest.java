@@ -12,7 +12,7 @@ public record StoreCreationRequest(
         @NotBlank String sido,
         @NotBlank String dong,
         @NotBlank String detailAddress,
-        @NotEmpty List<String> categoryNames // UUID 대신 카테고리 이름 리스트를 받음
+        @NotEmpty List<@NotBlank String> categoryNames // UUID 대신 카테고리 이름 리스트를 받음
 ) {
     // 이후 User 기능 구현 시, User도 추가
     public Store toEntity(StoreAddress address) {
