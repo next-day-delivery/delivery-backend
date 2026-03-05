@@ -37,7 +37,7 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("상품 생성 성공")
-    void createProduct() throws Exception {
+    void createProduct_Success() throws Exception {
         UUID productId = UUID.randomUUID();
 
         ProductCreateRequest request =
@@ -46,6 +46,7 @@ class ProductControllerTest {
         ProductResponse response =
                 new ProductResponse(productId, "치킨", "맛있는 치킨", 20000);
 
+        // 서비스 동작 mocking
         BDDMockito.given(productService.create(any()))
                 .willReturn(response);
 
@@ -54,7 +55,21 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.productId").value(productId.toString()))
-                .andExpect(jsonPath("$.productName").value("치킨"));
+                .andExpect(jsonPath("$.productName").value("치킨"))
+                .andExpect(jsonPath("$.productDetail").value("맛있는 치킨"))
+                .andExpect(jsonPath("$.price").value(20000));
+    }
+
+    @Test
+    @DisplayName("상품 생성 실패 - 상품명 빈 값")
+    void createProduct_Fail_EmptyName() throws Exception {
+        ProductCreateRequest request =
+                new ProductCreateRequest(UUID.randomUUID(), "", "맛있는 치킨", 20000, false);
+
+        mockMvc.perform(post("/api/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
