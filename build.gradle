@@ -52,7 +52,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
 
     // ai
-    implementation 'com.google.genai:google-genai:1.0.0'
+    implementation "com.google.genai:google-genai:${GENAI_VERSION}"
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
