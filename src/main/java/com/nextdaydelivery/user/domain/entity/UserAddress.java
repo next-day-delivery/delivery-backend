@@ -1,7 +1,6 @@
-package com.nextdaydelivery.user_address.domain.entity;
+package com.nextdaydelivery.user.domain.entity;
 
 import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
-import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
