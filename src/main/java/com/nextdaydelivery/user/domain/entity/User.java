@@ -12,17 +12,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "p_user")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@SQLRestriction("deleted_at IS NULL")
 public class User extends BaseAuditEntity {
 
     @Id
@@ -47,11 +46,41 @@ public class User extends BaseAuditEntity {
     private UserRole role; // 역할 (CUSTOMER, OWNER, MANAGER, MASTER)
 
     @Column(name = "is_public", nullable = false)
-    private Boolean isPublic; // 공개 여부 (BOOLEAN)
+    private Boolean isPublic = true; // 공개 여부 (BOOLEAN)
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt; // 레코드 삭제 시간
 
     @Column(name = "deleted_by", length = 100)
     private String deletedBy; // 레코드 삭제자
+
+    @Builder
+    private User(String username, String nickname, String email, String password, UserRole role, Boolean isPublic) {
+        this.username = username;
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.isPublic = (isPublic != null) ? isPublic : true;
+    }
+
+    public static User create(String username, String nickname, String email, String password, UserRole role,
+                              Boolean isPublic) {
+        return User.builder()
+                .username(username)
+                .nickname(nickname)
+                .email(email)
+                .password(password)
+                .role(role)
+                .isPublic(isPublic)
+                .build();
+    }
+
+    public void markAsDeleted(String deleterId) {
+        if (this.deletedAt != null) {
+            throw new IllegalStateException("이미 삭제된 유저입니다.");
+        }
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deleterId;
+    }
 }
