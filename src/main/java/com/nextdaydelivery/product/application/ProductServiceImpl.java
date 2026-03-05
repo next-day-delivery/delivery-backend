@@ -1,7 +1,7 @@
 package com.nextdaydelivery.product.application;
 
-import com.nextdaydelivery.ai_response.application.AiEventPublisher;
 import com.nextdaydelivery.ai_response.application.AiClient;
+import com.nextdaydelivery.ai_response.application.AiEventPublisher;
 import com.nextdaydelivery.ai_response.application.event.AiUsedEvent;
 import com.nextdaydelivery.ai_response.infrastructure.dto.AiGenerationResult;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -24,26 +25,30 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final AiClient aiClient;
     private final AiEventPublisher aiEventPublisher;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
+    @Override
     public ProductResponse create(ProductCreateRequest createRequest) {
         String productDetail = createRequest.productDetail();
+        AiGenerationResult result = null;
 
         if (createRequest.useAi()) {
-            AiGenerationResult result = aiClient.generateProductDetail(createRequest.productName());
+            result = aiClient.generateProductDetail(createRequest.productName());
             productDetail = result.content();
+        }
 
+        final String finalProductDetail = productDetail;
+        ProductResponse response = transactionTemplate.execute(status -> {
+            Product product = Product.ofCreateRequest(createRequest, finalProductDetail);
+            productRepository.save(product);
+            return response(product);
+        });
+
+        if (result != null) {
             aiEventPublisher.publishEvent(AiUsedEvent.from(result));
         }
 
-        Product product = Product.ofCreateRequest(
-                createRequest,
-                productDetail
-        );
-
-        productRepository.save(product);
-
-        return response(product);
+        return response;
     }
 
     @Override
@@ -89,7 +94,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public UUID deleteById(UUID id) {
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(ProductNotFoundException::new);
+        productRepository.delete(product);
 
         return id;
     }
