@@ -1,6 +1,6 @@
 package com.nextdaydelivery.user.domain.entity;
 
-import com.nextdaydelivery.global.domain.BaseAuditEntity;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,7 +48,7 @@ public class User extends BaseAuditEntity {
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic; // 공개 여부 (BOOLEAN)
-    
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt; // 레코드 삭제 시간
 

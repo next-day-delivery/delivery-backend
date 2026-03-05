@@ -1,6 +1,6 @@
 package com.nextdaydelivery.order.domain.entity;
 
-import com.nextdaydelivery.global.domain.BaseAuditEntity;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,7 +46,7 @@ public class OrderLine extends BaseAuditEntity {
 
     @Column(name = "price", nullable = false)
     private Long price; // 가격 (BIGINT)
-    
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt; // 레코드 삭제 시간
 
