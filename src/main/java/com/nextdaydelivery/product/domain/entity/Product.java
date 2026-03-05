@@ -1,7 +1,7 @@
 package com.nextdaydelivery.product.domain.entity;
 
-import com.nextdaydelivery.global.domain.BaseAuditEntity;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import com.nextdaydelivery.store.domain.entity.Store;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,9 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,6 +46,12 @@ public class Product extends BaseAuditEntity {
 
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 레코드 삭제 시간
+
+    @Column(name = "deleted_by", length = 100)
+    private String deletedBy; // 레코드 삭제자
 
     @Builder
     public Product(Store store, String productName, Integer price, String productDetail, boolean isHidden) {

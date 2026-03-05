@@ -1,4 +1,4 @@
-package com.nextdaydelivery.global.domain;
+package com.nextdaydelivery.global.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

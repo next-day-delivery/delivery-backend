@@ -1,7 +1,7 @@
 package com.nextdaydelivery.ai_response.domain.entity;
 
 import com.nextdaydelivery.ai_response.application.event.AiUsedEvent;
-import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
