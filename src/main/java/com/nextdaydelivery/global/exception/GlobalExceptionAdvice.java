@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -54,14 +55,16 @@ public class GlobalExceptionAdvice {
                 request.getRequestURI());
 
         List<CommonResponse.ValidationErrorDetail> details =
-                ex.getBindingResult()
-                        .getFieldErrors()
-                        .stream()
-                        .map(error -> new CommonResponse.ValidationErrorDetail(
-                                error.getField(),
-                                error.getDefaultMessage()
-                        ))
-                        .collect(Collectors.toList());
+                Stream.concat(
+                        ex.getBindingResult().getFieldErrors().stream()
+                                .map(error -> new CommonResponse.ValidationErrorDetail(
+                                        error.getField(),
+                                        error.getDefaultMessage())),
+                        ex.getBindingResult().getGlobalErrors().stream()
+                                .map(error -> new CommonResponse.ValidationErrorDetail(
+                                        error.getObjectName(),
+                                        error.getDefaultMessage()))
+                ).collect(Collectors.toList());
 
         ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
 
