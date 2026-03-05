@@ -22,9 +22,12 @@ public record PublicSignUpRequest(
         @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$",
                 message = "비밀번호는 8~15자, 대/소문자, 숫자, 특수문자를 포함해야 합니다.")
         String password,
-        
+
         @NotNull(message = "가입 유형(CUSTOMER, OWNER)을 선택해주세요.")
-        UserRole role
+        UserRole role,
+
+        @NotBlank(message = "배송 주소는 필수 입력값입니다.")
+        String address
 ) {
     public PublicSignUpRequest {
         if (role == UserRole.MANAGER || role == UserRole.MASTER) {
