@@ -9,6 +9,7 @@ import com.nextdaydelivery.user.domain.repository.UserAddressRepository;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,14 +43,19 @@ public class UserService {
                 true
         );
 
-        User savedUser = userRepository.save(newUser);
+        try {
+            User savedUser = userRepository.save(newUser);
 
-        UserAddress newAddress = UserAddress.create(
-                savedUser,
-                request.address()
-        );
-        userAddressRepository.save(newAddress);
+            UserAddress newAddress = UserAddress.create(
+                    savedUser,
+                    request.address()
+            );
+            userAddressRepository.save(newAddress);
 
-        return savedUser.getUserId();
+            return savedUser.getUserId();
+
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(UserErrorCode.USER_ALREADY_EXISTS);
+        }
     }
 }
