@@ -20,7 +20,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Long singUp(PublicSignUpRequest request) {
+    public Long signUp(PublicSignUpRequest request) {
         if (userRepository.existsByUniqueFields(request.username(), request.email(), request.nickname())) {
             throw new BusinessException(UserErrorCode.USER_ALREADY_EXISTS);
         }
