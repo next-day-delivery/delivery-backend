@@ -28,8 +28,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<ReviewList> getReview(UUID storeId) {
         return reviewRepository.findByStoreStoreId(storeId).stream()
-            .map(ReviewList::from)
-            .toList();
+                .map(ReviewList::from)
+                .toList();
     }
 
     @Override
@@ -37,19 +37,22 @@ public class ReviewServiceImpl implements ReviewService {
     public Review saveReview(ReviewCreateRequest request, UUID orderId, User user) {
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(NoSuchElementException::new);
         Store store = order.getStore();
 
         Review review = Review.builder()
-            .content(request.content())
-            .rating(request.rating())
-            .reviewStatus(ReviewStatus.VISIBLE)
-            .user(user)
-            .order(order)
-            .store(store)
-            .build();
+                .content(request.content())
+                .rating(request.rating())
+                .reviewStatus(ReviewStatus.VISIBLE)
+                .user(user)
+                .order(order)
+                .store(store)
+                .build();
 
         //TODO : 주문 테이블에 리뷰 완료 표시 해주는 기능 추가해야함
+        //TODO : 현재는 orderId만으로 리뷰를 생성하므로
+        // 본인 주문인지, 리뷰 작성 가능한 상태인지 보장되지 않는 상태.
+        // 저장 전에 소유자 일치·완료 상태·중복 리뷰 여부를 검증필요
 
         return reviewRepository.save(review);
     }
@@ -57,15 +60,15 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<ReviewList> getMyReview(Long userId) {
         return reviewRepository.findByUserUserId(userId).stream()
-            .map(ReviewList::from)
-            .toList();
+                .map(ReviewList::from)
+                .toList();
     }
 
     @Override
     @Transactional
     public Review updateMyReviewStatus(UUID reviewId) {
         Review review = reviewRepository.findById(reviewId)
-            .orElseThrow(() -> new NoSuchElementException("리뷰를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("리뷰를 찾을 수 없습니다."));
         review.toggleStatus();
         return review;
     }

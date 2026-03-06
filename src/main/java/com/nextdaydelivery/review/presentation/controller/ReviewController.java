@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,10 +39,10 @@ public class ReviewController implements ReviewApi {
     //내 리뷰 저장 ( 주문 내역 -> (주문 내역 리스트 표시) -> 리뷰 작성 클릭 -> 리뷰 작성, 별점 선택 )
     @Override
     @PostMapping("/write/{orderId}")
-    public ResponseEntity<Response> reviewPost(
+    public ResponseEntity<Void> reviewPost(
         @Valid @RequestBody ReviewCreateRequest request,
         @PathVariable UUID orderId) {
-        User user = User.builder().build(); //임시 유저
+        User user = User.builder().build(); //임시 유저 //TODO 추후 컨텍스트에서 User 객체 꺼내서 사용
         reviewService.saveReview(request, orderId, user); // TODO 반환값 설정
         return ResponseEntity.ok().build();
     }
@@ -53,6 +52,7 @@ public class ReviewController implements ReviewApi {
     @GetMapping("/me")
     public ResponseEntity<List<ReviewList>> myReviewListGet(
         @RequestParam Long userId
+        //TODO 추후 컨텍스트에서 User 객체 꺼내서 사용
     ) {
         List<ReviewList> reviews = reviewService.getMyReview(userId);
         return ResponseEntity.ok(reviews);
@@ -82,7 +82,7 @@ public class ReviewController implements ReviewApi {
     @PatchMapping("/me/{reviewId}")
     public void reviewUpdate(
         @PathVariable UUID reviewId,
-        @RequestBody ReviewCreateRequest request
+        @Valid @RequestBody ReviewCreateRequest request
     ) {
         reviewService.updateMyReview(reviewId, request);
     }
