@@ -3,7 +3,9 @@ package com.nextdaydelivery.order.application.service;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
+import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
 import com.nextdaydelivery.order.presentation.dto.request.ChangeOrderStatusRequest;
+import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void getOrderDetail() {
+    public OrderDetailResponse getOrderDetail(UUID orderId, Long userId) {
+        OrderDetails details = orderRepository.findByIdWithDetails(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 아이디입니다."));
+        validateOrderAccess(details);
+        return OrderDetailResponse.from(details, userId);
     }
 
     @Override
@@ -80,7 +86,8 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 아이디거나 접근 권한이 없습니다."));
     }
 
-    private void validateOrderAccess(Order order) {
+    private void validateOrderAccess(OrderDetails details) {
+        //권한 검증
     }
 
 

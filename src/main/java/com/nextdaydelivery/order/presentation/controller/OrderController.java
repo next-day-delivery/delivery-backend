@@ -3,9 +3,11 @@ package com.nextdaydelivery.order.presentation.controller;
 import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.order.application.service.OrderService;
 import com.nextdaydelivery.order.presentation.dto.request.ChangeOrderStatusRequest;
+import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,5 +50,12 @@ public class OrderController {
                                                             @RequestHeader("X-User-Id") Long userId) {
         orderService.cancelOrderByCustomer(orderId, userId);
         return ResponseEntity.ok(CommonResponse.onSuccess());
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<CommonResponse<OrderDetailResponse>> getOrderDetails(@PathVariable UUID orderId,
+                                                                               @RequestHeader("X-User-Id") Long userId) {
+        OrderDetailResponse response = orderService.getOrderDetail(orderId, userId);
+        return ResponseEntity.ok(CommonResponse.onSuccess(response));
     }
 }
