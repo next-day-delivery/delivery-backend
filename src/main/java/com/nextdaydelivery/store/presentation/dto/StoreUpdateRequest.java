@@ -10,4 +10,5 @@ public record StoreUpdateRequest(
         String dong,
         String detailAddress,
         List<UUID> categoryIds
-) {}
+) {
+}
