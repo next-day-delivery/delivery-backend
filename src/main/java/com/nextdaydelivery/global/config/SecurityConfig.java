@@ -19,8 +19,7 @@ public class SecurityConfig {
 
                 // 2. 경로별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/").permitAll()       // 메인 페이지는 누구나 접근 가능
-                        .requestMatchers("/api/health").permitAll() // 나중에 쓸 헬스체크도 미리 허용
+                        .requestMatchers("/api/health").permitAll()       // 메인 페이지는 누구나 접근 가능
                         .anyRequest().authenticated()           // 나머지는 로그인 필요
                 )
 
