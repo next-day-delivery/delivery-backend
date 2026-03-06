@@ -51,6 +51,14 @@ public class UserAddress extends BaseAuditEntity {
     }
 
     public static UserAddress create(User user, String address) {
+        if (user == null) {
+            throw new IllegalArgumentException("user는 필수입니다.");
+        }
+
+        if (address == null || address.isBlank() || address.length() > 255) {
+            throw new IllegalArgumentException("주소는 1~255자여야 합니다.");
+        }
+
         return UserAddress.builder()
                 .user(user)
                 .address(address)
