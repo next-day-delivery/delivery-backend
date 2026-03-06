@@ -19,13 +19,17 @@ public interface ReviewApi {
     //2. 내 리뷰 저장
     ResponseEntity<Response> reviewPost(
             ReviewCreateRequest review,
-            @PathVariable UUID storeId
+            @PathVariable UUID orderId
     );
 
     //3. 내가 작성한 리뷰 전체 조회
     ResponseEntity<List<ReviewList>> myReviewListGet(Long userId);
 
-    //4. 리뷰 상태 ( 공개, 숨기기 ) 전환
-    void ratingStatusUpdate(UUID reviewId);
+    //4. 리뷰 상태 ( 전체 공개, 숨기기 ) 전환
+    void ReviewStatusUpdate(UUID reviewId);
+
+    void reviewDelete(UUID reviewId);
+
+    void reviewUpdate(UUID reviewId, ReviewCreateRequest request);
 
 }

@@ -45,7 +45,7 @@ public class Review extends CreatedAuditEntity {
     // Review 엔티티 내부
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", unique = true, nullable = false)
-    private Order order;
+    private Order order; // 주문 완료 or 배달 완료 상태에서 리뷰 작성 가능
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
@@ -63,7 +63,12 @@ public class Review extends CreatedAuditEntity {
 
     public void toggleStatus() {
         this.reviewStatus = (this.reviewStatus == ReviewStatus.VISIBLE)
-                ? ReviewStatus.HIDDEN
-                : ReviewStatus.VISIBLE;
+            ? ReviewStatus.HIDDEN
+            : ReviewStatus.VISIBLE;
+    }
+
+    public void updateReview(String content, Integer rating) {
+        this.content = content;
+        this.rating = rating;
     }
 }
