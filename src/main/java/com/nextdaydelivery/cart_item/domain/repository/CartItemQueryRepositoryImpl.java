@@ -4,9 +4,11 @@ import static com.nextdaydelivery.cart.domain.entity.QCart.cart;
 import static com.nextdaydelivery.cart_item.domain.entity.QCartItem.cartItem;
 import static com.nextdaydelivery.product.domain.entity.QProduct.product;
 
+import com.nextdaydelivery.cart.domain.entity.Cart;
 import com.nextdaydelivery.cart.domain.enums.CartStatus;
 import com.nextdaydelivery.cart_item.domain.entity.CartItem;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,26 +39,33 @@ public class CartItemQueryRepositoryImpl implements CartItemQueryRepository {
 
     @Override
     public List<CartItemSummary> findActiveCartItemsByUserId(Long userId) {
-        // 사용자 ACTIVE cart의 품목 목록을 상품 정보와 함께 조회
+        // 1. 최신 ACTIVE cart 1건 확정
+        Cart activeCart = queryFactory
+                .selectFrom(cart)
+                .where(cart.user.userId.eq(userId), cart.status.eq(CartStatus.ACTIVE))
+                .orderBy(cart.cartId.desc())
+                .limit(1)
+                .fetchFirst();
+
+        if (activeCart == null) return Collections.emptyList();
+
+        // 2. 확정된 cartId로만 item 조회
         return queryFactory
-            .select(
-                new QCartItemSummary(
-                    cart.cartId,
-                    cart.store.storeId,
-                    product.productId,
-                    product.productName,
-                    product.price,
-                    cartItem.quantity
+                .select(new QCartItemSummary(
+                        cart.cartId,
+                        cart.store.storeId,
+                        product.productId,
+                        product.productName,
+                        product.price,
+                        cartItem.quantity
+                ))
+                .from(cartItem)
+                .join(cartItem.cart, cart)
+                .join(cartItem.product, product)
+                .where(
+                        cart.cartId.eq(activeCart.getCartId())  // ← userId+ACTIVE 대신 cartId
                 )
-            )
-            .from(cartItem)
-            .join(cartItem.cart, cart)
-            .join(cartItem.product, product)
-            .where(
-                cart.user.userId.eq(userId),
-                cart.status.eq(CartStatus.ACTIVE)
-            )
-            .fetch();
+                .fetch();
     }
 
     @Override

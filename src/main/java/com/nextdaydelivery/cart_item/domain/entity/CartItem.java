@@ -50,10 +50,21 @@ public class CartItem {
     }
 
     public void increaseQuantity(Long quantity) {
+        validateQuantity(quantity);
         this.quantity += quantity;
     }
 
     public void changeQuantity(Long quantity) {
+        validateQuantity(quantity);
         this.quantity = quantity;
     }
+
+    private void validateQuantity(Long quantity) {
+        if(quantity == null || quantity <= 0 ){
+            throw new IllegalArgumentException("장바구니 수량은 0보다 커야 합니다.( 입력값 : " + quantity + ")");
+        }
+    }
+
+
+
 }

@@ -43,6 +43,7 @@ public class CartService {
         Product product = getProduct(request.productId());
         Store targetStore = product.getStore();
 
+        // 이미 targetStore에 생성된 장바구니가 있으면 반환 , 다른가게의 장바구니를 담았다면 장바구니를 새로 생성(초기상태 ACTIVE)
         Cart activeCart = getOrCreateActiveCart(user, targetStore);
 
         CartItem cartItem = cartItemRepository.findByCartIdAndProductId(activeCart.getCartId(), request.productId())
@@ -63,7 +64,7 @@ public class CartService {
         );
     }
 
-
+    // 현재 사용자가 사용중인 장바구니의 품목들을 반환
     public ResGetCartItemsDto getActiveCartItems(Long userId) {
         validateUser(userId);
 
@@ -132,6 +133,7 @@ public class CartService {
 
     @Transactional
     public void completeActiveCart(Long userId) {
+        validateUser(userId);
         Cart activeCart = getActiveCart(userId);
         activeCart.markCompleted();
     }
