@@ -13,4 +13,8 @@ public enum UserRole {
 
     private final String authority;
     private final String description;
+
+    public boolean isPubliclyRegistrable() {
+        return this == CUSTOMER || this == OWNER;
+    }
 }
