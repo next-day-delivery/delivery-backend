@@ -11,10 +11,24 @@ import org.springframework.data.repository.query.Param;
 
 public interface OrderJPARepository extends JpaRepository<Order, UUID> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)    // 사용자,매니저랑 동시에 상태 변경을 진행할 경우 대비
+    @Lock(LockModeType.PESSIMISTIC_WRITE)    // 사용자,점포,매니저가 동시에 상태 변경을 진행할 경우 대비
     @Query("Select o from Order o " +
             "join o.store s " +
             "where o.orderId = :orderId and s.user.userId = :userId"
     )
-    Optional<Order> findByIdAndOwnerId(@Param("orderId") UUID orderId, @Param("userId") Long userId);
+    Optional<Order> findByIdAndOwnerIdWithLock(@Param("orderId") UUID orderId, @Param("userId") Long userId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("Select o from Order o " +
+            "join o.user u " +
+            "where o.orderId = :orderId and u.userId = :userId"
+    )
+    Optional<Order> findByIdAndCustomerIdWithLock(@Param("orderId") UUID orderId, @Param("userId") Long userId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("Select o from Order o " +
+            "where o.orderId = :orderId "
+    )
+    Optional<Order> findByIdWithLock(@Param("orderId") UUID orderId);
+
 }

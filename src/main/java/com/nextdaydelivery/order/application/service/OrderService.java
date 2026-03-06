@@ -5,17 +5,19 @@ import java.util.UUID;
 
 public interface OrderService {
 
-    public void getOrderList();
+    void getOrderList();
 
-    public void getOrderDetail();
+    void getOrderDetail();
 
-    public void cancelOrder();
+    void cancelOrderByCustomer(UUID orderId, Long userId);
 
-    public void rejectOrder();
+    void cancelOrderByManager(UUID orderId);
 
-    public void changeOrderStatus(ChangeOrderStatusRequest request, UUID orderId, Long userId);
+    void rejectOrder(UUID orderId, Long userId);
 
-    public void changeOrderStatus(ChangeOrderStatusRequest request, UUID orderId);
+    void changeOrderStatusByOwner(ChangeOrderStatusRequest request, UUID orderId, Long userId);
 
-    public void getOrderListActive();
+    void changeOrderStatusByManager(ChangeOrderStatusRequest request, UUID orderId);
+
+    void getOrderListActive();
 }

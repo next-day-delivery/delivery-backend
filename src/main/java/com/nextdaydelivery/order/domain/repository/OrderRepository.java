@@ -6,7 +6,10 @@ import java.util.UUID;
 
 public interface OrderRepository {
 
-    public Optional<Order> findByIdAndOwnerId(UUID orderId, Long ownerId);
+    Optional<Order> findByIdAndOwnerIdWithLock(UUID orderId, Long ownerId);
 
-    public Optional<Order> findById(UUID orderId);
+    Optional<Order> findByIdWithLock(UUID orderId);
+
+    Optional<Order> findByIdAndCustomerIdWithLock(UUID orderId, Long userId);
+
 }

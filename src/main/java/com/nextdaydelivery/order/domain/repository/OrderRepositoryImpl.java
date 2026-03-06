@@ -14,12 +14,19 @@ public class OrderRepositoryImpl implements OrderRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Optional<Order> findByIdAndOwnerId(UUID orderId, Long ownerId) {
-        return jpaRepository.findByIdAndOwnerId(orderId, ownerId);
+    public Optional<Order> findByIdAndOwnerIdWithLock(UUID orderId, Long ownerId) {
+        return jpaRepository.findByIdAndOwnerIdWithLock(orderId, ownerId);
     }
 
     @Override
-    public Optional<Order> findById(UUID orderId) {
-        return jpaRepository.findById(orderId);
+    public Optional<Order> findByIdWithLock(UUID orderId) {
+        return jpaRepository.findByIdWithLock(orderId);
     }
+
+    @Override
+    public Optional<Order> findByIdAndCustomerIdWithLock(UUID orderId, Long userId) {
+        return jpaRepository.findByIdAndCustomerIdWithLock(orderId, userId);
+    }
+
+
 }
