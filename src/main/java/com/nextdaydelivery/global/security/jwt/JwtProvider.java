@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.util.Date;
+import java.util.Objects;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,9 @@ public class JwtProvider {
     }
 
     public String createAccessToken(Long userId, UserRole role) {
+        Objects.requireNonNull(userId, "User ID는 null일 수 없습니다.");
+        Objects.requireNonNull(role, "User Role은 null일 수 없습니다.");
+
         Date now = new Date();
 
         long expirationMillis = jwtProperties.accessTokenValidity().toMillis();
