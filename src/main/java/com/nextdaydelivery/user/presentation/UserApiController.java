@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserApiController {
     private final UserService userService;
-    
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CommonResponse<Long> publicSignup(
             @Valid @RequestBody PublicSignUpRequest request
     ) {
-        Long response = userService.singUp(request);
+        Long response = userService.signUp(request);
         return CommonResponse.onSuccess(HttpStatus.CREATED, response);
     }
 }

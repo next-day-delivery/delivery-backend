@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 @Getter
 public enum AuthErrorCode implements ErrorCode {
-
-    FORBIDDEN(HttpStatus.FORBIDDEN, "A001", "접근 권한이 없습니다.");
+    FORBIDDEN(HttpStatus.FORBIDDEN, "A001", "접근 권한이 없습니다."),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않은 자격 증명입니다.");
 
     private final HttpStatus status;
     private final String code;

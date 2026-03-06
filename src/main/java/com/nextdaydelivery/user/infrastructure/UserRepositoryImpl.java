@@ -5,6 +5,7 @@ import static com.nextdaydelivery.user.domain.entity.QUser.user;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -32,5 +33,10 @@ public class UserRepositoryImpl implements UserRepository {
                 .fetchFirst();
 
         return fetchOne != null;
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userJpaRepository.findByUsername(username);
     }
 }
