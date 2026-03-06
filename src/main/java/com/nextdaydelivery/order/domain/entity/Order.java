@@ -1,6 +1,6 @@
 package com.nextdaydelivery.order.domain.entity;
 
-import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
@@ -47,7 +47,7 @@ public class Order extends CreatedAuditEntity {
     @Column(name = "address")
     private String address; // 배송지 (VARCHAR)
 
-    @ManyToOne(fetch = FetchType.LAZY) //TODO: 임시 설정
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 }

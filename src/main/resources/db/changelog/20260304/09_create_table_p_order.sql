@@ -5,6 +5,7 @@ CREATE TABLE p_order
 (
     order_id     UUID PRIMARY KEY,
     user_id      BIGINT       NOT NULL,
+    store_id     UUID         NOT NULL,
     order_status VARCHAR(30)  NOT NULL,
     address      VARCHAR(255),
 
@@ -14,6 +15,11 @@ CREATE TABLE p_order
     CONSTRAINT fk_order_user
         FOREIGN KEY (user_id)
             REFERENCES p_user (user_id)
+            ON DELETE RESTRICT,
+
+    CONSTRAINT fk_order_store
+        FOREIGN KEY (store_id)
+            REFERENCES p_store (store_id)
             ON DELETE RESTRICT,
 
     CONSTRAINT ck_order_status
