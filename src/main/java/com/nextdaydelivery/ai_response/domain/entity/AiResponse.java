@@ -1,6 +1,7 @@
 package com.nextdaydelivery.ai_response.domain.entity;
 
-import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.ai_response.application.event.AiUsedEvent;
+import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +13,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +22,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "p_ai_response")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class AiResponse extends CreatedAuditEntity {
 
     @Id
@@ -44,4 +42,21 @@ public class AiResponse extends CreatedAuditEntity {
 
     @Column(name = "content", length = 255)
     private String content; // 답변
+
+    @Builder
+    public AiResponse(User user, String productName, String prompt, String content) {
+        this.user = user;
+        this.productName = productName;
+        this.prompt = prompt;
+        this.content = content;
+    }
+
+    public static AiResponse fromEvent(AiUsedEvent event) {
+        return AiResponse.builder()
+                .user(null) // TODO: user 개발 후 추가 로직 필요
+                .productName(event.getProductName())
+                .prompt(event.getPrompt())
+                .content(event.getContent())
+                .build();
+    }
 }
