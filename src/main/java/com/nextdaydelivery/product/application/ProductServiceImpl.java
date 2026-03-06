@@ -4,12 +4,13 @@ import com.nextdaydelivery.ai_response.application.AiClient;
 import com.nextdaydelivery.ai_response.application.AiEventPublisher;
 import com.nextdaydelivery.ai_response.application.event.AiUsedEvent;
 import com.nextdaydelivery.ai_response.infrastructure.dto.AiGenerationResult;
+import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
 import com.nextdaydelivery.product.application.dto.response.ProductResponse;
 import com.nextdaydelivery.product.domain.entity.Product;
 import com.nextdaydelivery.product.domain.repository.ProductRepository;
-import com.nextdaydelivery.product.exception.ProductNotFoundException;
+import com.nextdaydelivery.product.exception.ProductErrorCode;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
             return response(product);
         });
 
-        if (result != null) {
+        if (isResultNull(result)) {
             aiEventPublisher.publishEvent(AiUsedEvent.from(result));
         }
 
@@ -54,8 +55,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse update(ProductUpdateRequest updateRequest) {
-        Product product = productRepository.findById(updateRequest.id())
-                .orElseThrow(ProductNotFoundException::new);
+        Product product = findById(updateRequest.productId());
 
         if (updateRequest.productName() != null) {
             product.updateProductName(updateRequest.productName());
@@ -85,8 +85,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public ProductResponse readById(UUID id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+        Product product = findById(id);
 
         return response(product);
     }
@@ -94,8 +93,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public UUID deleteById(UUID id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+        Product product = findById(id);
         productRepository.delete(product);
 
         return id;
@@ -104,14 +102,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse hideById(UUID id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
-
+        Product product = findById(id);
         product.hide();
 
         return response(product);
     }
 
+    private Product findById(UUID id){
+        return productRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    private static boolean isResultNull(AiGenerationResult result) {
+        return result != null;
+    }
 
     private ProductResponse response(Product product) {
         return new ProductResponse(
