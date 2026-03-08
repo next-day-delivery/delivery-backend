@@ -43,20 +43,23 @@ public class StoreCategoryServiceImpl implements StoreCategoryService {
     @Override
     @Transactional
     public void updateStoreCategories(Store store, List<UUID> categoryIds) {
-        // 1. 기존에 연결된 모든 StoreCategory 삭제 (Delete-and-Insert 전략)
-        // Store 엔티티 내의 storeCategories 리스트도 비워줘야 OrphanRemoval이 정상 작동하거나
-        // 직접 Repository에서 삭제 쿼리를 날릴 수 있습니다.
+        // 1. 기존 연결 삭제
         storeCategoryRepository.deleteByStore(store);
 
         if (categoryIds == null || categoryIds.isEmpty()) {
             return;
         }
 
-        // 2. 새로운 카테고리 ID 목록으로 다시 생성
-        for (UUID categoryId : categoryIds) {
-            Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 ID입니다: " + categoryId));
+        // 2. 한 번의 쿼리로 모든 카테고리 조회 (SELECT ... FROM category WHERE id IN (...))
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
 
+        // 3. 입력받은 ID 개수와 조회된 개수가 다른지 체크 (예외 처리)
+        if (categories.size() != categoryIds.size()) {
+            throw new IllegalArgumentException("일부 카테고리 ID가 유효하지 않습니다.");
+        }
+
+        // 4. 생성 및 저장
+        for (Category category : categories) {
             createStoreCategory(store, category);
         }
     }

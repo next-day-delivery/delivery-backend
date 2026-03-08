@@ -116,7 +116,6 @@ public class StoreServiceImpl implements StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다. ID: " + storeId));
 
-        // [단방향 지향] Repository를 통해 카테고리 목록 조회
         List<String> categoryNames = storeCategoryRepository.findAllByStore(store).stream()
                 .map(sc -> sc.getCategory().getCategoryName())
                 .toList();
@@ -154,13 +153,9 @@ public class StoreServiceImpl implements StoreService {
     @Transactional(readOnly = true)
     @Override
     public Page<StoreListResponse> getStoreList(StoreSearchCondition condition, Pageable pageable) {
-        // 1. 가게 목록 조회
         Page<Store> storePage = storeRepository.searchStores(condition, pageable);
 
-        // 2. 단방향 원칙 준수: Store 엔티티 내부가 아닌 외부에서 정보를 조합
         return storePage.map(store -> {
-            // [수정] 대표 카테고리를 찾기 위해 Repository 호출
-            // 주의: 이 방식은 목록 조회 시 N+1을 유발할 수 있음 (아래 팁 참고)
             String mainCategory = storeCategoryRepository.findFirstByStore(store)
                     .map(sc -> sc.getCategory().getCategoryName())
                     .orElse("미지정");
