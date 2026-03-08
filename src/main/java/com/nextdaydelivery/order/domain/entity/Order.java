@@ -1,6 +1,8 @@
 package com.nextdaydelivery.order.domain.entity;
 
 import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.error.OrderErrorCode;
+import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
@@ -53,14 +55,14 @@ public class Order extends CreatedAuditEntity {
 
     public void changeStatus(OrderStatus status) {
         if (!this.orderStatus.canChangeTo(status)) {
-            throw new IllegalStateException("변경이 불가능한 상태입니다.");
+            throw new BusinessException(OrderErrorCode.INVALID_STATUS_CHANGE);
         }
         this.orderStatus = status;
     }
 
     public void validateCancelableTime() {
         if (LocalDateTime.now().isAfter(this.getCreatedAt().plusMinutes(5))) {
-            throw new IllegalStateException("주문 후 5분이 지나 취소 할 수 없습니다.");
+            throw new BusinessException(OrderErrorCode.CANCEL_TIMEOUT);
         }
     }
 }

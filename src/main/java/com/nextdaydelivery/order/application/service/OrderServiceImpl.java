@@ -1,6 +1,8 @@
 package com.nextdaydelivery.order.application.service;
 
 import com.nextdaydelivery.global.config.PaginationConfig;
+import com.nextdaydelivery.global.domain.error.OrderErrorCode;
+import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
@@ -51,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDetailResponse getOrderDetail(UUID orderId, Long userId) {
         OrderDetails details = orderRepository.findByIdWithDetails(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 아이디입니다."));
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
         validateOrderAccess(details);
         return OrderDetailResponse.from(details, userId);
     }
@@ -98,17 +100,17 @@ public class OrderServiceImpl implements OrderService {
 
     private Order getOrderWithLock(UUID orderId) {
         return orderRepository.findByIdWithLock(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 아이디입니다."));
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
     }
 
     private Order getOrderByCustomerIdWithLock(UUID orderId, Long customerId) {
         return orderRepository.findByIdAndCustomerIdWithLock(orderId, customerId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 아이디거나 접근 권한이 없습니다."));
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_ORDER));
     }
 
     private Order getOrderByOwnerIdWithLock(UUID orderId, Long ownerId) {
         return orderRepository.findByIdAndOwnerIdWithLock(orderId, ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문 아이디거나 접근 권한이 없습니다."));
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER));
     }
 
     private void validateOrderAccess(OrderDetails details) {
