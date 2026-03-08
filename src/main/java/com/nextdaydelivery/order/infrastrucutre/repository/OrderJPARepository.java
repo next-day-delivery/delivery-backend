@@ -1,4 +1,4 @@
-package com.nextdaydelivery.order.domain.repository;
+package com.nextdaydelivery.order.infrastrucutre.repository;
 
 import com.nextdaydelivery.order.domain.entity.Order;
 import jakarta.persistence.LockModeType;

@@ -1,4 +1,4 @@
-package com.nextdaydelivery.order.domain.repository;
+package com.nextdaydelivery.order.infrastrucutre.repository;
 
 import static com.nextdaydelivery.order.domain.entity.QOrder.order;
 import static com.nextdaydelivery.order.domain.entity.QOrderLine.orderLine;
@@ -9,6 +9,7 @@ import static com.querydsl.core.group.GroupBy.list;
 
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
 import com.nextdaydelivery.order.domain.repository.dto.OrderSlice;
 import com.nextdaydelivery.order.domain.repository.dto.QOrderDetails;
