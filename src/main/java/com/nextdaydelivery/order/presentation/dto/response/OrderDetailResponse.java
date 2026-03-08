@@ -7,6 +7,7 @@ import com.nextdaydelivery.order.domain.repository.dto.OrderLineInfo;
 import java.util.List;
 import java.util.UUID;
 
+//배달, 결제정보 추가 예정
 public record OrderDetailResponse(
         UUID orderId,
         Long customerId,

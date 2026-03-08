@@ -25,4 +25,8 @@ public enum OrderStatus {
             default -> false;
         };
     }
+
+    public static List<OrderStatus> getActiveStatus() {
+        return List.of(ORDER_REQUESTED, ORDER_ACCEPTED, ORDER_COOKED);
+    }
 }

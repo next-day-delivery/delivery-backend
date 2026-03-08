@@ -2,10 +2,14 @@ package com.nextdaydelivery.order.presentation.controller;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.order.application.service.OrderService;
-import com.nextdaydelivery.order.presentation.dto.request.ChangeOrderStatusRequest;
+import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
+import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
+import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,18 +18,53 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/orders")
 public class OrderController {
-
     private final OrderService orderService;
+
+    @GetMapping("/me")
+    public ResponseEntity<CommonResponse<Slice<OrderListResponse>>> getMyOrders(@RequestHeader("X-User-Id") Long userId,
+                                                                                @RequestParam(required = false) UUID cursor,
+                                                                                @RequestParam(required = false, defaultValue = "10") int size) {
+        OrderSearchRequest request = OrderSearchRequest.builder()
+                .lastReadOrderId(cursor)
+                .customerId(userId)
+                .build();
+        Slice<OrderListResponse> response = orderService.getOrdersByCustomer(request, size);
+        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<CommonResponse<Slice<OrderListResponse>>> getAllOrders(
+            @RequestBody OrderSearchRequest request,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        Slice<OrderListResponse> response = orderService.getOrdersByManager(request, size);
+        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+    }
+
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<CommonResponse<Slice<OrderListResponse>>> getStoreOrders(@PathVariable UUID storeId,
+                                                                                   @RequestParam(required = false, defaultValue = "false") Boolean active,
+                                                                                   @RequestHeader("X-User-Id") Long userId,
+                                                                                   @RequestParam(required = false) UUID cursor,
+                                                                                   @RequestParam(required = false, defaultValue = "10") int size) {
+        OrderSearchRequest request = OrderSearchRequest.builder()
+                .storeId(storeId)
+                .lastReadOrderId(cursor)
+                .status(active ? OrderStatus.getActiveStatus() : null)
+                .build();
+        Slice<OrderListResponse> response = orderService.getStoreOrders(storeId, request, userId, size);
+        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+    }
 
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<CommonResponse<Void>> changeStatusByOwner(@PathVariable UUID orderId,
-                                                                    @RequestBody ChangeOrderStatusRequest request,
+                                                                    @RequestBody OrderStatusRequest request,
                                                                     @RequestHeader("X-User-Id") Long userId) {
         orderService.changeOrderStatusByOwner(request, orderId, userId);
         return ResponseEntity.ok(CommonResponse.onSuccess());
@@ -33,7 +72,7 @@ public class OrderController {
 
     @PatchMapping("/{orderId}/status/manager")
     public ResponseEntity<CommonResponse<Void>> changeStatusByManager(@PathVariable UUID orderId,
-                                                                      @RequestBody ChangeOrderStatusRequest request) {
+                                                                      @RequestBody OrderStatusRequest request) {
         orderService.changeOrderStatusByManager(request, orderId);
         return ResponseEntity.ok(CommonResponse.onSuccess());
     }
@@ -58,4 +97,5 @@ public class OrderController {
         OrderDetailResponse response = orderService.getOrderDetail(orderId, userId);
         return ResponseEntity.ok(CommonResponse.onSuccess(response));
     }
+
 }
