@@ -5,12 +5,13 @@ import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.repository.StoreQuerydslRepository;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class StoreJpaRepositoryImpl implements StoreQuerydslRepository {
@@ -22,6 +23,7 @@ public class StoreJpaRepositoryImpl implements StoreQuerydslRepository {
     public Page<Store> searchStores(StoreSearchCondition condition, Pageable pageable) {
         List<Store> content = queryFactory
                 .selectFrom(store)
+                .leftJoin(store.storeAddress).fetchJoin()
                 .where(
                         nameContains(condition.name()),
                         store.deletedAt.isNull() // 삭제된 가게 제외 로직 추가!
@@ -30,17 +32,16 @@ public class StoreJpaRepositoryImpl implements StoreQuerydslRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 카운트 쿼리도 별도로 작성 가능
-        Long total = queryFactory
+        // 필요 시 카운트 쿼리도 실행
+        JPAQuery<Long> countQuery = queryFactory
                 .select(store.count())
                 .from(store)
                 .where(
                         nameContains(condition.name()),
                         store.deletedAt.isNull()
-                )
-                .fetchOne();
+                );
 
-        return new PageImpl<>(content, pageable, total != null ? total : 0L);
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
     private BooleanExpression nameContains(String name) {
