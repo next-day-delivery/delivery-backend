@@ -57,4 +57,10 @@ public class Order extends CreatedAuditEntity {
         }
         this.orderStatus = status;
     }
+
+    public void validateCancelableTime() {
+        if (LocalDateTime.now().isAfter(this.getCreatedAt().plusMinutes(5))) {
+            throw new IllegalStateException("주문 후 5분이 지나 취소 할 수 없습니다.");
+        }
+    }
 }

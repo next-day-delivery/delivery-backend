@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void cancelOrderByCustomer(UUID orderId, Long userId) {
         Order order = getOrderByCustomerIdWithLock(orderId, userId);
-        //5분 이내인지 검증
+        order.validateCancelableTime();
         order.changeStatus(OrderStatus.ORDER_CANCELED);
         //환불 이벤트 발행
     }
