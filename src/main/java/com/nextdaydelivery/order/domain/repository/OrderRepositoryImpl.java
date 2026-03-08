@@ -72,6 +72,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                                 GroupBy.sum(orderLine.price.multiply(orderLine.quantity)),
                                 order.orderStatus.stringValue(),
                                 order.address,
+                                order.createdAt,
                                 list(new QOrderLineInfo(
                                         orderLine.orderLineId,
                                         product.productId,

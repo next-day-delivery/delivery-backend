@@ -1,6 +1,7 @@
 package com.nextdaydelivery.order.domain.repository.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ public record OrderDetails(
         Long totalPrice,
         String orderStatus,
         String orderAddress,
+        LocalDateTime createdAt,
         List<OrderLineInfo> orderLines
 ) {
     @QueryProjection
@@ -26,6 +28,7 @@ public record OrderDetails(
             Long totalPrice,
             String orderStatus,
             String orderAddress,
+            LocalDateTime createdAt,
             List<OrderLineInfo> orderLines
 
     ) {
@@ -37,6 +40,7 @@ public record OrderDetails(
         this.totalPrice = totalPrice;
         this.orderStatus = orderStatus;
         this.orderAddress = orderAddress;
+        this.createdAt = createdAt;
         this.orderLines = orderLines;
     }
 }
