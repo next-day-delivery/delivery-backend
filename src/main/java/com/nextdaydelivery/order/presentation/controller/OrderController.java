@@ -10,7 +10,7 @@ import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,74 +28,74 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("/me")
-    public ResponseEntity<CommonResponse<Slice<OrderListResponse>>> getMyOrders(@RequestHeader("X-User-Id") Long userId,
-                                                                                @RequestParam(required = false) UUID cursor,
-                                                                                @RequestParam(required = false, defaultValue = "10") int size) {
+    public CommonResponse<Slice<OrderListResponse>> getMyOrders(@RequestHeader("X-User-Id") Long userId,
+                                                                @RequestParam(required = false) UUID cursor,
+                                                                @RequestParam(required = false, defaultValue = "10") int size) {
         OrderSearchRequest request = OrderSearchRequest.builder()
                 .lastReadOrderId(cursor)
                 .customerId(userId)
                 .build();
         Slice<OrderListResponse> response = orderService.getOrdersByCustomer(request, size);
-        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+        return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
     @PostMapping("/search")
-    public ResponseEntity<CommonResponse<Slice<OrderListResponse>>> getAllOrders(
+    public CommonResponse<Slice<OrderListResponse>> getAllOrders(
             @RequestBody OrderSearchRequest request,
             @RequestParam(required = false, defaultValue = "10") int size) {
         Slice<OrderListResponse> response = orderService.getOrdersByManager(request, size);
-        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+        return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
     @GetMapping("/store/{storeId}")
-    public ResponseEntity<CommonResponse<Slice<OrderListResponse>>> getStoreOrders(@PathVariable UUID storeId,
-                                                                                   @RequestParam(required = false, defaultValue = "false") Boolean active,
-                                                                                   @RequestHeader("X-User-Id") Long userId,
-                                                                                   @RequestParam(required = false) UUID cursor,
-                                                                                   @RequestParam(required = false, defaultValue = "10") int size) {
+    public CommonResponse<Slice<OrderListResponse>> getStoreOrders(@PathVariable UUID storeId,
+                                                                   @RequestParam(required = false, defaultValue = "false") Boolean active,
+                                                                   @RequestHeader("X-User-Id") Long userId,
+                                                                   @RequestParam(required = false) UUID cursor,
+                                                                   @RequestParam(required = false, defaultValue = "10") int size) {
         OrderSearchRequest request = OrderSearchRequest.builder()
                 .storeId(storeId)
                 .lastReadOrderId(cursor)
                 .status(active ? OrderStatus.getActiveStatus() : null)
                 .build();
         Slice<OrderListResponse> response = orderService.getStoreOrders(storeId, request, userId, size);
-        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+        return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<CommonResponse<Void>> changeStatusByOwner(@PathVariable UUID orderId,
-                                                                    @RequestBody OrderStatusRequest request,
-                                                                    @RequestHeader("X-User-Id") Long userId) {
+    public CommonResponse<Void> changeStatusByOwner(@PathVariable UUID orderId,
+                                                    @RequestBody OrderStatusRequest request,
+                                                    @RequestHeader("X-User-Id") Long userId) {
         orderService.changeOrderStatusByOwner(request, orderId, userId);
-        return ResponseEntity.ok(CommonResponse.onSuccess());
+        return CommonResponse.onSuccess();
     }
 
     @PatchMapping("/{orderId}/status/manager")
-    public ResponseEntity<CommonResponse<Void>> changeStatusByManager(@PathVariable UUID orderId,
-                                                                      @RequestBody OrderStatusRequest request) {
+    public CommonResponse<Void> changeStatusByManager(@PathVariable UUID orderId,
+                                                      @RequestBody OrderStatusRequest request) {
         orderService.changeOrderStatusByManager(request, orderId);
-        return ResponseEntity.ok(CommonResponse.onSuccess());
+        return CommonResponse.onSuccess();
     }
 
     @PostMapping("/{orderId}/reject")
-    public ResponseEntity<CommonResponse<Void>> rejectOrder(@PathVariable UUID orderId,
-                                                            @RequestHeader("X-User-Id") Long userId) {
+    public CommonResponse<Void> rejectOrder(@PathVariable UUID orderId,
+                                            @RequestHeader("X-User-Id") Long userId) {
         orderService.rejectOrder(orderId, userId);
-        return ResponseEntity.ok(CommonResponse.onSuccess());
+        return CommonResponse.onSuccess();
     }
 
     @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<CommonResponse<Void>> cancelOrder(@PathVariable UUID orderId,
-                                                            @RequestHeader("X-User-Id") Long userId) {
+    public CommonResponse<Void> cancelOrder(@PathVariable UUID orderId,
+                                            @RequestHeader("X-User-Id") Long userId) {
         orderService.cancelOrderByCustomer(orderId, userId);
-        return ResponseEntity.ok(CommonResponse.onSuccess());
+        return CommonResponse.onSuccess();
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<CommonResponse<OrderDetailResponse>> getOrderDetails(@PathVariable UUID orderId,
-                                                                               @RequestHeader("X-User-Id") Long userId) {
+    public CommonResponse<OrderDetailResponse> getOrderDetails(@PathVariable UUID orderId,
+                                                               @RequestHeader("X-User-Id") Long userId) {
         OrderDetailResponse response = orderService.getOrderDetail(orderId, userId);
-        return ResponseEntity.ok(CommonResponse.onSuccess(response));
+        return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
 }
