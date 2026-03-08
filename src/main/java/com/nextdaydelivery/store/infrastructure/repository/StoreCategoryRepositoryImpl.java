@@ -13,12 +13,10 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
 
-    // 도메인 인터페이스가 아닌, JPA 인터페이스를 주입받아야 합니다.
     private final StoreCategoryJpaRepository storeCategoryJpaRepository;
 
     @Override
     public StoreCategory save(StoreCategory storeCategory) {
-        // JPA의 save 메서드를 호출하여 실제 DB에 영속화합니다.
         return storeCategoryJpaRepository.save(storeCategory);
     }
 
@@ -29,16 +27,16 @@ public class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
 
     @Override
     public List<StoreCategory> findAllByStore(Store store) {
-        return List.of();
+        return storeCategoryJpaRepository.findAllByStore(store);
     }
 
     @Override
     public Optional<StoreCategory> findFirstByStore(Store store) {
-        return Optional.empty();
+        return storeCategoryJpaRepository.findFirstByStore(store);
     }
 
     @Override
     public void deleteByStore(Store store) {
-
+        storeCategoryJpaRepository.deleteByStore(store);
     }
 }
