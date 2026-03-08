@@ -23,7 +23,8 @@ public class StoreRepositoryImpl implements StoreRepository {
 
     @Override
     public Optional<Store> findById(UUID id) {
-        return storeJpaRepository.findById(id);
+        return storeJpaRepository.findById(id)
+                .filter(store -> store.getDeletedAt() == null);
     }
 
     @Override
@@ -35,13 +36,6 @@ public class StoreRepositoryImpl implements StoreRepository {
     public List<Store> findAll() {
         return storeJpaRepository.findAll();
     }
-
-//    @Override
-//    public Page<Store> searchStores(StoreSearchCondition condition, Pageable pageable) {
-//        // QueryDSL을 이용한 동적 쿼리 로직이 들어가는 부분입니다.
-//        // 현재는 예시로 기본 페이징 조회를 보여드립니다.
-//        return storeJpaRepository.findAll(pageable);
-//    }
 
     @Override
     public Page<Store> searchStores(StoreSearchCondition condition, Pageable pageable) {
