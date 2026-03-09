@@ -14,7 +14,6 @@ import com.nextdaydelivery.review.domain.repository.ReviewRepository;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.review.presentation.dto.response.ReviewList;
 import com.nextdaydelivery.store.domain.entity.Store;
-import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.user.domain.entity.User;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,9 +32,6 @@ class ReviewServiceImplTest {
     private ReviewRepository reviewRepository;
 
     @Mock
-    private StoreRepository storeRepository;
-
-    @Mock
     private OrderRepository orderRepository;
 
     @InjectMocks
@@ -46,11 +42,12 @@ class ReviewServiceImplTest {
 
         //given
         UUID storeId = UUID.randomUUID();
-        Review review = Review.builder()
-            .content("맛이 훌륭해요. 배달이 빨라요")
-            .rating(5)
-            .reviewStatus(ReviewStatus.VISIBLE)
-            .build();
+//        Review review = Review.builder()
+//            .content("맛이 훌륭해요. 배달이 빨라요")
+//            .rating(5)
+//            .reviewStatus(ReviewStatus.VISIBLE)
+//            .build();
+        Review review = Review.of("맛이 훌륭해요. 배달이 빨라요", 5, ReviewStatus.VISIBLE);
 
         given(reviewRepository.findByStoreStoreId(storeId))
             .willReturn(List.of(review));
@@ -115,11 +112,8 @@ class ReviewServiceImplTest {
     void 내_리뷰_조회() {
 
         //given
-        Review review1 = Review.builder()
-            .content("맛있어요")
-            .rating(5)
-            .reviewStatus(ReviewStatus.VISIBLE)
-            .build();
+        Review review1 = Review.of("맛있어요", 5, ReviewStatus.VISIBLE);
+        
         Review review2 = Review.builder()
             .content("별로예요")
             .rating(1).reviewStatus(ReviewStatus.HIDDEN)
