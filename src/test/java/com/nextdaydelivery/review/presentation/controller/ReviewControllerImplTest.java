@@ -29,7 +29,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ReviewControllerImpl.class)
-public class ReviewControllerTest {
+public class ReviewControllerImplTest {
 
     @MockitoBean
     private ReviewService reviewService;
