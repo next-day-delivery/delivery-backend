@@ -50,7 +50,7 @@ public class Order extends CreatedAuditEntity {
     @Column(name = "address")
     private String address; // 배송지 (VARCHAR)
 
-    @Column(name = "reviewed_at", updatable = false)
+    @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
     public void changeStatus(OrderStatus status) {
