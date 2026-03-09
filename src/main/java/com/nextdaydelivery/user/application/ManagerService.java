@@ -68,6 +68,18 @@ public class ManagerService {
         manager.updateProfile(request.nickname(), request.email());
     }
 
+    @Transactional
+    public void deleteManager(Long managerId, String deleterId) {
+        User manager = userRepository.findById(managerId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (manager.getRole() == UserRole.MASTER) {
+            throw new BusinessException(UserErrorCode.INVALID_ROLE_OPERATION);
+        }
+
+        manager.markAsDeleted(deleterId);
+    }
+
     private User getActiveManager(Long managerId) {
         User user = userRepository.findById(managerId)
                 .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
@@ -79,17 +91,5 @@ public class ManagerService {
             throw new BusinessException(UserErrorCode.USER_ALREADY_DELETED);
         }
         return user;
-    }
-
-    @Transactional
-    public void deleteManager(Long managerId, String deleterId) {
-        User manager = userRepository.findById(managerId)
-                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
-
-        if (manager.getRole() == UserRole.MASTER) {
-            throw new BusinessException(UserErrorCode.INVALID_ROLE_OPERATION);
-        }
-
-        manager.markAsDeleted(deleterId);
     }
 }
