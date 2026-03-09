@@ -1,11 +1,14 @@
 package com.nextdaydelivery.global.config;
 
+import com.nextdaydelivery.global.security.dto.AuthUserDto;
 import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "customAuditorAware")
@@ -15,8 +18,19 @@ public class JpaAuditingConfig {
     @Bean
     public AuditorAware<String> customAuditorAware() {
         return () -> {
-            // TODO: 추후 JWT 도입 시 SecurityContextHolder에서 유저 ID 추출 로직으로 교체
-            return Optional.of("SYSTEM_USER");
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication == null || !authentication.isAuthenticated()
+                    || authentication.getPrincipal().equals("anonymousUser")) {
+                return Optional.of("ANONYMOUS");
+            }
+
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof AuthUserDto authUser) {
+                return Optional.of(String.valueOf(authUser.userId()));
+            }
+
+            return Optional.of("SYSTEM");
         };
     }
 }

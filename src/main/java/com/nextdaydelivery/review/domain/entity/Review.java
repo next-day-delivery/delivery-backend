@@ -1,8 +1,9 @@
 package com.nextdaydelivery.review.domain.entity;
 
-import com.nextdaydelivery.global.domain.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
-import com.nextdaydelivery.review.domain.enums.ReviewStatus;
+import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
+import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -44,8 +45,8 @@ public class Review extends CreatedAuditEntity {
 
     // Review 엔티티 내부
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", unique = true, nullable = false) // DB 테이블의 FK 컬럼명과 일치시킵니다.
-    private Order order;
+    @JoinColumn(name = "order_id", unique = true, nullable = false)
+    private Order order; // 주문 완료 or 배달 완료 상태에서 리뷰 작성 가능
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
@@ -54,10 +55,52 @@ public class Review extends CreatedAuditEntity {
     @Column(name = "content", length = 255)
     private String content; // 리뷰 내용
 
-    @Column(name = "rating", nullable = false)
-    private Integer rating; // 별점 (INT)
+    @Column(name = "rating")
+    private Integer rating; // 별점 (INT) // Null 허용이라 int 대신 Integer 사용
 
     @Enumerated(EnumType.STRING)
     @Column(name = "review_status", nullable = false)
     private ReviewStatus reviewStatus; // 리뷰 상태 (VISIBLE, HIDDEN)
+
+    public void toggleStatus() {
+        this.reviewStatus = (this.reviewStatus == ReviewStatus.VISIBLE)
+            ? ReviewStatus.HIDDEN
+            : ReviewStatus.VISIBLE;
+    }
+
+    public void updateReview(String content, Integer rating) {
+        this.content = content;
+        this.rating = rating;
+    }
+
+    private Review(String content, Integer rating, ReviewStatus reviewStatus) {
+        this.content = content;
+        this.rating = rating;
+        this.reviewStatus = reviewStatus;
+    }
+
+    private Review(String content, Integer rating, ReviewStatus reviewStatus, User user, Order order, Store store) {
+        this.user = user;
+        this.content = content;
+        this.rating = rating;
+        this.reviewStatus = reviewStatus;
+        this.order = order;
+        this.store = store;
+    }
+
+    public static Review create(ReviewCreateRequest request, User user, Order order, Store store) {
+        return new Review(request.content(), request.rating(), ReviewStatus.VISIBLE, user, order, store);
+    }
+
+    public static Review of(
+        String content,
+        Integer rating,
+        ReviewStatus reviewStatus
+    ) {
+        return new Review(
+            content,
+            rating,
+            reviewStatus
+        );
+    }
 }

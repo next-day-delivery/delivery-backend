@@ -1,7 +1,7 @@
 package com.nextdaydelivery.delivery.domain.entity;
 
 import com.nextdaydelivery.delivery.domain.enums.DeliveryStatus;
-import com.nextdaydelivery.global.domain.BaseAuditEntity;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,7 +43,7 @@ public class Delivery extends BaseAuditEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false)
     private DeliveryStatus deliveryStatus; // 배달 상태 (PENDING, ING, COMPLETED)
-    
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt; // 레코드 삭제 시간
 

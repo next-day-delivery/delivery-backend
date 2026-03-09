@@ -1,7 +1,7 @@
 package com.nextdaydelivery.payment.application.service;
 
 import com.nextdaydelivery.payment.domain.entity.Payment;
-import com.nextdaydelivery.payment.domain.repository.PaymentRepository;
+import com.nextdaydelivery.payment.infrastructure.PaymentJpaRepository;
 import com.nextdaydelivery.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.nextdaydelivery.payment.presentation.dto.request.PaymentRequest;
 import com.nextdaydelivery.payment.presentation.dto.response.PaymentConfirmResponse;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PaymentServiceImpl implements PaymentService {
-    private final PaymentRepository paymentRepository;
+    private final PaymentJpaRepository paymentRepository;
 
 
     @Transactional

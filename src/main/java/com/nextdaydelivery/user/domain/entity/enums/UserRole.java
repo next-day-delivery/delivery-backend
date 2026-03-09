@@ -1,11 +1,20 @@
 package com.nextdaydelivery.user.domain.entity.enums;
 
-/**
- * 회원 역할을 위한 ENUM -> 추후 파일 분리
- */
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum UserRole {
-    CUSTOMER, // 일반 고객
-    OWNER,    // 가게 주인
-    MANAGER,  // 매니저
-    MASTER    // 시스템 관리자
+    CUSTOMER("ROLE_CUSTOMER", "고객"),
+    OWNER("ROLE_OWNER", "가게 주인"),
+    MANAGER("ROLE_MANAGER", "매니저"),
+    MASTER("ROLE_MASTER", "관리자");
+
+    private final String authority;
+    private final String description;
+
+    public boolean isPubliclyRegistrable() {
+        return this == CUSTOMER || this == OWNER;
+    }
 }
