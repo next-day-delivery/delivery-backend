@@ -48,8 +48,8 @@ public class StoreController {
     // 3. 가게 정보 수정
     @PatchMapping("/{storeId}")
     public CommonResponse<StoreResponse> updateStore(
-            @PathVariable UUID storeId,
-            @Valid @RequestBody StoreUpdateRequest request) {
+        @PathVariable UUID storeId,
+        @Valid @RequestBody StoreUpdateRequest request) {
         StoreResponse response = storeService.updateStore(storeId, request);
         return CommonResponse.onSuccess(response);
     }
@@ -57,8 +57,8 @@ public class StoreController {
     // 4. 가게 삭제 (Soft Delete)
     @DeleteMapping("/{storeId}")
     public CommonResponse<String> deleteStore(
-            @PathVariable UUID storeId,
-            @RequestParam String deletedBy) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
+        @PathVariable UUID storeId,
+        @RequestParam String deletedBy) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
         storeService.deleteStore(storeId, deletedBy);
         return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
     }
@@ -67,8 +67,8 @@ public class StoreController {
     // 예시 URL: /api/stores?name=치킨&page=0&size=10&sort=createdAt,desc
     @GetMapping
     public CommonResponse<Page<StoreListResponse>> getStoreList(
-            StoreSearchCondition condition,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        StoreSearchCondition condition,
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<StoreListResponse> response = storeService.getStoreList(condition, pageable);
         return CommonResponse.onSuccess(response);
     }

@@ -19,4 +19,6 @@ public interface OrderRepository {
     Optional<OrderDetails> findByIdWithDetails(UUID orderId);
 
     Slice<OrderSlice> searchOrders(OrderSearchCritera request, int size);
+
+    Optional<Order> findById(UUID orderId);
 }

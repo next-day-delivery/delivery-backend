@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.dto.CommonResponse.Result;
 import com.nextdaydelivery.global.exception.BusinessException;
+import com.nextdaydelivery.global.security.jwt.JwtAuthenticationFilter;
+import com.nextdaydelivery.global.security.jwt.JwtValidator;
 import com.nextdaydelivery.order.application.service.OrderService;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
@@ -44,6 +46,12 @@ public class OrderControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private JwtValidator jwtValidator;
+
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    
     @MockitoBean
     private OrderService orderService;
 

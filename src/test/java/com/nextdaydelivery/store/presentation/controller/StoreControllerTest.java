@@ -55,24 +55,24 @@ class StoreControllerTest {
     @DisplayName("가게 생성 성공 테스트")
     void createStore() throws Exception {
         StoreCreationRequest request = new StoreCreationRequest(
-                "치킨나라", "강남구", "서울특별시", "역삼동", "테헤란로 123", List.of("치킨", "야식")
+            "치킨나라", "강남구", "서울특별시", "역삼동", "테헤란로 123", List.of("치킨", "야식")
         );
 
         UUID generatedId = UUID.randomUUID();
         StoreCreationResponse response = new StoreCreationResponse(
-                generatedId, "치킨나라", "강남구", "서울특별시", "역삼동", "테헤란로 123", List.of(UUID.randomUUID())
+            generatedId, "치킨나라", "강남구", "서울특별시", "역삼동", "테헤란로 123", List.of(UUID.randomUUID())
         );
 
         given(storeService.createStore(request)).willReturn(response);
 
         mockMvc.perform(post("/api/stores")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value("SUCCESS"))
-                .andExpect(jsonPath("$.data.storeId").value(generatedId.toString()))
-                .andDo(print());
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value("SUCCESS"))
+            .andExpect(jsonPath("$.data.storeId").value(generatedId.toString()))
+            .andDo(print());
     }
 
     @Test
@@ -82,17 +82,17 @@ class StoreControllerTest {
         UUID storeId = UUID.randomUUID();
         // StoreResponse 필드 8개 맞춰서 생성
         StoreResponse response = new StoreResponse(
-                storeId, "치킨나라", "사장님", "서울특별시 강남구 역삼동 테헤란로 123",
-                BigDecimal.valueOf(4.5), 100, List.of("치킨"), LocalDateTime.now()
+            storeId, "치킨나라", "사장님", "서울특별시 강남구 역삼동 테헤란로 123",
+            BigDecimal.valueOf(4.5), 100, List.of("치킨")
         );
 
         given(storeService.getStore(storeId)).willReturn(response);
 
         mockMvc.perform(get("/api/stores/{storeId}", storeId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value("SUCCESS"))
-                .andExpect(jsonPath("$.data.name").value("치킨나라"))
-                .andDo(print());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value("SUCCESS"))
+            .andExpect(jsonPath("$.data.name").value("치킨나라"))
+            .andDo(print());
     }
 
     @Test
@@ -102,22 +102,22 @@ class StoreControllerTest {
         UUID storeId = UUID.randomUUID();
         // StoreUpdateRequest 필드 6개 (마지막 List<UUID> 추가)
         StoreUpdateRequest request = new StoreUpdateRequest(
-                "수정된 치킨집", "서울", "강남구", "역삼", "번지", List.of(UUID.randomUUID())
+            "수정된 치킨집", "서울", "강남구", "역삼", "번지", List.of(UUID.randomUUID())
         );
         StoreResponse response = new StoreResponse(
-                storeId, "수정된 치킨집", "사장님", "서울 강남구 역삼 번지",
-                BigDecimal.valueOf(4.5), 100, List.of("치킨"), LocalDateTime.now()
+            storeId, "수정된 치킨집", "사장님", "서울 강남구 역삼 번지",
+            BigDecimal.valueOf(4.5), 100, List.of("치킨")
         );
 
         given(storeService.updateStore(eq(storeId), any(StoreUpdateRequest.class))).willReturn(response);
 
         mockMvc.perform(patch("/api/stores/{storeId}", storeId)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.name").value("수정된 치킨집"))
-                .andDo(print());
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.name").value("수정된 치킨집"))
+            .andDo(print());
     }
 
     @Test
@@ -130,11 +130,11 @@ class StoreControllerTest {
         willDoNothing().given(storeService).deleteStore(storeId, deletedBy);
 
         mockMvc.perform(delete("/api/stores/{storeId}", storeId)
-                        .with(csrf())
-                        .param("deletedBy", deletedBy))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").value("가게가 성공적으로 삭제되었습니다."))
-                .andDo(print());
+                .with(csrf())
+                .param("deletedBy", deletedBy))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").value("가게가 성공적으로 삭제되었습니다."))
+            .andDo(print());
     }
 
     @Test
@@ -143,21 +143,21 @@ class StoreControllerTest {
     void getStoreList() throws Exception {
         // StoreListResponse 필드 6개 맞춰서 생성
         StoreListResponse store1 = new StoreListResponse(
-                UUID.randomUUID(), "치킨집1", "서울 강남구",
-                BigDecimal.valueOf(4.0), 50, "치킨"
+            UUID.randomUUID(), "치킨집1", "서울 강남구",
+            BigDecimal.valueOf(4.0), 50, "치킨", LocalDateTime.now()
         );
         Page<StoreListResponse> pageResponse = new PageImpl<>(List.of(store1), PageRequest.of(0, 10), 1);
 
         given(storeService.getStoreList(any(StoreSearchCondition.class), any(Pageable.class)))
-                .willReturn(pageResponse);
+            .willReturn(pageResponse);
 
         mockMvc.perform(get("/api/stores")
-                        .param("name", "치킨")
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content").isArray())
-                .andExpect(jsonPath("$.data.content[0].name").value("치킨집1"))
-                .andDo(print());
+                .param("name", "치킨")
+                .param("page", "0")
+                .param("size", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content").isArray())
+            .andExpect(jsonPath("$.data.content[0].name").value("치킨집1"))
+            .andDo(print());
     }
 }
