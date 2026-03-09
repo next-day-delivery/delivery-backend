@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - chore/39-cicd-test
   pull_request:
     branches:
       - develop
