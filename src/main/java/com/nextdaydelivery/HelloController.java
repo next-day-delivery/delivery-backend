@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @GetMapping("/api/health")
     public String hello() {
-        return "Congratulation EC2 test success! for main branch";
+        return "Congratulation EC2 test success! for main branch!!";
+
     }
 }
 
