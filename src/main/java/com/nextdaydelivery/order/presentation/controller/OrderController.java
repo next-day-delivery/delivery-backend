@@ -85,9 +85,16 @@ public class OrderController {
     }
 
     @PostMapping("/{orderId}/cancel")
-    public CommonResponse<Void> cancelOrder(@PathVariable UUID orderId,
-                                            @RequestHeader("X-User-Id") Long userId) {
+    public CommonResponse<Void> cancelOrderByOwner(@PathVariable UUID orderId,
+                                                   @RequestHeader("X-User-Id") Long userId) {
         orderService.cancelOrderByCustomer(orderId, userId);
+        return CommonResponse.onSuccess();
+    }
+
+    @PostMapping("/{orderId}/cancel/manager")
+    public CommonResponse<Void> cancelOrderByManager(@PathVariable UUID orderId,
+                                                     @RequestHeader("X-User-Id") Long userId) {
+        orderService.cancelOrderByManager(orderId);
         return CommonResponse.onSuccess();
     }
 
