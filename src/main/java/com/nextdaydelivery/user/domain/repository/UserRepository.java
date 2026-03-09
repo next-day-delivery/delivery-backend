@@ -1,7 +1,13 @@
 package com.nextdaydelivery.user.domain.repository;
 
 import com.nextdaydelivery.user.domain.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository {
+
+    User save(User user);
+
+    boolean existsByUniqueFields(String username, String email, String nickname);
+
+    Optional<User> findByUsername(String username);
 }

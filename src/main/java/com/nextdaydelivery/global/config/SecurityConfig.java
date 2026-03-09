@@ -1,31 +1,64 @@
 package com.nextdaydelivery.global.config;
 
+import com.nextdaydelivery.global.security.jwt.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private static final String[] PUBLIC_POST_URLS = {
+            "/api/users",
+            "/api/auth/sign-in"
+    };
+
+    private static final String[] PUBLIC_GET_URLS = {
+            // TODO 공개 GET API 추가
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CSRF 보호 비활성화 (테스트 및 API 서버 개발 시 필수)
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // 2. 경로별 권한 설정
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/health").permitAll()       // 메인 페이지는 누구나 접근 가능
-                        .anyRequest().authenticated()           // 나머지는 로그인 필요
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_URLS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("MASTER")
+                        .anyRequest().authenticated()
                 )
-
-                // 3. 기본 로그인 폼 유지 (나중에 커스텀 로그인을 만들면 바꿀 부분)
-                .formLogin(form -> form.defaultSuccessUrl("/"));
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        ;
 
         return http.build();
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("MASTER").implies("MANAGER")
+                .role("MANAGER").implies("OWNER")
+                .role("MANAGER").implies("CUSTOMER")
+                .build();
     }
 }
