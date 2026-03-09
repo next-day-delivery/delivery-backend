@@ -1,7 +1,5 @@
 package com.nextdaydelivery.global.security.principal;
 
-import com.nextdaydelivery.global.domain.error.AuthErrorCode;
-import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +15,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userIdStr) throws UsernameNotFoundException {
-        Long userId = Long.valueOf(userIdStr);
+        Long userId;
+
+        try {
+            userId = Long.valueOf(userIdStr);
+        } catch (NumberFormatException e) {
+            throw new UsernameNotFoundException("Invalid user ID format: " + userIdStr, e);
+        }
 
         AuthUserDto authUserDto = userRepository.findAuthInfoById(userId)
-                .orElseThrow(() -> new BusinessException(AuthErrorCode.UNAUTHORIZED));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userId));
 
         return new PrincipalDetails(authUserDto);
     }
