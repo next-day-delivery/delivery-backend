@@ -6,6 +6,7 @@ import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.global.security.annotation.RequireManagerRole;
 import com.nextdaydelivery.global.security.annotation.RequireOwnerRole;
 import com.nextdaydelivery.global.security.principal.PrincipalDetails;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +26,7 @@ public class DeliveryController {
     @PatchMapping("/{deliveryId}")
     public CommonResponse<Void> updateDeliveryStatusByOwner(
             @PathVariable UUID deliveryId,
-            @RequestBody DeliveryStatusRequest request,
+            @RequestBody @Valid DeliveryStatusRequest request,
             @AuthenticationPrincipal PrincipalDetails principalDetails
 
     ) {
@@ -39,7 +40,7 @@ public class DeliveryController {
     @PatchMapping("/{deliveryId}/manager")
     public CommonResponse<Void> updateDeliveryStatusByManager(
             @PathVariable UUID deliveryId,
-            @RequestBody DeliveryStatusRequest request
+            @RequestBody @Valid DeliveryStatusRequest request
     ) {
         deliveryService.updateDeliveryStatusByManager(deliveryId, request.status());
         return CommonResponse.onSuccess();
