@@ -23,7 +23,7 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
     }
 
     @Override
-    public Optional<Delivery> findByIdWithDetailsAndLock(UUID deliveryId) {
-        return jpaRepository.findByIdWithDetailsAndLock(deliveryId);
+    public Optional<Delivery> findByIdWithDetails(UUID deliveryId) {
+        return jpaRepository.findByIdWithDetails(deliveryId);
     }
 }

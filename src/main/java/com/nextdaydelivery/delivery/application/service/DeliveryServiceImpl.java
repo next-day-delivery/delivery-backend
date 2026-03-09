@@ -24,8 +24,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public void updateDeliveryStatusByOwner(UUID deliveryId, DeliveryStatus status, Long userId) {
-        Delivery delivery = findByIdWithDetailsAndLock(deliveryId);
+        Delivery delivery = findByIdWithDetails(deliveryId);
         validateOwner(delivery, userId);
+        findByIdWithLock(deliveryId);
         delivery.transitionTo(status);
         publishEventIfCompleted(delivery);
     }
@@ -58,8 +59,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .orElseThrow(() -> new BusinessException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
     }
 
-    private Delivery findByIdWithDetailsAndLock(UUID deliveryId) {
-        return deliveryRepository.findByIdWithDetailsAndLock(deliveryId)
+    private Delivery findByIdWithDetails(UUID deliveryId) {
+        return deliveryRepository.findByIdWithDetails(deliveryId)
                 .orElseThrow(() -> new BusinessException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
     }

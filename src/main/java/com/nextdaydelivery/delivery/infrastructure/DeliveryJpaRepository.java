@@ -17,9 +17,9 @@ public interface DeliveryJpaRepository extends JpaRepository<Delivery, UUID> {
     )
     Optional<Delivery> findByIdWithLock(@Param("deliveryId") UUID deliveryId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+
     @Query("SELECT d FROM Delivery d " +
             "JOIN FETCH d.order o JOIN FETCH o.store s JOIN FETCH s.user u " +
             "WHERE d.deliveryId = :deliveryId")
-    Optional<Delivery> findByIdWithDetailsAndLock(@Param("deliveryId") UUID deliveryId);
+    Optional<Delivery> findByIdWithDetails(@Param("deliveryId") UUID deliveryId);
 }

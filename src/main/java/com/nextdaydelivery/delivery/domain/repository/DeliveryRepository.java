@@ -9,6 +9,6 @@ public interface DeliveryRepository {
 
     Optional<Delivery> findByIdWithLock(UUID deliveryId);
 
-    Optional<Delivery> findByIdWithDetailsAndLock(UUID deliveryId);
+    Optional<Delivery> findByIdWithDetails(UUID deliveryId);
 
 }
