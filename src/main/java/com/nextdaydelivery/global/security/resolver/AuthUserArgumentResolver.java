@@ -29,8 +29,7 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication.getPrincipal().equals("anonymousUser")) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new BusinessException(AuthErrorCode.UNAUTHORIZED);
         }
 
