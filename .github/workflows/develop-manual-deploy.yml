@@ -1,23 +1,23 @@
-name: CI - Build and Push Docker Image
+name: Develop Manual Deploy
 
 on:
-  push:
-    branches:
-      - chore/39-cicd-test
+  workflow_dispatch:
 
 jobs:
-  ci:
+  deploy-dev:
     runs-on: ubuntu-latest
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCOUNT_ID: 342573629770
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID}}
       ECR_REPOSITORY: next-day-delivery-api
-      IMAGE_TAG: latest
+      IMAGE_TAG: dev
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: develop
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -28,7 +28,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 테스트는 임시 제외
       - name: Build jar
         run: ./gradlew clean bootJar -x test
 
@@ -55,3 +54,12 @@ jobs:
         run: |
           docker push \
             $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy dev image to EC2 via SSM
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Manual deploy develop image" \
+            --parameters commands='["/opt/ai-verify/deploy-dev.sh"]' \
+            --region "$AWS_REGION"
