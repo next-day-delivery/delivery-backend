@@ -1,4 +1,4 @@
-package com.nextdaydelivery.order.infrastrucutre.repository;
+package com.nextdaydelivery.order.infrastructure.repository;
 
 import static com.nextdaydelivery.order.domain.entity.QOrder.order;
 import static com.nextdaydelivery.order.domain.entity.QOrderLine.orderLine;
