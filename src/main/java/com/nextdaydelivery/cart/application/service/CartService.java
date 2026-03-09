@@ -18,6 +18,7 @@ import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
 import com.nextdaydelivery.global.exception.BusinessException;
+import com.nextdaydelivery.user.infrastructure.UserJpaRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -31,11 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class CartService {
 
     private final CartRepository cartRepository;
-    //private final CartQueryRepository cartQueryRepository;
     private final CartItemRepository cartItemRepository;
-    //private final CartItemQueryRepository cartItemQueryRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
 
     @Transactional
     public ResPostCartItemDto addCartItem(Long userId, ReqPostCartItemDto request) {
@@ -144,7 +144,7 @@ public class CartService {
     }
 
     private User getUser(Long userId) {
-        return userRepository.findById(userId)
+        return userJpaRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(CartErrorCode.USER_NOT_FOUND));
     }
 
@@ -166,7 +166,7 @@ public class CartService {
     }
 
     private void validateUser(Long userId) {  // Todo : 향후 Jwt방식으로 변경 필요
-        if (!userRepository.existsById(userId)) {
+        if (!userJpaRepository.existsById(userId)) {
             throw new BusinessException(CartErrorCode.USER_NOT_FOUND);
         }
     }
