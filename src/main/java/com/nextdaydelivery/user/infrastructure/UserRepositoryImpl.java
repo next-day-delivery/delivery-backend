@@ -2,8 +2,11 @@ package com.nextdaydelivery.user.infrastructure;
 
 import static com.nextdaydelivery.user.domain.entity.QUser.user;
 
+import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.user.domain.entity.QUser;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +41,24 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findByUsername(String username) {
         return userJpaRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<AuthUserDto> findAuthInfoById(Long userId) {
+        QUser user = QUser.user;
+
+        AuthUserDto result = queryFactory
+                .select(Projections.constructor(AuthUserDto.class,
+                        user.userId,
+                        user.role
+                ))
+                .from(user)
+                .where(
+                        user.userId.eq(userId),
+                        user.deletedAt.isNull()
+                )
+                .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 }

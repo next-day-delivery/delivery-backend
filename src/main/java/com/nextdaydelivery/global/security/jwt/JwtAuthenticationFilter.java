@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token)) {
                 AuthUserDto authUserDto = jwtValidator.validateAndGetPayload(token);
 
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(authUserDto.role().getAuthority());
+                UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         authUserDto,
