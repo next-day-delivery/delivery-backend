@@ -13,4 +13,6 @@ public interface UserRepository {
     Optional<User> findByUsername(String username);
 
     Optional<AuthUserDto> findAuthInfoById(Long userId);
+
+    Optional<User> findById(Long userId);
 }

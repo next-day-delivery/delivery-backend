@@ -36,9 +36,10 @@ public class StoreController {
     // 1. 가게 등록
     @RequireOwnerRole
     @PostMapping
-    public CommonResponse<StoreCreationResponse> createStore(@Valid @RequestBody StoreCreationRequest request) {
-
-        StoreCreationResponse response = storeService.createStore(request);
+    public CommonResponse<StoreCreationResponse> createStore(@Valid @RequestBody StoreCreationRequest request
+            , @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long username = principalDetails.getAuthUserDto().userId();
+        StoreCreationResponse response = storeService.createStore(request, username);
         return CommonResponse.onSuccess(response);
     }
 
@@ -59,6 +60,18 @@ public class StoreController {
         return CommonResponse.onSuccess(response);
     }
 
+    // 4. 가게 삭제 (Soft Delete)
+    // PrincipalDetails
+    @RequireOwnerRole
+    @DeleteMapping("/{storeId}")
+    public CommonResponse<String> deleteStoreUsingUserDetails(
+            @PathVariable UUID storeId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
+        String deletedBy = String.valueOf(principalDetails.getAuthUserDto().userId());
+        storeService.deleteStore(storeId, deletedBy);
+        return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
+    }
+
     // 5. 가게 목록 조회 (검색 및 페이징)
     // 예시 URL: /api/stores?name=치킨&page=0&size=10&sort=createdAt,desc
     @GetMapping
@@ -68,16 +81,4 @@ public class StoreController {
         Page<StoreListResponse> response = storeService.getStoreList(condition, pageable);
         return CommonResponse.onSuccess(response);
     }
-
-    // 4. 가게 삭제 (Soft Delete)
-    // PrincipalDetails
-    @DeleteMapping("/{storeId}")
-    public CommonResponse<String> deleteStoreUsingUserDetails(
-            @PathVariable UUID storeId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
-        String deletedBy = String.valueOf(principalDetails.getAuthUserDto().userId());
-        storeService.deleteStore(storeId, deletedBy);
-        return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
-    }
 }
-

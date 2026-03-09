@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 public interface StoreService {
 
     // 1. 가게 생성
-    StoreCreationResponse createStore(StoreCreationRequest request);
+    StoreCreationResponse createStore(StoreCreationRequest request, Long username);
 
     // 2. 단건 상세 조회
     StoreResponse getStore(UUID storeId);

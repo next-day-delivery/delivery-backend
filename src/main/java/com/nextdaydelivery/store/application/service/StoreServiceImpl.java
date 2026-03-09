@@ -16,8 +16,7 @@ import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
 import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
 import com.nextdaydelivery.user.domain.entity.User;
-import com.nextdaydelivery.user.domain.entity.enums.UserRole;
-import jakarta.persistence.EntityManager;
+import com.nextdaydelivery.user.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,77 +35,30 @@ public class StoreServiceImpl implements StoreService {
     private final StoreAddressService storeAddressService;
     private final CategoryService categoryService;         // 카테고리 조회용
     private final StoreCategoryService storeCategoryService; // 연결용
-    private final EntityManager em; // 임시 테스트를 위해 주입
+    private final UserRepository userRepository;
 
     @Transactional
     @Override
-    public StoreCreationResponse createStore(StoreCreationRequest request) {
-        // 가게 주소를 가게 주소 테이블에 저장하기, 이때 중복 체크 해야함
+    public StoreCreationResponse createStore(StoreCreationRequest request, Long username) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        // 가게 주소를 가게 주소 테이블에 저장, 중복 체크
         StoreAddress storeAddress = storeAddressService.getOrCreateAddress(
                 request.sigungu(),
                 request.sido(),
                 request.dong()
         );
-
-        // 2. [수정] 임시 유저 조회 또는 생성
-        String testUsername = "test_owner";
-        User dummyUser;
-
-        // JPQL을 사용하여 기존 유저가 있는지 확인
-        List<User> existingUsers = em.createQuery("select u from User u where u.username = :username", User.class)
-                .setParameter("username", testUsername)
-                .getResultList();
-
-        if (existingUsers.isEmpty()) {
-            // 없으면 새로 생성 후 저장
-            dummyUser = User.builder()
-                    .username(testUsername)
-                    .nickname("임시사장님")
-                    .email("test@test.com")
-                    .password("1234")
-                    .role(UserRole.OWNER)
-                    .isPublic(true)
-                    .build();
-            em.persist(dummyUser);
-        } else {
-            // 있으면 기존 유저 사용
-            dummyUser = existingUsers.get(0);
-        }
-
-//        // 가게에 기본정보 저장
-//        Store store = storeRepository.save(request.toEntity(storeAddress));
-
-        // 3. 가게 저장 (빌더에 .user(dummyUser) 추가 필요!)
         Store store = Store.builder()
-                .user(dummyUser) // 핵심: 여기서 유저를 넣어줘야 에러가 안 납니다.
+                .user(user)
                 .storeAddress(storeAddress)
                 .name(request.name())
                 .detailAddress(request.detailAddress())
                 .build();
-
         storeRepository.save(store);
 
-        // 4. [개선됨] 카테고리 처리: 정규화(trim) 후 중복 제거(Set)
-        List<UUID> savedCategoryIds = new ArrayList<>();
-
-        if (request.categoryNames() != null && !request.categoryNames().isEmpty()) {
-            // 먼저 공백 제거 및 중복 제거 수행
-            LinkedHashSet<String> normalizedCategoryNames = new LinkedHashSet<>();
-            for (String rawCategoryName : request.categoryNames()) {
-                if (rawCategoryName == null || rawCategoryName.isBlank()) {
-                    throw new IllegalArgumentException("categoryNames에는 빈 값을 포함할 수 없습니다.");
-                }
-                normalizedCategoryNames.add(rawCategoryName.trim());
-            }
-
-            // 정제된 이름들에 대해서만 로직 수행
-            for (String categoryName : normalizedCategoryNames) {
-                Category category = categoryService.getOrCreateCategory(categoryName);
-                storeCategoryService.createStoreCategory(store, category);
-                savedCategoryIds.add(category.getCategoryId());
-            }
-        }
-
+        // 4. 카테고리 처리 (중복 제거 및 등록)
+        List<UUID> savedCategoryIds = processCategories(store, request.categoryNames());
         return StoreCreationResponse.from(store, savedCategoryIds);
     }
 
@@ -168,5 +120,27 @@ public class StoreServiceImpl implements StoreService {
                 .toList();
 
         return StoreResponse.from(store, store.getUser().getNickname(), categoryNames);
+    }
+
+    // 가독성을 위해 카테고리 로직 분리
+    private List<UUID> processCategories(Store store, List<String> categoryNames) {
+        List<UUID> savedCategoryIds = new ArrayList<>();
+        if (categoryNames == null || categoryNames.isEmpty()) {
+            return savedCategoryIds;
+        }
+
+        LinkedHashSet<String> normalizedNames = new LinkedHashSet<>();
+        for (String rawName : categoryNames) {
+            if (rawName != null && !rawName.isBlank()) {
+                normalizedNames.add(rawName.trim());
+            }
+        }
+
+        for (String name : normalizedNames) {
+            Category category = categoryService.getOrCreateCategory(name);
+            storeCategoryService.createStoreCategory(store, category);
+            savedCategoryIds.add(category.getCategoryId());
+        }
+        return savedCategoryIds;
     }
 }
