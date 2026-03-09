@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record ProductUpdateRequest(
-        @NotNull UUID id,
+        @NotNull UUID productId,
         String productDetail,
         String productName,
         Integer price
