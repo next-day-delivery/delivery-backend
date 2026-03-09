@@ -72,5 +72,4 @@ public class StoreController {
         Page<StoreListResponse> response = storeService.getStoreList(condition, pageable);
         return CommonResponse.onSuccess(response);
     }
-
 }
