@@ -30,6 +30,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findById(Long managerId) {
+        return userJpaRepository.findById(managerId);
+    }
+
+    @Override
     public boolean existsByUniqueFields(String username, String email, String nickname) {
         Integer fetchOne = queryFactory
                 .selectOne()
@@ -95,5 +100,15 @@ public class UserRepositoryImpl implements UserRepository {
                 );
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        return userJpaRepository.existsByNickname(nickname);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userJpaRepository.existsByEmail(email);
     }
 }

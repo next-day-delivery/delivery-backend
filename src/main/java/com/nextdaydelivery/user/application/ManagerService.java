@@ -6,6 +6,7 @@ import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
 import com.nextdaydelivery.user.presentation.dto.request.ManagerCreateRequest;
+import com.nextdaydelivery.user.presentation.dto.request.ManagerUpdateRequest;
 import com.nextdaydelivery.user.presentation.dto.response.ManagerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -50,5 +51,33 @@ public class ManagerService {
     @Transactional(readOnly = true)
     public Page<ManagerResponse> getManagers(Pageable pageable) {
         return userRepository.findManagersWithPagination(pageable);
+    }
+
+    @Transactional
+    public void updateManagerProfile(Long managerId, ManagerUpdateRequest request) {
+        User manager = getActiveManager(managerId);
+
+        if (!manager.getNickname().equals(request.nickname()) && userRepository.existsByNickname(request.nickname())) {
+            throw new BusinessException(UserErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        if (!manager.getEmail().equals(request.email()) && userRepository.existsByEmail(request.email())) {
+            throw new BusinessException(UserErrorCode.DUPLICATE_EMAIL);
+        }
+
+        manager.updateProfile(request.nickname(), request.email());
+    }
+
+    private User getActiveManager(Long managerId) {
+        User user = userRepository.findById(managerId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() != UserRole.MANAGER) {
+            throw new BusinessException(UserErrorCode.INVALID_ROLE_OPERATION);
+        }
+        if (user.getDeletedAt() != null) {
+            throw new BusinessException(UserErrorCode.USER_ALREADY_DELETED);
+        }
+        return user;
     }
 }

@@ -11,6 +11,8 @@ public interface UserRepository {
 
     User save(User user);
 
+    Optional<User> findById(Long managerId);
+
     boolean existsByUniqueFields(String username, String email, String nickname);
 
     Optional<User> findByUsername(String username);
@@ -18,4 +20,8 @@ public interface UserRepository {
     Optional<AuthUserDto> findAuthInfoById(Long userId);
 
     Page<ManagerResponse> findManagersWithPagination(Pageable pageable);
+
+    boolean existsByNickname(String nickname);
+
+    boolean existsByEmail(String email);
 }
