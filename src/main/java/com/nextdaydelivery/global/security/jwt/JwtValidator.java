@@ -37,10 +37,15 @@ public class JwtValidator {
                     .getPayload();
 
             Long userId = Long.valueOf(claims.getSubject());
-            UserRole role = UserRole.valueOf(claims.get("role", String.class));
+
+            String roleClaim = claims.get("role", String.class);
+            if (roleClaim == null) {
+                throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
+            }
+            UserRole role = UserRole.valueOf(roleClaim);
 
             return new AuthUserDto(userId, role);
-
+            
         } catch (ExpiredJwtException e) {
             throw new BusinessException(AuthErrorCode.EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
