@@ -36,3 +36,8 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+
+app:
+  pagination:
+    allowed-sizes: 10,30,50
+    default-size: 10

@@ -1,39 +1,37 @@
 package com.nextdaydelivery.product.presentation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.nextdaydelivery.global.support.ControllerTestSupport;
 import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
 import com.nextdaydelivery.product.application.dto.response.ProductResponse;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(ProductController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class ProductControllerTest {
+class ProductControllerTest extends ControllerTestSupport {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private ProductService productService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("상품 생성 성공")
