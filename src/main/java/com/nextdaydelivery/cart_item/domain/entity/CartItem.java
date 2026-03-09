@@ -1,6 +1,8 @@
 package com.nextdaydelivery.cart_item.domain.entity;
 
 import com.nextdaydelivery.cart.domain.entity.Cart;
+import com.nextdaydelivery.global.domain.error.CartErrorCode;
+import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,11 +62,8 @@ public class CartItem {
     }
 
     private void validateQuantity(Long quantity) {
-        if(quantity == null || quantity <= 0 ){
-            throw new IllegalArgumentException("장바구니 수량은 0보다 커야 합니다.( 입력값 : " + quantity + ")");
+        if (quantity == null || quantity <= 0) {
+            throw new BusinessException(CartErrorCode.INVALID_CART_ITEM_QUANTITY);
         }
     }
-
-
-
 }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-//@ConditionalOnBean(JPAQueryFactory.class)
 public class CartQueryRepositoryImpl implements CartQueryRepository {
 
     private final JPAQueryFactory queryFactory;

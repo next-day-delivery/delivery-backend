@@ -1,6 +1,7 @@
 package com.nextdaydelivery.cart.application.service;
 
 import com.nextdaydelivery.cart.domain.entity.Cart;
+import com.nextdaydelivery.global.domain.error.CartErrorCode;
 import com.nextdaydelivery.cart.domain.enums.CartStatus;
 import com.nextdaydelivery.cart.domain.repository.CartRepository;
 import com.nextdaydelivery.cart.presentation.dto.request.ReqPatchCartItemDto;
@@ -16,14 +17,13 @@ import com.nextdaydelivery.product.domain.repository.ProductRepository;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
+import com.nextdaydelivery.global.exception.BusinessException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -106,7 +106,7 @@ public class CartService {
 
         Cart activeCart = getActiveCart(userId);
         CartItem cartItem = cartItemRepository.findByCartIdAndProductId(activeCart.getCartId(), productId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "장바구니 품목을 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND));
 
         cartItem.changeQuantity(request.quantity());
         CartItem saved = cartItemRepository.save(cartItem);
@@ -127,7 +127,7 @@ public class CartService {
         Cart activeCart = getActiveCart(userId);
         long deletedCount = cartItemRepository.deleteByCartIdAndProductId(activeCart.getCartId(), productId);
         if (deletedCount == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "장바구니 품목을 찾을 수 없습니다.");
+            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
         }
     }
 
@@ -140,12 +140,12 @@ public class CartService {
 
     private Product getProduct(UUID productId) {
         return productRepository.findById(productId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException(CartErrorCode.PRODUCT_NOT_FOUND));
     }
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException(CartErrorCode.USER_NOT_FOUND));
     }
 
     private Cart getOrCreateActiveCart(User user, Store targetStore) {
@@ -162,12 +162,12 @@ public class CartService {
 
     private Cart getActiveCart(Long userId) {
         return cartRepository.findActiveCartByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "활성화된 장바구니가 없습니다."));
+                .orElseThrow(() -> new BusinessException(CartErrorCode.ACTIVE_CART_NOT_FOUND));
     }
 
     private void validateUser(Long userId) {  // Todo : 향후 Jwt방식으로 변경 필요
         if (!userRepository.existsById(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다.");
+            throw new BusinessException(CartErrorCode.USER_NOT_FOUND);
         }
     }
 }
