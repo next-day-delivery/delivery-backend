@@ -2,7 +2,7 @@ package com.nextdaydelivery.global.security.resolver;
 
 import com.nextdaydelivery.global.domain.error.AuthErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
-import com.nextdaydelivery.global.security.dto.AuthUser;
+import com.nextdaydelivery.global.security.annotation.AuthUser;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;

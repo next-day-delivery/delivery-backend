@@ -1,4 +1,4 @@
-package com.nextdaydelivery.global.security.dto;
+package com.nextdaydelivery.global.security.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
