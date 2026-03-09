@@ -2,6 +2,7 @@ package com.nextdaydelivery.store.presentation.controller;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.global.security.annotation.RequireOwnerRole;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.store.domain.service.StoreService;
 import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
 import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -58,16 +59,6 @@ public class StoreController {
         return CommonResponse.onSuccess(response);
     }
 
-    // 4. 가게 삭제 (Soft Delete)
-    @RequireOwnerRole
-    @DeleteMapping("/{storeId}")
-    public CommonResponse<String> deleteStore(
-            @PathVariable UUID storeId,
-            @RequestParam String deletedBy) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
-        storeService.deleteStore(storeId, deletedBy);
-        return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
-    }
-
     // 5. 가게 목록 조회 (검색 및 페이징)
     // 예시 URL: /api/stores?name=치킨&page=0&size=10&sort=createdAt,desc
     @GetMapping
@@ -78,26 +69,15 @@ public class StoreController {
         return CommonResponse.onSuccess(response);
     }
 
-//    // 4. 가게 삭제 (Soft Delete)
-//    // PrincipalDetails
-//    @DeleteMapping("/{storeId}")
-//    public CommonResponse<String> deleteStoreUsingUserDetails(
-//            @PathVariable UUID storeId,
-//            @AuthenticationPrincipal PrincipalDetails principalDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
-//        String deletedBy = principalDetails.getAuthUserDto().userId().getUserName();
-//        storeService.deleteStore(storeId, deletedBy);
-//        return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
-//    }
-
-//    // 4. 가게 삭제 (Soft Delete)
-//    // UserDetails
-//    @DeleteMapping("/{storeId}")
-//    public CommonResponse<String> deleteStoreUsingUserDetails(
-//            @PathVariable UUID storeId,
-//            @AuthenticationPrincipal UserDetails userDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
-//        String deletedBy = userDetails.getUserName();
-//        storeService.deleteStore(storeId, deletedBy);
-//        return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.")
-//   }
+    // 4. 가게 삭제 (Soft Delete)
+    // PrincipalDetails
+    @DeleteMapping("/{storeId}")
+    public CommonResponse<String> deleteStoreUsingUserDetails(
+            @PathVariable UUID storeId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
+        String deletedBy = String.valueOf(principalDetails.getAuthUserDto().userId());
+        storeService.deleteStore(storeId, deletedBy);
+        return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
+    }
 }
 
