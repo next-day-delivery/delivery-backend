@@ -14,3 +14,7 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/db.changelog-master.yaml
+
+jwt:
+  secret: ${SECRET_KEY}
+  access-token-validity: 1h

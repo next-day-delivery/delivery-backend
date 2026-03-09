@@ -1,5 +1,6 @@
 package com.nextdaydelivery.product.presentation;
 
+import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
@@ -27,33 +28,33 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductCreateRequest createRequest) {
-        return new ResponseEntity<>(productService.create(createRequest), HttpStatus.CREATED);
+    public CommonResponse<ProductResponse> create(@Valid @RequestBody ProductCreateRequest createRequest) {
+        return CommonResponse.onSuccess(HttpStatus.CREATED, productService.create(createRequest));
     }
 
     @PatchMapping
-    public ResponseEntity<ProductResponse> update(
+    public CommonResponse<ProductResponse> update(
             @Valid @RequestBody ProductUpdateRequest updateRequest) {
-        return new ResponseEntity<>(productService.update(updateRequest), HttpStatus.OK);
+        return CommonResponse.onSuccess(HttpStatus.OK, productService.update(updateRequest));
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> readAll() {
-        return new ResponseEntity<>(productService.readAll(), HttpStatus.OK);
+    public CommonResponse<List<ProductResponse>> readAll() {
+        return CommonResponse.onSuccess(HttpStatus.OK, productService.readAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> readById(@PathVariable UUID id) {
-        return new ResponseEntity<>(productService.readById(id), HttpStatus.OK);
+    public CommonResponse<ProductResponse> readById(@PathVariable UUID id) {
+        return CommonResponse.onSuccess(HttpStatus.OK, productService.readById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<UUID> deleteById(@PathVariable UUID id) {
-        return new ResponseEntity<>(productService.deleteById(id), HttpStatus.OK);
+    public CommonResponse<UUID> deleteById(@PathVariable UUID id) {
+        return CommonResponse.onSuccess(HttpStatus.OK, productService.deleteById(id));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ProductResponse> hideById(@PathVariable UUID id) {
-        return new ResponseEntity<>(productService.hideById(id), HttpStatus.OK);
+    public CommonResponse<ProductResponse> hideById(@PathVariable UUID id) {
+        return CommonResponse.onSuccess(HttpStatus.OK, productService.hideById(id));
     }
 }

@@ -1,7 +1,6 @@
-package com.nextdaydelivery.user_address.domain.entity;
+package com.nextdaydelivery.user.domain.entity;
 
 import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
-import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,18 +12,17 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "p_user_address")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@SQLRestriction("deleted_at IS NULL")
 public class UserAddress extends BaseAuditEntity {
 
     @Id
@@ -44,5 +42,34 @@ public class UserAddress extends BaseAuditEntity {
     private LocalDateTime deletedAt; // 레코드 삭제 시간
 
     @Column(name = "deleted_by", length = 100)
-    private String deletedBy; // 레코드 삭제자
+    private String deletedBy;
+
+    @Builder
+    private UserAddress(User user, String address) {
+        this.user = user;
+        this.address = address;
+    }
+
+    public static UserAddress create(User user, String address) {
+        if (user == null) {
+            throw new IllegalArgumentException("user는 필수입니다.");
+        }
+
+        if (address == null || address.isBlank() || address.length() > 255) {
+            throw new IllegalArgumentException("주소는 1~255자여야 합니다.");
+        }
+
+        return UserAddress.builder()
+                .user(user)
+                .address(address)
+                .build();
+    }
+
+    public void markAsDeleted(String deleterId) {
+        if (this.deletedAt != null) {
+            throw new IllegalStateException("이미 삭제된 주소입니다.");
+        }
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deleterId;
+    }
 }

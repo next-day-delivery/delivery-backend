@@ -53,11 +53,11 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.productId").value(productId.toString()))
-                .andExpect(jsonPath("$.productName").value("치킨"))
-                .andExpect(jsonPath("$.productDetail").value("맛있는 치킨"))
-                .andExpect(jsonPath("$.price").value(20000));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.productId").value(productId.toString()))
+                .andExpect(jsonPath("$.data.productName").value("치킨"))
+                .andExpect(jsonPath("$.data.productDetail").value("맛있는 치킨"))
+                .andExpect(jsonPath("$.data.price").value(20000));
     }
 
     @Test
@@ -90,8 +90,8 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName").value("수정된 이름"))
-                .andExpect(jsonPath("$.price").value(25000));
+                .andExpect(jsonPath("$.data.productName").value("수정된 이름"))
+                .andExpect(jsonPath("$.data.price").value(25000));
     }
 
     @Test
@@ -105,7 +105,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].productName").value("피자"));
+                .andExpect(jsonPath("$.data.[0].productName").value("피자"));
     }
 
     @Test
@@ -121,19 +121,23 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/products/{id}", productId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productId").value(productId.toString()));
+                .andExpect(jsonPath("$.data.productId").value(productId.toString()));
     }
 
     @Test
     @DisplayName("상품 삭제 성공")
     void deleteById() throws Exception {
+
         UUID productId = UUID.randomUUID();
 
         BDDMockito.given(productService.deleteById(productId))
                 .willReturn(productId);
 
         mockMvc.perform(delete("/api/products/{id}", productId))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value("SUCCESS"))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.data").value(productId.toString()));
     }
 
     @Test
@@ -149,6 +153,6 @@ class ProductControllerTest {
 
         mockMvc.perform(patch("/api/products/{id}", productId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productId").value(productId.toString()));
+                .andExpect(jsonPath("$.data.productId").value(productId.toString()));
     }
 }
