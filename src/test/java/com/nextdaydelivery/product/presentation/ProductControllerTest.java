@@ -1,6 +1,12 @@
 package com.nextdaydelivery.product.presentation;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -8,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.nextdaydelivery.global.config.PaginationConfig;
 import com.nextdaydelivery.global.support.ControllerTestSupport;
 import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
@@ -20,11 +27,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc(addFilters = false)
+@Import(PaginationConfig.class)
 class ProductControllerTest extends ControllerTestSupport {
 
     @Autowired
@@ -32,6 +44,153 @@ class ProductControllerTest extends ControllerTestSupport {
 
     @MockitoBean
     private ProductService productService;
+
+    @Test
+    @DisplayName("허용된 pageSize(30) 요청 시 그대로 전달된다")
+    void pageable_size_30() throws Exception {
+
+        when(productService.readAll(any()))
+                .thenReturn(List.of(
+                        new ProductResponse(UUID.randomUUID(), "상품", "설명", 1000)
+                ));
+
+        mockMvc.perform(get("/api/products")
+                        .param("page", "0")
+                        .param("size", "30"))
+                .andExpect(status().isOk());
+
+        verify(productService).readAll(argThat(pageable ->
+                pageable.getPageNumber() == 0 &&
+                        pageable.getPageSize() == 30
+        ));
+    }
+
+    @Test
+    @DisplayName("허용되지 않은 pageSize(100) 요청 시 10으로 변경된다")
+    void pageable_invalid_size() throws Exception {
+
+        when(productService.readAll(any()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/products")
+                        .param("page", "0")
+                        .param("size", "100"))
+                .andExpect(status().isOk());
+
+        verify(productService).readAll(argThat(pageable ->
+                pageable.getPageSize() == 10
+        ));
+    }
+
+    @Test
+    @DisplayName("pageSize 미입력 시 기본값 10")
+    void pageable_default() throws Exception {
+
+        when(productService.readAll(any()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/products"))
+                .andExpect(status().isOk());
+
+        verify(productService).readAll(argThat(pageable ->
+                pageable.getPageSize() == 10
+        ));
+    }
+
+    @Test
+    @DisplayName("상품 검색 - 기본 페이징, 이름 필터 없이")
+    void searchProducts_defaultPaging() throws Exception {
+        // Mock 데이터
+        UUID productId = UUID.randomUUID();
+        ProductResponse response = new ProductResponse(productId, "상품", "설명", 10000);
+
+        Slice<ProductResponse> slice = new SliceImpl<>(
+                List.of(response)
+        );
+
+        // Mockito matcher 수정: 모든 파라미터를 matcher로 감싸기
+        given(productService.searchProducts(
+                any(), any(), any(), any(), any(Pageable.class)
+        )).willReturn(slice);
+
+        mockMvc.perform(get("/api/products/search")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].productId").value(productId.toString()))
+                .andExpect(jsonPath("$.data.content[0].productName").value("상품"))
+                .andExpect(jsonPath("$.data.content[0].productDetail").value("설명"))
+                .andExpect(jsonPath("$.data.content[0].price").value(10000));
+
+        // 서비스 호출 검증
+        verify(productService).searchProducts(
+                any(), any(), any(), any(), any(Pageable.class)
+        );
+    }
+
+    @Test
+    @DisplayName("상품 검색 - 이름 필터 적용")
+    void searchProducts_withNameFilter() throws Exception {
+        UUID productId = UUID.randomUUID();
+        ProductResponse response = new ProductResponse(productId, "피자", "맛있는 피자", 30000);
+
+        Slice<ProductResponse> slice = new SliceImpl<>(
+                List.of(response)
+        );
+
+        String searchName = "피자";
+
+        // Mockito 매처 통일
+        given(productService.searchProducts(
+                eq(searchName), nullable(Integer.class), nullable(Integer.class), nullable(UUID.class), any(Pageable.class)
+        )).willReturn(slice);
+
+        mockMvc.perform(get("/api/products/search")
+                        .param("name", searchName)
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                // Slice 때문에 content 안으로 접근
+                .andExpect(jsonPath("$.data.content[0].productName").value("피자"))
+                .andExpect(jsonPath("$.data.content[0].productDetail").value("맛있는 피자"))
+                .andExpect(jsonPath("$.data.content[0].price").value(30000));
+
+        verify(productService).searchProducts(
+                eq(searchName), nullable(Integer.class), nullable(Integer.class), nullable(UUID.class), any(Pageable.class)
+        );
+    }
+
+    @Test
+    @DisplayName("상품 검색 - 가격 범위 필터 적용")
+    void searchProducts_withPriceFilter() throws Exception {
+        UUID productId = UUID.randomUUID();
+        ProductResponse response = new ProductResponse(productId, "햄버거", "맛있는 햄버거", 15000);
+
+        Slice<ProductResponse> slice = new SliceImpl<>(
+                List.of(response)
+        );
+
+        int minPrice = 10000;
+        int maxPrice = 20000;
+
+        given(productService.searchProducts(
+                nullable(String.class), eq(minPrice), eq(maxPrice), nullable(UUID.class), any(Pageable.class)
+        )).willReturn(slice);
+
+        mockMvc.perform(get("/api/products/search")
+                        .param("minPrice", String.valueOf(minPrice))
+                        .param("maxPrice", String.valueOf(maxPrice))
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].productName").value("햄버거"))
+                .andExpect(jsonPath("$.data.content[0].productDetail").value("맛있는 햄버거"))
+                .andExpect(jsonPath("$.data.content[0].price").value(15000));
+
+        verify(productService).searchProducts(
+                nullable(String.class), eq(minPrice), eq(maxPrice), nullable(UUID.class), any(Pageable.class)
+        );
+    }
 
     @Test
     @DisplayName("상품 생성 성공")
@@ -45,7 +204,7 @@ class ProductControllerTest extends ControllerTestSupport {
                 new ProductResponse(productId, "치킨", "맛있는 치킨", 20000);
 
         // 서비스 동작 mocking
-        BDDMockito.given(productService.create(any()))
+        given(productService.create(any()))
                 .willReturn(response);
 
         mockMvc.perform(post("/api/products")
@@ -81,7 +240,7 @@ class ProductControllerTest extends ControllerTestSupport {
         ProductResponse response =
                 new ProductResponse(productId, "수정된 이름", "수정된 설명", 25000);
 
-        BDDMockito.given(productService.update(any()))
+        given(productService.update(any()))
                 .willReturn(response);
 
         mockMvc.perform(patch("/api/products")
@@ -92,19 +251,19 @@ class ProductControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.data.price").value(25000));
     }
 
-    @Test
-    @DisplayName("상품 전체 조회 성공")
-    void readAll() throws Exception {
-        ProductResponse response =
-                new ProductResponse(UUID.randomUUID(), "피자", "맛있는 피자", 30000);
-
-        BDDMockito.given(productService.readAll())
-                .willReturn(List.of(response));
-
-        mockMvc.perform(get("/api/products"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.[0].productName").value("피자"));
-    }
+//    @Test
+//    @DisplayName("상품 전체 조회 성공")
+//    void readAll() throws Exception {
+//        ProductResponse response =
+//                new ProductResponse(UUID.randomUUID(), "피자", "맛있는 피자", 30000);
+//
+//        BDDMockito.given(productService.readAll())
+//                .willReturn(List.of(response));
+//
+//        mockMvc.perform(get("/api/products"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.data.[0].productName").value("피자"));
+//    }
 
     @Test
     @DisplayName("상품 단건 조회 성공")
@@ -114,7 +273,7 @@ class ProductControllerTest extends ControllerTestSupport {
         ProductResponse response =
                 new ProductResponse(productId, "햄버거", "맛있는 햄버거", 15000);
 
-        BDDMockito.given(productService.readById(productId))
+        given(productService.readById(productId))
                 .willReturn(response);
 
         mockMvc.perform(get("/api/products/{id}", productId))
@@ -128,7 +287,7 @@ class ProductControllerTest extends ControllerTestSupport {
 
         UUID productId = UUID.randomUUID();
 
-        BDDMockito.given(productService.deleteById(productId))
+        given(productService.deleteById(productId))
                 .willReturn(productId);
 
         mockMvc.perform(delete("/api/products/{id}", productId))
@@ -146,7 +305,7 @@ class ProductControllerTest extends ControllerTestSupport {
         ProductResponse response =
                 new ProductResponse(productId, "상품", "설명", 10000);
 
-        BDDMockito.given(productService.hideById(productId))
+        given(productService.hideById(productId))
                 .willReturn(response);
 
         mockMvc.perform(patch("/api/products/{id}", productId))
