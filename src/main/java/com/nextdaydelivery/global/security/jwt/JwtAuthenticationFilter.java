@@ -55,12 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("Security Context 인증 정보 주입 완료: UID = {}, URI = {}", authUserDto.userId(),
                         request.getRequestURI());
             }
-
-            filterChain.doFilter(request, response);
-
         } catch (Exception e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
 
     private String extractTokenFromHeader(HttpServletRequest request) {
