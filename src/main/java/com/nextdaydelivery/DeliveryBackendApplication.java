@@ -2,9 +2,10 @@ package com.nextdaydelivery;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
-@SpringBootApplication
-public class DeliveryBackendApplication  {
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+public class DeliveryBackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(DeliveryBackendApplication.class, args);
