@@ -17,6 +17,6 @@ public class PaginationConfig {
         if (allowedSizes == null || !allowedSizes.contains(inputSize)) {
             return defaultSize;
         }
-        return defaultSize;
+        return inputSize;
     }
 }
