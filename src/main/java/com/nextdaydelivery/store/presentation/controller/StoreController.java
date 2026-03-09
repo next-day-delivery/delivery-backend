@@ -38,8 +38,8 @@ public class StoreController {
     @PostMapping
     public CommonResponse<StoreCreationResponse> createStore(@Valid @RequestBody StoreCreationRequest request
             , @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        Long username = principalDetails.getAuthUserDto().userId();
-        StoreCreationResponse response = storeService.createStore(request, username);
+        Long userId = principalDetails.getAuthUserDto().userId();
+        StoreCreationResponse response = storeService.createStore(request, userId);
         return CommonResponse.onSuccess(response);
     }
 
