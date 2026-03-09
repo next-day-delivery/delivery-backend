@@ -3,6 +3,7 @@ package com.nextdaydelivery.store.application.service;
 import com.nextdaydelivery.store.domain.entity.Category;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.entity.StoreAddress;
+import com.nextdaydelivery.store.domain.entity.StoreCategory;
 import com.nextdaydelivery.store.domain.repository.StoreCategoryRepository;
 import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.store.domain.service.CategoryService;
@@ -20,7 +21,9 @@ import com.nextdaydelivery.user.domain.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -103,14 +106,27 @@ public class StoreServiceImpl implements StoreService {
     @Transactional(readOnly = true)
     @Override
     public Page<StoreListResponse> getStoreList(StoreSearchCondition condition, Pageable pageable) {
+        // 1. 가게 목록 조회 (Querydsl - 1번)
         Page<Store> storePage = storeRepository.searchStores(condition, pageable);
+        List<Store> stores = storePage.getContent();
+
+        if (stores.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 2. 카테고리 일괄 조회 (Querydsl - 1번, N+1 방지)
+        List<StoreCategory> allStoreCategories = storeCategoryRepository.findAllByStoreIn(stores);
+
+        // 3. 메모리 매핑 및 DTO 변환
+        Map<UUID, List<String>> categoryMap = allStoreCategories.stream()
+                .collect(Collectors.groupingBy(
+                        sc -> sc.getStore().getStoreId(),
+                        Collectors.mapping(sc -> sc.getCategory().getCategoryName(), Collectors.toList())
+                ));
 
         return storePage.map(store -> {
-            String mainCategory = storeCategoryRepository.findFirstByStore(store)
-                    .map(sc -> sc.getCategory().getCategoryName())
-                    .orElse("미지정");
-
-            return StoreListResponse.from(store, mainCategory);
+            List<String> categories = categoryMap.getOrDefault(store.getStoreId(), List.of());
+            return StoreListResponse.from(store, categories.isEmpty() ? "미지정" : categories.getFirst());
         });
     }
 

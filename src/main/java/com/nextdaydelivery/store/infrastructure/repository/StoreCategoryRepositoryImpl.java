@@ -36,6 +36,11 @@ public class StoreCategoryRepositoryImpl implements StoreCategoryRepository {
     }
 
     @Override
+    public List<StoreCategory> findAllByStoreIn(List<Store> storeIds) {
+        return storeCategoryJpaRepository.findAllByStoreIn(storeIds);
+    }
+
+    @Override
     public void deleteByStore(Store store) {
         storeCategoryJpaRepository.deleteByStore(store);
     }
