@@ -7,6 +7,8 @@ import static com.nextdaydelivery.store.domain.entity.QStore.store;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.list;
 
+import com.nextdaydelivery.global.domain.error.OrderErrorCode;
+import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
@@ -95,6 +97,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                     .from(order)
                     .where(order.orderId.eq(critera.lastReadOrderId()))
                     .fetchOne();
+            if (cursorTime == null) {
+                throw new BusinessException(OrderErrorCode.INVALID_CURSOR);
+            }
         }
         List<UUID> orderIds = queryFactory
                 .select(order.orderId)
