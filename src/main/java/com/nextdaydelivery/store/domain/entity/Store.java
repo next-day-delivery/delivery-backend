@@ -43,7 +43,7 @@ public class Store extends BaseAuditEntity {
     private String name; // 가게명
 
     @Column(name = "rating_avg", precision = 2, scale = 1)
-    private BigDecimal ratingAvg; // 가게 평점 (DECIMAL 2,1)
+    private BigDecimal ratingAvg; // 가게 평점 (DECIMAL 2,1) // double 타입으로 변경해도 무방할듯
 
     @Column(name = "review_count")
     private Integer reviewCount; // 리뷰 수 (INT)
