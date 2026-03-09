@@ -32,6 +32,7 @@ public record OrderDetailResponse(
                 .customerId(details.customerId())
                 .storeId(details.storeId())
                 .ownerId(filteredOwnerId)
+                .totalPrice(details.totalPrice())
                 .storeName(details.storeName())
                 .orderStatus(details.orderStatus())
                 .createdAt(details.createdAt())
