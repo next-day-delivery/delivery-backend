@@ -3,7 +3,9 @@ package com.nextdaydelivery.ai_response.infrastructure;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import com.nextdaydelivery.ai_response.application.AiClient;
+import com.nextdaydelivery.ai_response.exception.AiResponseErrorCode;
 import com.nextdaydelivery.ai_response.infrastructure.dto.AiGenerationResult;
+import com.nextdaydelivery.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ public class GeminiAiClient implements AiClient {
                         null
                 );
 
+        validateResponse(response);
+
         String content = normalizeContent(response.text());
 
         return new AiGenerationResult(
@@ -42,5 +46,11 @@ public class GeminiAiClient implements AiClient {
         return rawContent.length() > MAXIMUM_LENGTH
                 ? rawContent.substring(MINIMUM_LENGTH, MAXIMUM_LENGTH)
                 : rawContent;
+    }
+
+    private void validateResponse(GenerateContentResponse result) {
+        if (result == null) {
+            throw new BusinessException(AiResponseErrorCode.AI_RESPONSE_EMPTY);
+        }
     }
 }

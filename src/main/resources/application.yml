@@ -14,3 +14,12 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/db.changelog-master.yaml
+
+jwt:
+  secret: ${SECRET_KEY}
+  access-token-validity: 1h
+
+app:
+  pagination:
+    allowed-sizes: 10,30,50
+    default-size: 10

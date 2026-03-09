@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -103,6 +105,7 @@ public class GlobalExceptionAdvice {
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             NoHandlerFoundException.class,
+            NoResourceFoundException.class,
             HttpRequestMethodNotSupportedException.class,
             IllegalArgumentException.class
     })
@@ -119,6 +122,7 @@ public class GlobalExceptionAdvice {
 
         ErrorCode errorCode = switch (ex) {
             case NoHandlerFoundException ignored -> GlobalErrorCode.NOT_FOUND;
+            case NoResourceFoundException ignored -> GlobalErrorCode.NOT_FOUND;
             case HttpRequestMethodNotSupportedException ignored -> GlobalErrorCode.METHOD_NOT_ALLOWED;
             case IllegalArgumentException ignored -> GlobalErrorCode.INVALID_INPUT_VALUE;
             case MethodArgumentTypeMismatchException ignored -> GlobalErrorCode.INVALID_INPUT_VALUE;
@@ -130,12 +134,28 @@ public class GlobalExceptionAdvice {
                 .body(CommonResponse.onFailure(errorCode));
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<CommonResponse<Void>> handleAuthenticationException(
+            AuthenticationException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("[UNAUTH] {} {} | {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getMessage());
+
+        ErrorCode errorCode = AuthErrorCode.UNAUTHORIZED;
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(CommonResponse.onFailure(errorCode));
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<CommonResponse<Void>> handleAccessDeniedException(
             AccessDeniedException ex,
             HttpServletRequest request
     ) {
-
         log.warn("[DENY] {} {} | {}",
                 request.getMethod(),
                 request.getRequestURI(),
