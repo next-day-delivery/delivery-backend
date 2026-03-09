@@ -2,6 +2,7 @@ package com.nextdaydelivery.store.presentation.dto;
 
 import com.nextdaydelivery.store.domain.entity.Store;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record StoreListResponse(
@@ -10,7 +11,8 @@ public record StoreListResponse(
         String region,        // "서울 종로구" 정도의 요약 주소
         BigDecimal ratingAvg,
         Integer reviewCount,
-        String mainCategory   // 여러 개 중 대표 카테고리 하나만 노출
+        String mainCategory,   // 여러 개 중 대표 카테고리 하나만 노출
+        LocalDateTime createdAt
 ) {
     public static StoreListResponse from(Store store, String mainCategory) {
         return new StoreListResponse(
@@ -19,7 +21,8 @@ public record StoreListResponse(
                 store.getStoreAddress().getSido() + " " + store.getStoreAddress().getSigungu(),
                 store.getRatingAvg(),
                 store.getReviewCount(),
-                mainCategory
+                mainCategory,
+                store.getCreatedAt() // 신규 오픈순으로 정렬할 때 사용
         );
     }
 }

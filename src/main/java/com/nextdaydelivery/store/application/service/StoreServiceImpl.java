@@ -116,11 +116,7 @@ public class StoreServiceImpl implements StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다. ID: " + storeId));
 
-        List<String> categoryNames = storeCategoryRepository.findAllByStore(store).stream()
-                .map(sc -> sc.getCategory().getCategoryName())
-                .toList();
-
-        return StoreResponse.from(store, store.getUser().getNickname(), categoryNames);
+        return convertToStoreResponse(store);
     }
 
     @Transactional
@@ -129,6 +125,7 @@ public class StoreServiceImpl implements StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 가게가 존재하지 않습니다."));
 
+        // 주소 및 카테고리 업데이트
         StoreAddress newAddress = storeAddressService.getOrCreateAddress(
                 request.sigungu(), request.sido(), request.dong()
         );
@@ -139,7 +136,8 @@ public class StoreServiceImpl implements StoreService {
             storeCategoryService.updateStoreCategories(store, request.categoryIds());
         }
 
-        return getStore(storeId);
+        // DTO로 변환해서 반환
+        return convertToStoreResponse(store);
     }
 
     @Transactional
@@ -162,5 +160,13 @@ public class StoreServiceImpl implements StoreService {
 
             return StoreListResponse.from(store, mainCategory);
         });
+    }
+
+    private StoreResponse convertToStoreResponse(Store store) {
+        List<String> categoryNames = storeCategoryRepository.findAllByStore(store).stream()
+                .map(sc -> sc.getCategory().getCategoryName())
+                .toList();
+
+        return StoreResponse.from(store, store.getUser().getNickname(), categoryNames);
     }
 }
