@@ -55,6 +55,9 @@ dependencies {
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     runtimeOnly "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}"
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
+    
+    // ai
+    implementation "com.google.genai:google-genai:${GENAI_VERSION}"
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
