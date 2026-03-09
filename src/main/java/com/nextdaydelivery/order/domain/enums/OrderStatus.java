@@ -18,6 +18,9 @@ public enum OrderStatus {
     private final String description;
 
     public boolean canChangeTo(OrderStatus status) {
+        if (status == null) {
+            return false;
+        }
         return switch (this) {
             case ORDER_REQUESTED -> List.of(ORDER_ACCEPTED, ORDER_CANCELED, ORDER_REJECTED).contains(status);
             case ORDER_ACCEPTED -> List.of(ORDER_CANCELED, ORDER_COOKED).contains(status);
