@@ -20,7 +20,7 @@ public record OrderListResponse(
         String storeName,
         Long totalPrice,
         String orderStatus,
-        @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:MM:SS", timezone = "Asia/Seoul")
+        @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime createdAt,
         List<OrderLineSummary> orderLines
 ) {

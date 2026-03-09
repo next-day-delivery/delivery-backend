@@ -35,6 +35,7 @@ public record OrderDetailResponse(
                 .totalPrice(details.totalPrice())
                 .storeName(details.storeName())
                 .orderStatus(details.orderStatus())
+                .orderAddress(details.orderAddress())
                 .createdAt(details.createdAt())
                 .orderLines(details.orderLines())
                 .build();
