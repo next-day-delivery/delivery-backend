@@ -6,8 +6,11 @@ import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
 import com.nextdaydelivery.user.presentation.dto.request.ManagerCreateRequest;
+import com.nextdaydelivery.user.presentation.dto.response.ManagerResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,5 +45,10 @@ public class ManagerService {
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(UserErrorCode.USER_ALREADY_EXISTS);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ManagerResponse> getManagers(Pageable pageable) {
+        return userRepository.findManagersWithPagination(pageable);
     }
 }
