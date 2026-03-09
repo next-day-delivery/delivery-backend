@@ -7,6 +7,7 @@ import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
+import com.nextdaydelivery.order.domain.repository.dto.OrderSearchCritera;
 import com.nextdaydelivery.order.domain.repository.dto.OrderSlice;
 import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
@@ -30,14 +31,16 @@ public class OrderServiceImpl implements OrderService {
     public Slice<OrderListResponse> getOrdersByCustomer(OrderSearchRequest request, int size) {
         //유효한 유저인지 검증
         int validatedPageSize = paginationConfig.getValidatedSize(size);
-        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(request, validatedPageSize);
+        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
+                validatedPageSize);
         return orderSlices.map(slice -> OrderListResponse.ofCustomer(slice, request.customerId()));
     }
 
     @Override
     public Slice<OrderListResponse> getOrdersByManager(OrderSearchRequest request, int size) {
         int validatedPageSize = paginationConfig.getValidatedSize(size);
-        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(request, validatedPageSize);
+        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
+                validatedPageSize);
         return orderSlices.map(OrderListResponse::from);
     }
 
@@ -45,7 +48,8 @@ public class OrderServiceImpl implements OrderService {
     public Slice<OrderListResponse> getStoreOrders(UUID storeId, OrderSearchRequest request, Long userId, int size) {
         //유저가 해당 가게 사장인지 검증
         int validatedPageSize = paginationConfig.getValidatedSize(size);
-        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(request, validatedPageSize);
+        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
+                validatedPageSize);
         return orderSlices.map(OrderListResponse::from);
 
     }

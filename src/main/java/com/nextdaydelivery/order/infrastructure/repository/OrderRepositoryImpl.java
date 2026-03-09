@@ -11,11 +11,11 @@ import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
+import com.nextdaydelivery.order.domain.repository.dto.OrderSearchCritera;
 import com.nextdaydelivery.order.domain.repository.dto.OrderSlice;
 import com.nextdaydelivery.order.domain.repository.dto.QOrderDetails;
 import com.nextdaydelivery.order.domain.repository.dto.QOrderLineInfo;
 import com.nextdaydelivery.order.domain.repository.dto.QOrderSlice;
-import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -88,23 +88,23 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Slice<OrderSlice> searchOrders(OrderSearchRequest request, int size) {
+    public Slice<OrderSlice> searchOrders(OrderSearchCritera critera, int size) {
         LocalDateTime cursorTime = null;
-        if (request.lastReadOrderId() != null) {
+        if (critera.lastReadOrderId() != null) {
             cursorTime = queryFactory.select(order.createdAt)
                     .from(order)
-                    .where(order.orderId.eq(request.lastReadOrderId()))
+                    .where(order.orderId.eq(critera.lastReadOrderId()))
                     .fetchOne();
         }
         List<UUID> orderIds = queryFactory
                 .select(order.orderId)
                 .from(order)
                 .where(
-                        ltOrderId(cursorTime, request.lastReadOrderId()),
-                        customerIdEq(request.customerId()),
-                        storeIdEq(request.storeId()),
-                        statusIn(request.status()),
-                        dateBetween(request.startDate(), request.endDate())
+                        ltOrderId(cursorTime, critera.lastReadOrderId()),
+                        customerIdEq(critera.customerId()),
+                        storeIdEq(critera.storeId()),
+                        statusIn(critera.status()),
+                        dateBetween(critera.startDate(), critera.endDate())
                 )
                 .orderBy(order.createdAt.desc(), order.orderId.desc())
                 .limit(size + 1)
