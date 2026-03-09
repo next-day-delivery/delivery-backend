@@ -3,6 +3,7 @@ name: Main Deploy
 on:
   push:
     branches:
+      - chore/39-cicd-test
       - main
 
 jobs:
