@@ -51,6 +51,11 @@ dependencies {
     // Liquibase
     implementation 'org.liquibase:liquibase-core'
 
+    // JJWT
+    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
+    
     // ai
     implementation "com.google.genai:google-genai:${GENAI_VERSION}"
 
@@ -58,6 +63,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
