@@ -18,3 +18,8 @@ spring:
 jwt:
   secret: ${SECRET_KEY}
   access-token-validity: 1h
+
+app:
+  pagination:
+    allowed-sizes: 10,30,50
+    default-size: 10
