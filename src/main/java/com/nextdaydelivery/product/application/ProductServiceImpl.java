@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -60,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> readAll() {
+    public List<ProductResponse> readAll(Pageable pageable) {
         return productRepository.findAll()
                 .stream()
                 .filter(product -> !product.isHidden())
@@ -92,6 +94,19 @@ public class ProductServiceImpl implements ProductService {
         product.hide();
 
         return response(product);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Slice<ProductResponse> searchProducts(
+            String name,
+            Integer minPrice,
+            Integer maxPrice,
+            UUID cursorId,
+            Pageable pageable) {
+
+        return productRepository.searchByConditions(name, minPrice, maxPrice, cursorId, pageable)
+                .map(ProductResponse::from);
     }
 
     private AiGenerationResult generateProductDetailIfNeeded(ProductCreateRequest request) {
