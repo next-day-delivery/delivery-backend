@@ -3,6 +3,7 @@ package com.nextdaydelivery.review.domain.entity;
 import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
+import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -55,7 +56,7 @@ public class Review extends CreatedAuditEntity {
     private String content; // 리뷰 내용
 
     @Column(name = "rating")
-    private Integer rating; // 별점 (INT)
+    private Integer rating; // 별점 (INT) // Null 허용이라 int 대신 Integer 사용
 
     @Enumerated(EnumType.STRING)
     @Column(name = "review_status", nullable = false)
@@ -70,5 +71,36 @@ public class Review extends CreatedAuditEntity {
     public void updateReview(String content, Integer rating) {
         this.content = content;
         this.rating = rating;
+    }
+
+    private Review(String content, Integer rating, ReviewStatus reviewStatus) {
+        this.content = content;
+        this.rating = rating;
+        this.reviewStatus = reviewStatus;
+    }
+
+    private Review(String content, Integer rating, ReviewStatus reviewStatus, User user, Order order, Store store) {
+        this.user = user;
+        this.content = content;
+        this.rating = rating;
+        this.reviewStatus = reviewStatus;
+        this.order = order;
+        this.store = store;
+    }
+
+    public static Review create(ReviewCreateRequest request, User user, Order order, Store store) {
+        return new Review(request.content(), request.rating(), ReviewStatus.VISIBLE, user, order, store);
+    }
+
+    public static Review of(
+        String content,
+        Integer rating,
+        ReviewStatus reviewStatus
+    ) {
+        return new Review(
+            content,
+            rating,
+            reviewStatus
+        );
     }
 }

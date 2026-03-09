@@ -8,7 +8,6 @@ import com.nextdaydelivery.review.domain.repository.ReviewRepository;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.review.presentation.dto.response.ReviewList;
 import com.nextdaydelivery.store.domain.entity.Store;
-import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.user.domain.entity.User;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -23,13 +22,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
-    private final StoreRepository storeRepository;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public List<ReviewList> getReview(UUID storeId) {
         return reviewRepository.findByStoreStoreId(storeId).stream()
-                .map(ReviewList::from)
-                .toList();
+            .map(ReviewList::from)
+            .toList();
     }
 
     @Override
@@ -37,7 +36,7 @@ public class ReviewServiceImpl implements ReviewService {
     public Review saveReview(ReviewCreateRequest request, UUID orderId, User user) {
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(NoSuchElementException::new);
+            .orElseThrow(NoSuchElementException::new);
         Store store = order.getStore();
 
         Review review = Review.builder()
@@ -60,15 +59,15 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<ReviewList> getMyReview(Long userId) {
         return reviewRepository.findByUserUserId(userId).stream()
-                .map(ReviewList::from)
-                .toList();
+            .map(ReviewList::from)
+            .toList();
     }
 
     @Override
     @Transactional
     public Review updateMyReviewStatus(UUID reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new NoSuchElementException("리뷰를 찾을 수 없습니다."));
+            .orElseThrow(() -> new NoSuchElementException("리뷰를 찾을 수 없습니다."));
         review.toggleStatus();
         return review;
     }
