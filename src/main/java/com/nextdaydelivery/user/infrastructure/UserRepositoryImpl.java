@@ -3,7 +3,6 @@ package com.nextdaydelivery.user.infrastructure;
 import static com.nextdaydelivery.user.domain.entity.QUser.user;
 
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
-import com.nextdaydelivery.user.domain.entity.QUser;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
@@ -52,8 +51,6 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<AuthUserDto> findAuthInfoById(Long userId) {
-        QUser user = QUser.user;
-
         AuthUserDto result = queryFactory
                 .select(Projections.constructor(AuthUserDto.class,
                         user.userId,
@@ -71,8 +68,6 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Page<ManagerResponse> findManagersWithPagination(Pageable pageable) {
-        QUser user = QUser.user;
-
         List<ManagerResponse> content = queryFactory
                 .select(Projections.constructor(ManagerResponse.class,
                         user.userId,
