@@ -1,12 +1,17 @@
 package com.nextdaydelivery.delivery.domain.enums;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * 배달 상태 관리를 위한 ENUM
  */
+@RequiredArgsConstructor
 public enum DeliveryStatus {
-    DELIVERY_PENDING,   // 배달 대기
-    DELIVERY_ING,       // 배달 중
-    DELIVERY_COMPLETED;  // 배달 완료
+    DELIVERY_PENDING("배달 대기"),   // 배달 대기
+    DELIVERY_ING("배달 중"),       // 배달 중
+    DELIVERY_COMPLETED("배달 완료");
+
+    private final String description;// 배달 완료
 
     public boolean canChangeTo(DeliveryStatus status) {
 
