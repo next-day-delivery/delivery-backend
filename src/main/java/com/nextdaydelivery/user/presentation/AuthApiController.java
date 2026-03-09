@@ -20,7 +20,6 @@ public class AuthApiController {
     @PostMapping("/sign-in")
     public CommonResponse<String> signIn(@Valid @RequestBody SignInRequest request) {
         String accessToken = authService.signIn(request);
-
         return CommonResponse.onSuccess(accessToken);
     }
 }
