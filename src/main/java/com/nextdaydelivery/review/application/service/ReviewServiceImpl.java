@@ -3,7 +3,6 @@ package com.nextdaydelivery.review.application.service;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.review.domain.entity.Review;
-import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
 import com.nextdaydelivery.review.domain.repository.ReviewRepository;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.review.presentation.dto.response.ReviewList;
@@ -20,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
-    private final ReviewRepository reviewRepository;
+    // DIP, 의존성, 클린 아키텍쳐
+    // JPA 영속성 컨텍스트와 트랜잭션 외부에서 Entity를 접근하는 경우 발생하는 문제
+    // 서비스 계층의 역할과 책임
+    // TODO : 튜터님 조언 추후 반영 예정
     private final OrderRepository orderRepository;
     private final ReviewRepository reviewRepository;
 
@@ -34,19 +36,10 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public Review saveReview(ReviewCreateRequest request, UUID orderId, User user) {
-
         Order order = orderRepository.findById(orderId)
             .orElseThrow(NoSuchElementException::new);
         Store store = order.getStore();
-
-        Review review = Review.builder()
-                .content(request.content())
-                .rating(request.rating())
-                .reviewStatus(ReviewStatus.VISIBLE)
-                .user(user)
-                .order(order)
-                .store(store)
-                .build();
+        Review review = Review.create(request, user, order, store);
 
         //TODO : 주문 테이블에 리뷰 완료 표시 해주는 기능 추가해야함
         //TODO : 현재는 orderId만으로 리뷰를 생성하므로
