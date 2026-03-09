@@ -39,22 +39,22 @@ class WithJpaConfigTest {
     void setUp() {
         // 1. User 생성 (Auditing 필드 제외 필수값만 입력)
         testUser = User.builder()
-                .username("test_user_01")
-                .nickname("치킨집 사장 닉네임")
-                .email("test@example.com")
-                .password("password123")
-                .role(UserRole.OWNER)
-                .isPublic(true)
-                .build();
+            .username("test_user_01")
+            .nickname("치킨집 사장 닉네임")
+            .email("test@example.com")
+            .password("password123")
+            .role(UserRole.OWNER)
+            .isPublic(true)
+            .build();
 
         entityManager.persist(testUser);
 
         // 2. StoreAddress 생성
         testAddress = StoreAddress.builder()
-                .sido("서울특별시")
-                .sigungu("종로구")
-                .dong("묘동")
-                .build();
+            .sido("서울특별시")
+            .sigungu("종로구")
+            .dong("묘동")
+            .build();
 
         entityManager.persist(testAddress);
 
@@ -72,11 +72,11 @@ class WithJpaConfigTest {
         StoreAddress address = entityManager.find(StoreAddress.class, testAddress.getStoreAddressId());
 
         Store store = Store.builder()
-                .user(user)
-                .storeAddress(address)
-                .name("가게 1")
-                .detailAddress("상세 주소 1")
-                .build();
+            .user(user)
+            .storeAddress(address)
+            .name("가게 1")
+            .detailAddress("상세 주소 1")
+            .build();
 
         // When
         Store savedStore = storeRepository.save(store);
@@ -101,9 +101,9 @@ class WithJpaConfigTest {
         StoreAddress address = entityManager.find(StoreAddress.class, testAddress.getStoreAddressId());
 
         storeRepository.save(Store.builder()
-                .user(user).storeAddress(address).name("가게 1").detailAddress("상세 주소 1").build());
+            .user(user).storeAddress(address).name("가게 1").detailAddress("상세 주소 1").build());
         storeRepository.save(Store.builder()
-                .user(user).storeAddress(address).name("가게 2").detailAddress("상세 주소 2").build());
+            .user(user).storeAddress(address).name("가게 2").detailAddress("상세 주소 2").build());
 
         entityManager.flush();
         entityManager.clear();
@@ -124,7 +124,7 @@ class WithJpaConfigTest {
         StoreAddress address = entityManager.find(StoreAddress.class, testAddress.getStoreAddressId());
 
         Store savedStore = storeRepository.save(Store.builder()
-                .user(user).storeAddress(address).name("삭제용 가게").detailAddress("주소").build());
+            .user(user).storeAddress(address).name("삭제용 가게").detailAddress("주소").build());
         UUID storeId = savedStore.getStoreId();
 
         entityManager.flush();
