@@ -1,18 +1,18 @@
 package com.nextdaydelivery.global.security.jwt;
 
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.global.security.token.JwtAuthenticationToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -29,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtValidator jwtValidator;
 
     private final HandlerExceptionResolver handlerExceptionResolver;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -39,13 +40,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(token)) {
                 AuthUserDto authUserDto = jwtValidator.validateAndGetPayload(token);
+                Long userId = authUserDto.userId();
 
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(authUserDto.role().getAuthority());
+                UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        authUserDto,
-                        null,
-                        Collections.singletonList(authority)
+                JwtAuthenticationToken authentication = new JwtAuthenticationToken(
+                        userDetails,
+                        token,
+                        userDetails.getAuthorities()
                 );
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
