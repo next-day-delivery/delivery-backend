@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,12 +96,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                     .where(order.orderId.eq(request.lastReadOrderId()))
                     .fetchOne();
         }
-
-        Map<UUID, OrderSlice> results = queryFactory
+        List<UUID> orderIds = queryFactory
+                .select(order.orderId)
                 .from(order)
-                .leftJoin(orderLine).on(orderLine.order.eq(order))
-                .leftJoin(orderLine.product, product)
-                .join(order.store, store)
                 .where(
                         ltOrderId(cursorTime, request.lastReadOrderId()),
                         customerIdEq(request.customerId()),
@@ -110,6 +108,18 @@ public class OrderRepositoryImpl implements OrderRepository {
                 )
                 .orderBy(order.createdAt.desc(), order.orderId.desc())
                 .limit(size + 1)
+                .fetch();
+        if (orderIds.isEmpty()) {
+            return new SliceImpl<>(Collections.emptyList(), PageRequest.ofSize(size), false);
+        }
+
+        Map<UUID, OrderSlice> results = queryFactory
+                .from(order)
+                .leftJoin(orderLine).on(orderLine.order.eq(order))
+                .leftJoin(orderLine.product, product)
+                .join(order.store, store)
+                .where(order.orderId.in(orderIds))
+                .orderBy(order.createdAt.desc(), order.orderId.desc())
                 .transform(GroupBy.groupBy(order.orderId).as(new QOrderSlice(
                         order.orderId,
                         order.user.userId,
