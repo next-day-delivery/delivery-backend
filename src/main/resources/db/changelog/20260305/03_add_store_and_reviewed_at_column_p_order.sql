@@ -7,6 +7,4 @@ ALTER TABLE p_order
     ADD COLUMN reviewed_at TIMESTAMP;
 
 
--- rollback ALTER TABLE p_order DROP CONSTRAINT fk_order_store;
--- rollback ALTER TABLE p_order DROP COLUMN store_id;
 -- rollback ALTER TABLE p_order DROP COLUMN reviewed_at;
