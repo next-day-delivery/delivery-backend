@@ -58,4 +58,9 @@ public class UserService {
             throw new BusinessException(UserErrorCode.USER_ALREADY_EXISTS);
         }
     }
+
+    public User getById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+    }
 }

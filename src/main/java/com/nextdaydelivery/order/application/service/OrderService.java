@@ -1,9 +1,12 @@
 package com.nextdaydelivery.order.application.service;
 
+import com.nextdaydelivery.checkout.domain.entity.Checkout;
+import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.user.domain.entity.User;
 import java.util.UUID;
 import org.springframework.data.domain.Slice;
 
@@ -27,4 +30,5 @@ public interface OrderService {
 
     void changeOrderStatusByManager(OrderStatusRequest request, UUID orderId);
 
+    Order createFromCheckout(Checkout checkout, User user);
 }

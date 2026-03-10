@@ -1,10 +1,17 @@
 package com.nextdaydelivery.order.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextdaydelivery.checkout.domain.entity.Checkout;
 import com.nextdaydelivery.global.config.PaginationConfig;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
+import com.nextdaydelivery.order.application.dto.OrderSnapshot;
 import com.nextdaydelivery.order.domain.entity.Order;
+import com.nextdaydelivery.order.domain.entity.OrderLine;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.repository.OrderLineRepository;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
 import com.nextdaydelivery.order.domain.repository.dto.OrderSearchCritera;
@@ -13,6 +20,12 @@ import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.product.domain.entity.Product;
+import com.nextdaydelivery.product.domain.repository.ProductRepository;
+import com.nextdaydelivery.store.domain.entity.Store;
+import com.nextdaydelivery.store.domain.repository.StoreRepository;
+import com.nextdaydelivery.user.domain.entity.User;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -26,6 +39,11 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final PaginationConfig paginationConfig;
+    private final StoreRepository storeRepository;
+    private final ProductRepository productRepository;
+    private final OrderLineRepository orderLineRepository;
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public Slice<OrderListResponse> getOrdersByCustomer(OrderSearchRequest request, int size) {
@@ -101,6 +119,34 @@ public class OrderServiceImpl implements OrderService {
         order.changeStatus(request.orderStatus());
     }
 
+    @Override
+    public Order createFromCheckout(Checkout checkout, User user) {
+        OrderSnapshot snapshot = deserializeSnapshot(checkout.getOrderSnapshot());
+
+        Store store = storeRepository.findById(snapshot.storeId())
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.STORE_NOT_FOUND));
+
+        Order order = Order.from(checkout, snapshot, user, store);
+        Order savedOrder = orderRepository.save(order);
+
+        List<OrderLine> orderLines = snapshot.items().stream()
+                .map(item -> {
+                    Product product = productRepository.findById(item.productId())
+                            .orElseThrow(() -> new BusinessException(OrderErrorCode.PRODUCT_NOT_FOUND));
+
+                    return OrderLine.create(
+                            savedOrder,
+                            product,
+                            item.quantity().longValue(),
+                            item.price()
+                    );
+                })
+                .toList();
+
+        orderLineRepository.saveAll(orderLines);
+        return savedOrder;
+    }
+
 
     private Order getOrderWithLock(UUID orderId) {
         return orderRepository.findByIdWithLock(orderId)
@@ -119,6 +165,18 @@ public class OrderServiceImpl implements OrderService {
 
     private void validateOrderAccess(OrderDetails details) {
         //권한 검증 - 유저는 자기 주문인지,
+    }
+
+    private OrderSnapshot deserializeSnapshot(JsonNode jsonNode) {
+        if (jsonNode == null || jsonNode.isNull()) {
+            throw new BusinessException(OrderErrorCode.ORDER_SNAPSHOT_NOT_FOUND);
+        }
+
+        try {
+            return objectMapper.treeToValue(jsonNode, OrderSnapshot.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(OrderErrorCode.ORDER_SNAPSHOT_PARSE_ERROR);
+        }
     }
 
 

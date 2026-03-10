@@ -1,8 +1,10 @@
 package com.nextdaydelivery.order.domain.entity;
 
+import com.nextdaydelivery.checkout.domain.entity.Checkout;
 import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
+import com.nextdaydelivery.order.application.dto.OrderSnapshot;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
@@ -19,6 +21,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -50,6 +53,9 @@ public class Order extends CreatedAuditEntity {
     @Column(name = "address")
     private String address; // 배송지 (VARCHAR)
 
+    @Column(name = "order_no", unique = true)
+    private String orderNo;
+
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
@@ -64,5 +70,24 @@ public class Order extends CreatedAuditEntity {
         if (LocalDateTime.now().isAfter(this.getCreatedAt().plusMinutes(5))) {
             throw new BusinessException(OrderErrorCode.CANCEL_TIMEOUT);
         }
+    }
+
+    @Builder
+    public Order(String address, String orderNo, User user, Store store) {
+        this.orderStatus = OrderStatus.ORDER_REQUESTED;
+        this.user = user;
+        this.address = address;
+        this.store = store;
+        this.orderNo = orderNo;
+
+    }
+
+    public static Order from(Checkout checkout, OrderSnapshot snapshot, User user, Store store) {
+        return Order.builder()
+                .orderNo(checkout.getOrderNo())
+                .address(snapshot.address())
+                .user(user)
+                .store(store)
+                .build();
     }
 }

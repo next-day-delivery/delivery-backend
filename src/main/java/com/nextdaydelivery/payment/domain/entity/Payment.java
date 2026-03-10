@@ -1,9 +1,11 @@
 package com.nextdaydelivery.payment.domain.entity;
 
+import com.nextdaydelivery.checkout.domain.entity.Checkout;
 import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.payment.domain.enums.PaymentMethod;
 import com.nextdaydelivery.payment.domain.enums.PaymentStatus;
+import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +14,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -33,9 +35,16 @@ public class Payment extends CreatedAuditEntity {
     @Column(name = "payment_id", updatable = false, nullable = false)
     private UUID paymentId; // 결제 PK
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
     private Order order; // 결제에서 주문을 참조
+
+    @Column(name = "order_no", unique = true)
+    private String orderNo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
@@ -45,28 +54,52 @@ public class Payment extends CreatedAuditEntity {
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus; // 결제 상태 (CANCEL, COMPLETE, FAILED)
 
+    @Column(name = "amount", nullable = false)
+    private Long amount;
+
+    @Column(name = "payment_key", nullable = false)
+    private String paymentKey;
+
+
     @Builder
-    Payment(PaymentMethod method, PaymentStatus status) {
+    public Payment(PaymentMethod method, PaymentStatus status, String paymentKey, Long amount, User user,
+                   String orderNo) {
         this.paymentMethod = method;
         this.paymentStatus = status;
+        this.paymentKey = paymentKey;
+        this.amount = amount;
+        this.user = user;
+        this.orderNo = orderNo;
     }
 
 
-    public static Payment from(PaymentMethod method) {
+    public static Payment of(Checkout checkout, String paymentKey, User user) {
         return Payment.builder()
-                .method(method)
+                .orderNo(checkout.getOrderNo())
                 .status(PaymentStatus.PENDING)
+                .method(checkout.getPaymentMethod())
+                .paymentKey(paymentKey)
+                .amount(checkout.getAmount())
+                .user(user)
                 .build();
+
     }
 
-    public void processPayment() {
+    public void fail() {
+        this.paymentStatus = PaymentStatus.FAILED;
+    }
+
+    public void cancel() {
+        this.paymentStatus = PaymentStatus.CANCELED;
+    }
+
+    public void complete(Order order) {
+        this.order = order;
         this.paymentStatus = PaymentStatus.COMPLETED;
     }
 
-    public void validatePendingStatus() {
-        if (this.paymentStatus != PaymentStatus.PENDING) {
-            throw new IllegalStateException("결제 가능한 상태가 아닙니다.");
-        }
+    public void cancelFail() {
+        this.paymentStatus = PaymentStatus.CANCELFAILED;
     }
 
 

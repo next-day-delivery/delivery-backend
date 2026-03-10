@@ -165,6 +165,11 @@ public class OrderRepositoryImpl implements OrderRepository {
         return jpaRepository.findById(orderId);
     }
 
+    @Override
+    public Order save(Order order) {
+        return jpaRepository.save(order);
+    }
+
     private BooleanExpression ltOrderId(LocalDateTime lastTime, UUID lastOrderId) {
         if (lastTime == null || lastOrderId == null) {
             return null;
