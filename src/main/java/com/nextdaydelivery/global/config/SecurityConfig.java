@@ -25,12 +25,12 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_POST_URLS = {
             "/api/users",
-            "/api/auth/sign-in",
-            "/api/health"
+            "/api/auth/sign-in"
     };
 
     private static final String[] PUBLIC_GET_URLS = {
             // TODO 공개 GET API 추가
+            "/api/health" // for health check
     };
 
     @Bean
