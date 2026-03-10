@@ -1,6 +1,6 @@
 package com.nextdaydelivery.global.config;
 
-import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +26,9 @@ public class JpaAuditingConfig {
             }
 
             Object principal = authentication.getPrincipal();
-            if (principal instanceof AuthUserDto authUser) {
-                return Optional.of(String.valueOf(authUser.userId()));
+
+            if (principal instanceof PrincipalDetails principalDetails) {
+                return Optional.of(principalDetails.getUsername());
             }
 
             return Optional.of("SYSTEM");
