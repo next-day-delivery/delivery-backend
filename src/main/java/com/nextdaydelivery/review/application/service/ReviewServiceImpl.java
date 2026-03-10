@@ -33,7 +33,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<ReviewList> getReview(UUID storeId, Pageable pageable) {
-        return reviewRepository.findByStoreStoreIdAndReviewStatus(storeId, ReviewStatus.VISIBLE, pageable)
+        return reviewRepository.getReviewByStoreIdandReviewStatus(storeId, ReviewStatus.VISIBLE, pageable)
             .map(ReviewList::from);
     }
 
@@ -53,14 +53,14 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<ReviewList> getMyReview(Long userId, Pageable pageable) {
-        return reviewRepository.findByUserUserId(userId, pageable)
+        return reviewRepository.getReviewByUserId(userId, pageable)
             .map(ReviewList::from);
     }
 
     @Override
     @Transactional
     public Review updateMyReviewStatus(AuthUserDto authUser, UUID reviewId) {
-        Review review = reviewRepository.findById(reviewId)
+        Review review = reviewRepository.getReviewById(reviewId)
             .orElseThrow(() -> new NoSuchElementException("리뷰를 찾을 수 없습니다."));
         if (!review.getUser().getUserId().equals(authUser.userId())) {
             throw new BusinessException(AuthErrorCode.FORBIDDEN); // 403
@@ -73,7 +73,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public Review updateMyReview(AuthUserDto authUser, UUID reviewId, ReviewCreateRequest request) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(NoSuchElementException::new);
+        Review review = reviewRepository.getReviewById(reviewId).orElseThrow(NoSuchElementException::new);
         if (!review.getUser().getUserId().equals(authUser.userId())) {
             throw new BusinessException(AuthErrorCode.FORBIDDEN); // 403
         }
@@ -86,7 +86,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public void deleteMyReview(AuthUserDto authUser, UUID reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(NoSuchElementException::new);
+        Review review = reviewRepository.getReviewById(reviewId).orElseThrow(NoSuchElementException::new);
         if (!review.getUser().getUserId().equals(authUser.userId())) {
             throw new BusinessException(AuthErrorCode.FORBIDDEN); // 403
         }

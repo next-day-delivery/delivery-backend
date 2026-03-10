@@ -60,7 +60,7 @@ class ReviewServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Review> reviewPage = new PageImpl<>(List.of(review), pageable, 1);
 
-        given(reviewRepository.findByStoreStoreIdAndReviewStatus(storeId, ReviewStatus.VISIBLE, pageable)).willReturn(
+        given(reviewRepository.getReviewByStoreIdandReviewStatus(storeId, ReviewStatus.VISIBLE, pageable)).willReturn(
             reviewPage);
 
         //when
@@ -71,7 +71,7 @@ class ReviewServiceImplTest {
         assertThat(result.getContent().getFirst().content()).isEqualTo("맛이 훌륭해요. 배달이 빨라요");
         assertThat(result.getContent().getFirst().rating()).isEqualTo(5);
         assertThat(result.getContent().getFirst().reviewStatus()).isEqualTo(ReviewStatus.VISIBLE);
-        verify(reviewRepository).findByStoreStoreIdAndReviewStatus(storeId, ReviewStatus.VISIBLE, pageable);
+        verify(reviewRepository).getReviewByStoreIdandReviewStatus(storeId, ReviewStatus.VISIBLE, pageable);
     }
 
     @Test
@@ -133,13 +133,13 @@ class ReviewServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Review> reviewPage = new PageImpl<>(List.of(review1, review2), pageable, 2);
 
-        given(reviewRepository.findByUserUserId(userId, pageable)).willReturn(reviewPage);
+        given(reviewRepository.getReviewByUserId(userId, pageable)).willReturn(reviewPage);
 
         //when
         Page<ReviewList> result = reviewService.getMyReview(userId, pageable);
 
         //then
-        verify(reviewRepository).findByUserUserId(userId, pageable);
+        verify(reviewRepository).getReviewByUserId(userId, pageable);
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).content()).isEqualTo("맛있어요");
         assertThat(result.getContent().get(0).rating()).isEqualTo(5);
@@ -163,13 +163,13 @@ class ReviewServiceImplTest {
             .reviewStatus(ReviewStatus.VISIBLE)
             .build();
 
-        given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+        given(reviewRepository.getReviewById(reviewId)).willReturn(Optional.of(review));
 
         //when
         reviewService.updateMyReviewStatus(authUser, reviewId);
 
         //then
-        verify(reviewRepository).findById(reviewId);
+        verify(reviewRepository).getReviewById(reviewId);
         assertThat(review.getReviewStatus()).isEqualTo(ReviewStatus.HIDDEN);
     }
 
@@ -178,14 +178,14 @@ class ReviewServiceImplTest {
         //given
         UUID wrongReviewId = UUID.randomUUID();
         AuthUserDto authUser = new AuthUserDto(1L, UserRole.CUSTOMER);
-        given(reviewRepository.findById(wrongReviewId)).willReturn(Optional.empty());
+        given(reviewRepository.getReviewById(wrongReviewId)).willReturn(Optional.empty());
 
         //when & then
         assertThatThrownBy(() -> reviewService.updateMyReviewStatus(authUser, wrongReviewId))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("리뷰를 찾을 수 없습니다.");
 
-        verify(reviewRepository).findById(wrongReviewId);
+        verify(reviewRepository).getReviewById(wrongReviewId);
     }
 
     @Test
@@ -203,13 +203,13 @@ class ReviewServiceImplTest {
             .user(user)
             .build();
 
-        given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+        given(reviewRepository.getReviewById(reviewId)).willReturn(Optional.of(review));
 
         //when
         Review result = reviewService.updateMyReview(authUser, reviewId, request);
 
         //then
-        verify(reviewRepository).findById(reviewId);
+        verify(reviewRepository).getReviewById(reviewId);
         assertThat(result.getContent()).isEqualTo("너무 맛있습니다.");
         assertThat(result.getRating()).isEqualTo(5);
     }
@@ -220,12 +220,12 @@ class ReviewServiceImplTest {
         UUID reviewId = UUID.randomUUID();
         AuthUserDto authUser = new AuthUserDto(1L, UserRole.CUSTOMER);
         ReviewCreateRequest request = new ReviewCreateRequest("리뷰 수정 전", 4);
-        given(reviewRepository.findById(reviewId)).willReturn(Optional.empty());
+        given(reviewRepository.getReviewById(reviewId)).willReturn(Optional.empty());
 
         //when & then
         assertThatThrownBy(() -> reviewService.updateMyReview(authUser, reviewId, request))
             .isInstanceOf(NoSuchElementException.class);
-        verify(reviewRepository).findById(reviewId);
+        verify(reviewRepository).getReviewById(reviewId);
     }
 
     @Test
@@ -241,7 +241,7 @@ class ReviewServiceImplTest {
         given(review.getUser()).willReturn(user);
         given(review.getStore()).willReturn(store);
         given(review.getRating()).willReturn(3);
-        given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+        given(reviewRepository.getReviewById(reviewId)).willReturn(Optional.of(review));
 
         //when
         reviewService.deleteMyReview(authUser, reviewId);
