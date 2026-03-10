@@ -19,11 +19,11 @@ public interface UserRepository {
 
     Optional<AuthUserDto> findAuthInfoById(Long userId);
 
-
     Page<ManagerResponse> findManagersWithPagination(Pageable pageable);
 
     boolean existsByNickname(String nickname);
 
     boolean existsByEmail(String email);
 
+    void flush();
 }
