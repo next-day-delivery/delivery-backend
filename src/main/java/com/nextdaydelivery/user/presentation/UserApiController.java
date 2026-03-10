@@ -1,8 +1,6 @@
 package com.nextdaydelivery.user.presentation;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
-import com.nextdaydelivery.global.security.annotation.RequireCustomerRole;
-import com.nextdaydelivery.global.security.annotation.RequireOwnerRole;
 import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.user.application.UserService;
 import com.nextdaydelivery.user.presentation.dto.request.AddressUpdateRequest;
@@ -11,6 +9,7 @@ import com.nextdaydelivery.user.presentation.dto.request.UserProfileUpdateReques
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,8 +33,7 @@ public class UserApiController {
     }
 
     @PatchMapping("/me/address")
-    @RequireOwnerRole
-    @RequireCustomerRole
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     public CommonResponse<Void> updateMyAddress(
             @Valid @RequestBody AddressUpdateRequest request,
             @AuthenticationPrincipal PrincipalDetails principal
@@ -47,8 +45,7 @@ public class UserApiController {
     }
 
     @PatchMapping("/me")
-    @RequireOwnerRole
-    @RequireCustomerRole
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     public CommonResponse<Void> updateMyProfile(
             @Valid @RequestBody UserProfileUpdateRequest request,
             @AuthenticationPrincipal PrincipalDetails principal
@@ -61,8 +58,7 @@ public class UserApiController {
     }
 
     @DeleteMapping("/me")
-    @RequireOwnerRole
-    @RequireCustomerRole
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
     public CommonResponse<Void> deleteUser(
             @AuthenticationPrincipal PrincipalDetails principal
     ) {
