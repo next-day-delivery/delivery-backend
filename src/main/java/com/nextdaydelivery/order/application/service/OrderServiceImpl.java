@@ -29,7 +29,6 @@ import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -160,7 +159,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderReviewStatusResponse getReviewStatus(UUID orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
         return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
     }
 
