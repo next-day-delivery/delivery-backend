@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version "${SPRING_BOOT_VERSION}"
     id 'io.spring.dependency-management' version "${SPRING_BOOT_DEPENDENCY_MANAGEMENT_VERSION}"
+    id "org.asciidoctor.jvm.convert" version "3.3.2"
 }
 
 group = 'com.nextdaydelivery'
@@ -18,6 +19,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    asciidoctorExt
 }
 
 repositories {
@@ -59,6 +61,10 @@ dependencies {
     // ai
     implementation "com.google.genai:google-genai:${GENAI_VERSION}"
 
+    //rest docs
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -69,4 +75,31 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    outputs.dir snippetsDir
+}
+
+// REST DOCS SETTING
+ext {
+    snippetsDir = file('build/generated-snippets')
+}
+
+tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
+    dependsOn tasks.test
+}
+
+bootJar {
+    dependsOn tasks.asciidoctor
+    from ("${asciidoctor.outputDir}") {
+        into 'static/docs'
+    }
+}
+
+bootRun {
+    dependsOn tasks.asciidoctor
+    classpath += files(tasks.asciidoctor.outputDir)
+
+    systemProperty "spring.web.resources.static-locations",
+            "classpath:/static/,file:${tasks.asciidoctor.outputDir}"
 }
