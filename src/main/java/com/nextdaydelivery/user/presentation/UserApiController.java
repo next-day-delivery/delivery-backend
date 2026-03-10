@@ -20,9 +20,7 @@ public class UserApiController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CommonResponse<Long> publicSignup(
-            @Valid @RequestBody PublicSignUpRequest request
-    ) {
+    public CommonResponse<Long> publicSignup(@Valid @RequestBody PublicSignUpRequest request) {
         Long response = userService.signUp(request);
         return CommonResponse.onSuccess(HttpStatus.CREATED, response);
     }

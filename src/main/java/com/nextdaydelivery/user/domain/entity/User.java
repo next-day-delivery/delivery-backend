@@ -76,6 +76,11 @@ public class User extends BaseAuditEntity {
                 .build();
     }
 
+    public void updateProfile(String nickname, String email) {
+        this.nickname = nickname;
+        this.email = email;
+    }
+
     public void markAsDeleted(String deleterId) {
         if (this.deletedAt != null) {
             throw new IllegalStateException("이미 삭제된 유저입니다.");
