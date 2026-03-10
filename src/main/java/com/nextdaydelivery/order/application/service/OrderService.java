@@ -6,6 +6,7 @@ import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.order.presentation.dto.response.OrderReviewStatusResponse;
 import com.nextdaydelivery.user.domain.entity.User;
 import java.util.UUID;
 import org.springframework.data.domain.Slice;
@@ -30,5 +31,8 @@ public interface OrderService {
 
     void changeOrderStatusByManager(OrderStatusRequest request, UUID orderId);
 
+    OrderReviewStatusResponse getReviewStatus(UUID orderId);
+
     Order createFromCheckout(Checkout checkout, User user);
+
 }

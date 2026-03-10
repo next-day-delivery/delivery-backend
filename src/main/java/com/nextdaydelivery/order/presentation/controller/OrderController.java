@@ -7,6 +7,7 @@ import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.order.presentation.dto.response.OrderReviewStatusResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -103,6 +104,13 @@ public class OrderController {
                                                                @RequestHeader("X-User-Id") Long userId) {
         OrderDetailResponse response = orderService.getOrderDetail(orderId, userId);
         return CommonResponse.onSuccess(HttpStatus.OK, response);
+    }
+
+    @GetMapping("/{orderId}/review")
+    public CommonResponse<OrderReviewStatusResponse> getReviewStatus(
+            @PathVariable UUID orderId
+    ) {
+        return CommonResponse.onSuccess(orderService.getReviewStatus(orderId));
     }
 
 }

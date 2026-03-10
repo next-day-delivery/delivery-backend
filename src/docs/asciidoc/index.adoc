@@ -1,0 +1,37 @@
+= Delivery Backend API
+:toc: left
+:toclevels: 3
+:toc-title: 목차
+:source-highlighter: highlightjs
+
+== Product API
+
+=== 상품 생성
+
+==== Request Example
+
+include::{snippets}/product-create/http-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/product-create/request-fields.adoc[]
+
+==== Request Body
+
+include::{snippets}/product-create/request-body.adoc[]
+
+==== Response Example
+
+include::{snippets}/product-create/http-response.adoc[]
+
+==== Response Fields
+
+include::{snippets}/product-create/response-fields.adoc[]
+
+==== Response Body
+
+include::{snippets}/product-create/response-body.adoc[]
+
+==== Curl Example
+
+include::{snippets}/product-create/curl-request.adoc[]

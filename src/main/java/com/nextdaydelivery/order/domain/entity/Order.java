@@ -72,6 +72,14 @@ public class Order extends CreatedAuditEntity {
         }
     }
 
+    public void markAsReviewed() {
+        this.reviewedAt = LocalDateTime.now();
+    }
+
+    public boolean isReviewed() {
+        return this.reviewedAt != null;
+    }
+
     @Builder
     public Order(String address, String orderNo, User user, Store store) {
         this.orderStatus = OrderStatus.ORDER_REQUESTED;

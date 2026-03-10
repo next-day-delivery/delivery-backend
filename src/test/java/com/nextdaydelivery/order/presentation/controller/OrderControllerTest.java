@@ -51,7 +51,7 @@ public class OrderControllerTest {
 
     @MockitoBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
-    
+
     @MockitoBean
     private OrderService orderService;
 

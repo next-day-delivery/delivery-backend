@@ -20,12 +20,14 @@ import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.order.presentation.dto.response.OrderReviewStatusResponse;
 import com.nextdaydelivery.product.domain.entity.Product;
 import com.nextdaydelivery.product.domain.repository.ProductRepository;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.user.domain.entity.User;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -118,7 +120,6 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderWithLock(orderId);
         order.changeStatus(request.orderStatus());
     }
-
     @Override
     public Order createFromCheckout(Checkout checkout, User user) {
         OrderSnapshot snapshot = deserializeSnapshot(checkout.getOrderSnapshot());
@@ -147,7 +148,6 @@ public class OrderServiceImpl implements OrderService {
         return savedOrder;
     }
 
-
     private Order getOrderWithLock(UUID orderId) {
         return orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
@@ -167,6 +167,13 @@ public class OrderServiceImpl implements OrderService {
         //권한 검증 - 유저는 자기 주문인지,
     }
 
+    @Override
+    public OrderReviewStatusResponse getReviewStatus(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(NoSuchElementException::new);
+        return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
+    }
+
     private OrderSnapshot deserializeSnapshot(JsonNode jsonNode) {
         if (jsonNode == null || jsonNode.isNull()) {
             throw new BusinessException(OrderErrorCode.ORDER_SNAPSHOT_NOT_FOUND);
@@ -178,6 +185,4 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(OrderErrorCode.ORDER_SNAPSHOT_PARSE_ERROR);
         }
     }
-
-
 }

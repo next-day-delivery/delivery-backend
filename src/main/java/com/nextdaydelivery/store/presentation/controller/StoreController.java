@@ -1,13 +1,17 @@
 package com.nextdaydelivery.store.presentation.controller;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
+import com.nextdaydelivery.global.security.annotation.RequireOwnerRole;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
+import com.nextdaydelivery.store.domain.service.StoreReviewService;
 import com.nextdaydelivery.store.domain.service.StoreService;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
-import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreCreationRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.response.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreReviewSummary;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,7 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,11 +34,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class StoreController {
     private final StoreService storeService;
+    private final StoreReviewService storeReviewService;
 
+    // 1. 가게 등록
+    @RequireOwnerRole
     @PostMapping
-    public CommonResponse<StoreCreationResponse> createStore(@Valid @RequestBody StoreCreationRequest request) {
-
-        StoreCreationResponse response = storeService.createStore(request);
+    public CommonResponse<StoreCreationResponse> createStore(@Valid @RequestBody StoreCreationRequest request
+            , @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getAuthUserDto().userId();
+        StoreCreationResponse response = storeService.createStore(request, userId);
         return CommonResponse.onSuccess(response);
     }
 
@@ -46,19 +54,26 @@ public class StoreController {
     }
 
     // 3. 가게 정보 수정
+    @RequireOwnerRole
     @PatchMapping("/{storeId}")
     public CommonResponse<StoreResponse> updateStore(
-        @PathVariable UUID storeId,
-        @Valid @RequestBody StoreUpdateRequest request) {
-        StoreResponse response = storeService.updateStore(storeId, request);
+            @PathVariable UUID storeId,
+            @Valid @RequestBody StoreUpdateRequest request,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long updatedBy = principalDetails.getAuthUserDto().userId();
+        StoreResponse response = storeService.updateStore(storeId, request, updatedBy);
         return CommonResponse.onSuccess(response);
     }
 
     // 4. 가게 삭제 (Soft Delete)
+    // PrincipalDetails
+    @RequireOwnerRole
     @DeleteMapping("/{storeId}")
-    public CommonResponse<String> deleteStore(
-        @PathVariable UUID storeId,
-        @RequestParam String deletedBy) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
+    public CommonResponse<String> deleteStoreUsingUserDetails(
+            @PathVariable UUID storeId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
+        Long deletedBy = principalDetails.getAuthUserDto().userId();
         storeService.deleteStore(storeId, deletedBy);
         return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
     }
@@ -67,9 +82,20 @@ public class StoreController {
     // 예시 URL: /api/stores?name=치킨&page=0&size=10&sort=createdAt,desc
     @GetMapping
     public CommonResponse<Page<StoreListResponse>> getStoreList(
-        StoreSearchCondition condition,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            StoreSearchCondition condition,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<StoreListResponse> response = storeService.getStoreList(condition, pageable);
         return CommonResponse.onSuccess(response);
     }
+
+    // 6. 가게 평점 + 리뷰 개수 조회
+    @GetMapping("/{storeId}/summary")
+    public CommonResponse<StoreReviewSummary> getStoreSummary(@PathVariable UUID storeId) {
+        StoreReviewSummary storeReviewSummary = new StoreReviewSummary(
+            storeReviewService.getStoreRatingAvg(storeId),
+            storeReviewService.getStoreReviewCount(storeId)
+        );
+        return CommonResponse.onSuccess(storeReviewSummary);
+    }
+
 }
