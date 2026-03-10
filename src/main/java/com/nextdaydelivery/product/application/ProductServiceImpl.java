@@ -11,6 +11,8 @@ import com.nextdaydelivery.product.application.dto.response.ProductResponse;
 import com.nextdaydelivery.product.domain.entity.Product;
 import com.nextdaydelivery.product.domain.repository.ProductRepository;
 import com.nextdaydelivery.product.exception.ProductErrorCode;
+import com.nextdaydelivery.store.domain.entity.Store;
+import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
     private final AiClient aiClient;
     private final AiEventPublisher aiEventPublisher;
     private final TransactionTemplate transactionTemplate;
@@ -121,8 +124,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductResponse saveProduct(ProductCreateRequest createRequest, String productDetail) {
+        Store store = storeRepository.findById(createRequest.storeId())
+                .orElseThrow(() -> new IllegalArgumentException("Product 저장 실패, 조회한 UUID의 Store가 존재하지 않습니다."));
         return transactionTemplate.execute(status -> {
-            Product product = Product.ofCreateRequest(createRequest, productDetail);
+            Product product = Product.ofCreateRequest(createRequest, productDetail, store);
             productRepository.save(product);
             return response(product);
         });

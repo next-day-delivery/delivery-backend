@@ -18,11 +18,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "p_product")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted_at IS NULL")
 public class Product extends BaseAuditEntity {
 
     @Id
@@ -63,10 +65,10 @@ public class Product extends BaseAuditEntity {
     }
 
     public static Product ofCreateRequest(ProductCreateRequest createRequest,
-                                          String productDetail) {
+                                          String productDetail,
+                                          Store store) {
         return Product.builder()
-//                .store(createRequest.storeId())
-                .store(null) // TODO : store 개발 후 추가 로직 필요
+                .store(store)
                 .productName(createRequest.productName())
                 .productDetail(productDetail)
                 .price(createRequest.price())
