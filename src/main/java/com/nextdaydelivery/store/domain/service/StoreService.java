@@ -1,11 +1,11 @@
 package com.nextdaydelivery.store.domain.service;
 
-import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
-import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreCreationRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.response.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

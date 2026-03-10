@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextdaydelivery.global.support.ControllerTestSupport;
 import com.nextdaydelivery.review.application.service.ReviewService;
 import com.nextdaydelivery.review.domain.entity.Review;
 import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
@@ -29,7 +30,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ReviewControllerImpl.class)
-public class ReviewControllerImplTest {
+public class ReviewControllerImplTest extends ControllerTestSupport {
 
     @MockitoBean
     private ReviewService reviewService;

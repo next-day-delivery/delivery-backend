@@ -17,12 +17,12 @@ import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.store.domain.service.CategoryService;
 import com.nextdaydelivery.store.domain.service.StoreAddressService;
 import com.nextdaydelivery.store.domain.service.StoreCategoryService;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
-import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreCreationRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.response.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -62,17 +62,17 @@ class StoreServiceImplTest {
     // 공통으로 사용할 Mock 객체 생성 메서드들
     private User createMockUser() {
         return User.builder()
-                .username("test_owner")
-                .nickname("임시사장님")
-                .build();
+            .username("test_owner")
+            .nickname("임시사장님")
+            .build();
     }
 
     private StoreAddress createMockAddress() {
         return StoreAddress.builder()
-                .sido("서울특별시")
-                .sigungu("강남구")
-                .dong("역삼동")
-                .build();
+            .sido("서울특별시")
+            .sigungu("강남구")
+            .dong("역삼동")
+            .build();
     }
 
     @Test
@@ -80,7 +80,7 @@ class StoreServiceImplTest {
     void createStore_success() {
         // Given
         StoreCreationRequest request = new StoreCreationRequest(
-                "치킨나라", "강남구", "서울특별시", "역삼동", "테헤란로 123", List.of("치킨")
+            "치킨나라", "강남구", "서울특별시", "역삼동", "테헤란로 123", List.of("치킨")
         );
 
         // Mocking 로직 생략 (이전과 동일)
@@ -90,7 +90,7 @@ class StoreServiceImplTest {
         given(mockQuery.getResultList()).willReturn(List.of(createMockUser()));
         given(storeAddressService.getOrCreateAddress(any(), any(), any())).willReturn(createMockAddress());
         given(categoryService.getOrCreateCategory("치킨")).willReturn(
-                Category.builder().categoryId(UUID.randomUUID()).categoryName("치킨").build());
+            Category.builder().categoryId(UUID.randomUUID()).categoryName("치킨").build());
 
         // When
         StoreCreationResponse response = storeService.createStore(request);
@@ -110,11 +110,11 @@ class StoreServiceImplTest {
         // Given
         UUID storeId = UUID.randomUUID();
         Store store = Store.builder()
-                .user(createMockUser())
-                .storeAddress(createMockAddress())
-                .name("치킨나라")
-                .detailAddress("123번지")
-                .build();
+            .user(createMockUser())
+            .storeAddress(createMockAddress())
+            .name("치킨나라")
+            .detailAddress("123번지")
+            .build();
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
         given(storeCategoryRepository.findAllByStore(store)).willReturn(List.of());
@@ -140,10 +140,10 @@ class StoreServiceImplTest {
         StoreSearchCondition condition = new StoreSearchCondition("치킨", null, null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
         Store mockStore = Store.builder().user(createMockUser()).storeAddress(createMockAddress()).name("치킨나라")
-                .detailAddress("역삼동").build();
+            .detailAddress("역삼동").build();
         Page<Store> storePage = new PageImpl<>(List.of(mockStore), pageable, 1);
         StoreCategory storeCategory = StoreCategory.builder().category(Category.builder().categoryName("치킨").build())
-                .build();
+            .build();
 
         given(storeRepository.searchStores(any(), any())).willReturn(storePage);
         given(storeCategoryRepository.findFirstByStore(any())).willReturn(Optional.of(storeCategory));
@@ -155,7 +155,7 @@ class StoreServiceImplTest {
         System.out.println("\n✅ [가게 목록 조회 테스트 데이터]");
         System.out.println("검색 결과 수: " + result.getTotalElements());
         result.getContent().forEach(s ->
-                System.out.println("조회된 가게: " + s.name() + " (" + s.mainCategory() + ")")
+            System.out.println("조회된 가게: " + s.name() + " (" + s.mainCategory() + ")")
         );
 
         // Then
@@ -168,20 +168,20 @@ class StoreServiceImplTest {
         // 1. Given
         UUID storeId = UUID.randomUUID();
         StoreUpdateRequest request = new StoreUpdateRequest(
-                "맛있어진 치킨집", "서울특별시", "강남구", "역삼동", "테헤란로 999", List.of()
+            "맛있어진 치킨집", "서울특별시", "강남구", "역삼동", "테헤란로 999", List.of()
         );
 
         // 수정 전 기존 엔티티
         Store existingStore = Store.builder()
-                .user(createMockUser())
-                .storeAddress(createMockAddress()) // 서울특별시 강남구 역삼동
-                .name("옛날 치킨집")
-                .detailAddress("테헤란로 123")
-                .build();
+            .user(createMockUser())
+            .storeAddress(createMockAddress()) // 서울특별시 강남구 역삼동
+            .name("옛날 치킨집")
+            .detailAddress("테헤란로 123")
+            .build();
 
         // 수정될 새로운 주소 객체
         StoreAddress newAddress = StoreAddress.builder()
-                .sido("서울특별시").sigungu("강남구").dong("역삼동").build();
+            .sido("서울특별시").sigungu("강남구").dong("역삼동").build();
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(existingStore));
         given(storeAddressService.getOrCreateAddress(anyString(), anyString(), anyString())).willReturn(newAddress);
@@ -210,7 +210,7 @@ class StoreServiceImplTest {
         // Given
         UUID storeId = UUID.randomUUID();
         Store store = Store.builder().user(createMockUser()).storeAddress(createMockAddress()).name("삭제될가게")
-                .detailAddress("주소").build();
+            .detailAddress("주소").build();
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
 
         // [삭제 전 로그]

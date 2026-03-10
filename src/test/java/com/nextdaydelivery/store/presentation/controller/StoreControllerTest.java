@@ -14,13 +14,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextdaydelivery.global.support.ControllerTestSupport;
+import com.nextdaydelivery.store.domain.service.StoreReviewService;
 import com.nextdaydelivery.store.domain.service.StoreService;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
-import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreCreationRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.response.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,7 +41,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(StoreController.class)
-class StoreControllerTest {
+public class StoreControllerTest extends ControllerTestSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,6 +51,9 @@ class StoreControllerTest {
 
     @MockitoBean
     private StoreService storeService;
+
+    @MockitoBean
+    private StoreReviewService storeReviewService;
 
     @Test
     @WithMockUser
@@ -159,5 +164,21 @@ class StoreControllerTest {
             .andExpect(jsonPath("$.data.content").isArray())
             .andExpect(jsonPath("$.data.content[0].name").value("치킨집1"))
             .andDo(print());
+    }
+
+    @Test
+    @WithMockUser
+    void 가게_평점_리뷰개수_조회() throws Exception {
+        //given
+        UUID storeId = UUID.randomUUID();
+        given(storeReviewService.getStoreRatingAvg(storeId)).willReturn(4.5);
+        given(storeReviewService.getStoreReviewCount(storeId)).willReturn(100);
+
+        //when & then
+        mockMvc.perform(get("/api/stores/{storeId}/summary", storeId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value("SUCCESS"))
+            .andExpect(jsonPath("$.data.ratingAvg").value(4.5))
+            .andExpect(jsonPath("$.data.reviewCount").value(100));
     }
 }

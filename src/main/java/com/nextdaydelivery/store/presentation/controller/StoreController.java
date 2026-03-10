@@ -3,12 +3,13 @@ package com.nextdaydelivery.store.presentation.controller;
 import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.store.domain.service.StoreReviewService;
 import com.nextdaydelivery.store.domain.service.StoreService;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
-import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreCreationRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.response.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreReviewSummary;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -75,19 +76,14 @@ public class StoreController {
         return CommonResponse.onSuccess(response);
     }
 
-    // 6. 가게 평점 조회
-    @GetMapping("/{storeId}/rating")
-    public void getStoreRatingAvg(
-        @PathVariable UUID storeId
-    ) {
-        double storeRating = storeReviewService.getStoreRatingAvg(storeId);
+    // 6. 가게 평점 + 리뷰 개수 조회
+    @GetMapping("/{storeId}/summary")
+    public CommonResponse<StoreReviewSummary> getStoreSummary(@PathVariable UUID storeId) {
+        StoreReviewSummary storeReviewSummary = new StoreReviewSummary(
+            storeReviewService.getStoreRatingAvg(storeId),
+            storeReviewService.getStoreReviewCount(storeId)
+        );
+        return CommonResponse.onSuccess(storeReviewSummary);
     }
 
-    // 7. 리뷰 수 조회
-    @GetMapping("/{storeId}/reviewCount")
-    public void getStoreReviewCount(
-        @PathVariable UUID storeId
-    ) {
-        int reviewCount = storeReviewService.getStoreReviewCount(storeId);
-    }
 }

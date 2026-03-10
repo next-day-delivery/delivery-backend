@@ -9,12 +9,12 @@ import com.nextdaydelivery.store.domain.service.CategoryService;
 import com.nextdaydelivery.store.domain.service.StoreAddressService;
 import com.nextdaydelivery.store.domain.service.StoreCategoryService;
 import com.nextdaydelivery.store.domain.service.StoreService;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationRequest;
-import com.nextdaydelivery.store.presentation.dto.StoreCreationResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreListResponse;
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
 import com.nextdaydelivery.store.presentation.dto.StoreSearchCondition;
-import com.nextdaydelivery.store.presentation.dto.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreCreationRequest;
+import com.nextdaydelivery.store.presentation.dto.request.StoreUpdateRequest;
+import com.nextdaydelivery.store.presentation.dto.response.StoreCreationResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreListResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import jakarta.persistence.EntityManager;
@@ -43,9 +43,9 @@ public class StoreServiceImpl implements StoreService {
     public StoreCreationResponse createStore(StoreCreationRequest request) {
         // 가게 주소를 가게 주소 테이블에 저장하기, 이때 중복 체크 해야함
         StoreAddress storeAddress = storeAddressService.getOrCreateAddress(
-                request.sigungu(),
-                request.sido(),
-                request.dong()
+            request.sigungu(),
+            request.sido(),
+            request.dong()
         );
 
         // 2. [수정] 임시 유저 조회 또는 생성
@@ -54,19 +54,19 @@ public class StoreServiceImpl implements StoreService {
 
         // JPQL을 사용하여 기존 유저가 있는지 확인
         List<User> existingUsers = em.createQuery("select u from User u where u.username = :username", User.class)
-                .setParameter("username", testUsername)
-                .getResultList();
+            .setParameter("username", testUsername)
+            .getResultList();
 
         if (existingUsers.isEmpty()) {
             // 없으면 새로 생성 후 저장
             dummyUser = User.builder()
-                    .username(testUsername)
-                    .nickname("임시사장님")
-                    .email("test@test.com")
-                    .password("1234")
-                    .role(UserRole.OWNER)
-                    .isPublic(true)
-                    .build();
+                .username(testUsername)
+                .nickname("임시사장님")
+                .email("test@test.com")
+                .password("1234")
+                .role(UserRole.OWNER)
+                .isPublic(true)
+                .build();
             em.persist(dummyUser);
         } else {
             // 있으면 기존 유저 사용
@@ -78,11 +78,11 @@ public class StoreServiceImpl implements StoreService {
 
         // 3. 가게 저장 (빌더에 .user(dummyUser) 추가 필요!)
         Store store = Store.builder()
-                .user(dummyUser) // 핵심: 여기서 유저를 넣어줘야 에러가 안 납니다.
-                .storeAddress(storeAddress)
-                .name(request.name())
-                .detailAddress(request.detailAddress())
-                .build();
+            .user(dummyUser) // 핵심: 여기서 유저를 넣어줘야 에러가 안 납니다.
+            .storeAddress(storeAddress)
+            .name(request.name())
+            .detailAddress(request.detailAddress())
+            .build();
 
         storeRepository.save(store);
 
@@ -114,7 +114,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreResponse getStore(UUID storeId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다. ID: " + storeId));
+            .orElseThrow(() -> new IllegalArgumentException("해당 가게를 찾을 수 없습니다. ID: " + storeId));
 
         return convertToStoreResponse(store);
     }
@@ -123,11 +123,11 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("수정할 가게가 존재하지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("수정할 가게가 존재하지 않습니다."));
 
         // 주소 및 카테고리 업데이트
         StoreAddress newAddress = storeAddressService.getOrCreateAddress(
-                request.sigungu(), request.sido(), request.dong()
+            request.sigungu(), request.sido(), request.dong()
         );
 
         store.update(request.name(), request.detailAddress(), newAddress);
@@ -144,7 +144,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public void deleteStore(UUID storeId, String deletedBy) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제할 가게가 존재하지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("삭제할 가게가 존재하지 않습니다."));
         store.delete(deletedBy);
     }
 
@@ -155,8 +155,8 @@ public class StoreServiceImpl implements StoreService {
 
         return storePage.map(store -> {
             String mainCategory = storeCategoryRepository.findFirstByStore(store)
-                    .map(sc -> sc.getCategory().getCategoryName())
-                    .orElse("미지정");
+                .map(sc -> sc.getCategory().getCategoryName())
+                .orElse("미지정");
 
             return StoreListResponse.from(store, mainCategory);
         });
@@ -164,8 +164,8 @@ public class StoreServiceImpl implements StoreService {
 
     private StoreResponse convertToStoreResponse(Store store) {
         List<String> categoryNames = storeCategoryRepository.findAllByStore(store).stream()
-                .map(sc -> sc.getCategory().getCategoryName())
-                .toList();
+            .map(sc -> sc.getCategory().getCategoryName())
+            .toList();
 
         return StoreResponse.from(store, store.getUser().getNickname(), categoryNames);
     }
