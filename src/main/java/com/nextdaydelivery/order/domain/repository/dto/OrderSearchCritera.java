@@ -26,4 +26,17 @@ public record OrderSearchCritera(
                 request.endDate()
         );
     }
+
+    public static OrderSearchCritera of(OrderSearchRequest request, UUID storeId) {
+        return new OrderSearchCritera(
+                request.lastReadOrderId(),
+                request.customerId(),
+                storeId,
+                request.categoryIds(),
+                request.status(),
+                request.startDate(),
+                request.endDate()
+        );
+    }
+
 }

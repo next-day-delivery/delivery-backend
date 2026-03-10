@@ -45,6 +45,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -103,7 +104,6 @@ public class OrderControllerTest extends ControllerTestSupport {
             @Override
             public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                           NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-                // SecurityContext에 넣어둔 인증 객체를 반환하거나, 기본값으로 customerPrincipal 반환
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 return (auth != null) ? auth.getPrincipal() : customerPrincipal;
             }
@@ -111,8 +111,11 @@ public class OrderControllerTest extends ControllerTestSupport {
 
         this.mockMvc = MockMvcBuilders
                 .standaloneSetup(new OrderController(orderService, orderCancelFacade))
-                .setCustomArgumentResolvers(mockResolver)
                 .setControllerAdvice(new GlobalExceptionAdvice())
+                .setCustomArgumentResolvers(
+                        mockResolver,
+                        new PageableHandlerMethodArgumentResolver()
+                )
                 .build();
     }
 
@@ -135,6 +138,7 @@ public class OrderControllerTest extends ControllerTestSupport {
         mockMvc.perform(get("/api/orders/me")
                         .with(user(customerPrincipal)).with(csrf())
                         .param("size", "10")
+                        .param("page", "0")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].orderId").value(orderId.toString()))
@@ -158,6 +162,7 @@ public class OrderControllerTest extends ControllerTestSupport {
         mockMvc.perform(get("/api/orders/store/{storeId}", storeId)
                         .with(user(ownerPrincipal)).with(csrf())
                         .param("size", "10")
+                        .param("page", "0")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
@@ -181,6 +186,7 @@ public class OrderControllerTest extends ControllerTestSupport {
         mockMvc.perform(post("/api/orders/search")
                         .with(user(managerPrincipal)).with(csrf())
                         .param("size", "10")
+                        .param("page", "0")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
