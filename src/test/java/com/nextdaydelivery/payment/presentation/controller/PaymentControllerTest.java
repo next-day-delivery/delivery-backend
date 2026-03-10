@@ -98,7 +98,7 @@ class PaymentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderNumber").value(orderNo))
                 .andExpect(jsonPath("$.data.paymentStatus").value("COMPLETED"))
-                .andDo(document("payment/confirm-payment",
+                .andDo(document("payment-confirm",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(

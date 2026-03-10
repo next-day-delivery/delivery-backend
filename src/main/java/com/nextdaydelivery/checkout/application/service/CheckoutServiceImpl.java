@@ -2,12 +2,14 @@ package com.nextdaydelivery.checkout.application.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextdaydelivery.cart_item.domain.repository.CartItemRepository;
+import com.nextdaydelivery.cart_item.domain.repository.CartItemSummary;
 import com.nextdaydelivery.checkout.domain.entity.Checkout;
 import com.nextdaydelivery.checkout.domain.enums.CheckoutStatus;
 import com.nextdaydelivery.checkout.domain.repository.CheckoutRepository;
-import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutItemRequest;
 import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutRequest;
 import com.nextdaydelivery.checkout.presentation.dto.response.CheckoutResponse;
+import com.nextdaydelivery.global.domain.error.CartErrorCode;
 import com.nextdaydelivery.global.domain.error.CheckoutErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.application.dto.OrderSnapshot;
@@ -15,6 +17,7 @@ import com.nextdaydelivery.payment.presentation.dto.request.PaymentConfirmReques
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -26,41 +29,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CheckoutServiceImpl implements CheckoutService {
-
+    private final CartItemRepository cartItemRepository;
     private final CheckoutRepository checkoutRepository;
     private final ObjectMapper objectMapper;
 
 
     @Transactional
     public CheckoutResponse createOrUpdateCheckout(CheckoutRequest request, Long userId) {
-        Checkout activeCheckout = checkoutRepository.findActivePendingByCartId(request.cartId(),
-                CheckoutStatus.PAYMENT_PENDING).orElse(null);
-        String requestHash = generateHash(request);
+        List<CartItemSummary> cartItems = cartItemRepository.findActiveCartItemsByUserId(userId);
+        validateCartAndAmount(cartItems, request);
 
-        if (activeCheckout != null) {
-            validateCheckoutAccess(activeCheckout, userId);
-            if (activeCheckout.isExpired()) {
-                activeCheckout.markExpired();
-            } else if (activeCheckout.isSameSnapshot(requestHash, request.amount())) {
-                return CheckoutResponse.from(activeCheckout);
-            } else {
-                activeCheckout.markExpired();
-            }
-        }
+        String requestHash = generateHash(cartItems, request);
 
-        JsonNode snapshot = buildOrderSnapshot(request, userId);
-        Checkout newCheckout = Checkout.of(request, userId, requestHash, generateOrderNumber(userId),
-                snapshot);
-        try {
-            checkoutRepository.saveAndFlush(newCheckout);
-            return CheckoutResponse.from(newCheckout);
-        } catch (DataIntegrityViolationException e) {
-            return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
-                    .map(CheckoutResponse::from)
-                    .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
-        }
+        return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
+                .filter(active -> isUsable(active, userId, requestHash, request.amount()))
+                .map(CheckoutResponse::from)
+                .orElseGet(() -> createNewCheckout(request, userId, requestHash, cartItems));
+
     }
-    
+
+
     @Transactional
     @Override
     public Checkout getValidatedCheckout(PaymentConfirmRequest request, Long userId) {
@@ -70,10 +58,57 @@ public class CheckoutServiceImpl implements CheckoutService {
         return checkout;
     }
 
+    private boolean isUsable(Checkout active, Long userId, String requestHash, Long amount) {
+        validateCheckoutAccess(active, userId);
+        if (active.isExpired() || !active.isSameSnapshot(requestHash, amount)) {
+            active.markExpired();
+            return false;
+        }
+        return true;
+    }
 
-    private String generateHash(CheckoutRequest request) {
-        String itemsPart = request.items().stream()
-                .sorted(Comparator.comparing(CheckoutItemRequest::productId))
+    private CheckoutResponse createNewCheckout(CheckoutRequest request, Long userId, String requestHash,
+                                               List<CartItemSummary> cartItems) {
+        JsonNode snapshot = buildOrderSnapshot(cartItems, request, userId);
+        Checkout newCheckout = Checkout.of(request, userId, requestHash, generateOrderNumber(userId), snapshot);
+
+        try {
+            return CheckoutResponse.from(checkoutRepository.saveAndFlush(newCheckout));
+        } catch (DataIntegrityViolationException e) {
+            return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
+                    .filter(active -> isUsable(active, userId, requestHash, request.amount()))
+                    .map(CheckoutResponse::from)
+                    .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
+        }
+    }
+
+    private void validateCartAndAmount(List<CartItemSummary> cartItems, CheckoutRequest request) {
+        if (cartItems.isEmpty()) {
+            throw new BusinessException(CartErrorCode.CART_EMPTY);
+        }
+
+        UUID actualCartId = cartItems.get(0).cartId();
+        if (!actualCartId.equals(request.cartId())) {
+            throw new BusinessException(CartErrorCode.CART_ID_MISMATCH);
+        }
+        UUID actualStoreId = cartItems.get(0).storeId();
+        if (!actualStoreId.equals(request.storeId())) {
+            throw new BusinessException(CheckoutErrorCode.INVALID_ARGUMENT);
+        }
+
+        long serverCalculatedTotal = cartItems.stream()
+                .mapToLong(item -> item.price().longValue() * item.quantity())
+                .sum();
+
+        if (serverCalculatedTotal != request.amount()) {
+            throw new BusinessException(CheckoutErrorCode.AMOUNT_MISMATCH);
+        }
+    }
+
+
+    private String generateHash(List<CartItemSummary> items, CheckoutRequest request) {
+        String itemsPart = items.stream()
+                .sorted(Comparator.comparing(CartItemSummary::productId))
                 .map(item -> item.productId() + ":" + item.quantity() + ":" + item.price())
                 .collect(Collectors.joining("|"));
         String rawPayload = String.format("cart:%s|store:%s|amount:%d|items:%s",
@@ -92,8 +127,8 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
     }
 
-    private JsonNode buildOrderSnapshot(CheckoutRequest request, Long userId) {
-        OrderSnapshot snapshot = OrderSnapshot.from(request, userId);
+    private JsonNode buildOrderSnapshot(List<CartItemSummary> items, CheckoutRequest request, Long userId) {
+        OrderSnapshot snapshot = OrderSnapshot.from(items, request, userId);
         return objectMapper.valueToTree(snapshot);
     }
 

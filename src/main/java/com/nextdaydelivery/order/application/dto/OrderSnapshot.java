@@ -1,5 +1,6 @@
 package com.nextdaydelivery.order.application.dto;
 
+import com.nextdaydelivery.cart_item.domain.repository.CartItemSummary;
 import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutRequest;
 import java.util.List;
 import java.util.UUID;
@@ -12,8 +13,8 @@ public record OrderSnapshot(
         String address,
         List<OrderItemSnapshot> items
 ) {
-    public static OrderSnapshot from(CheckoutRequest request, Long userId) {
-        List<OrderItemSnapshot> itemSnapshots = request.items().stream()
+    public static OrderSnapshot from(List<CartItemSummary> items, CheckoutRequest request, Long userId) {
+        List<OrderItemSnapshot> itemSnapshots = items.stream()
                 .map(item -> new OrderItemSnapshot(
                         item.productId(),
                         item.productName(), // 명칭이 포함되어 있다고 가정
@@ -35,8 +36,8 @@ public record OrderSnapshot(
     public record OrderItemSnapshot(
             UUID productId,
             String productName,
-            Integer quantity,
-            Long price
+            Long quantity,
+            Integer price
     ) {
     }
 }

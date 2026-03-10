@@ -121,7 +121,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.data.content[0].storeName").value("맛집"))
                 .andExpect(jsonPath("$.data.content[0].totalPrice").value(10000L))
                 .andExpect(jsonPath("$.data.content[0].orderStatus").value(OrderStatus.ORDER_ACCEPTED.toString()))
-                .andDo(document("my-order-list",
+                .andDo(document("order-my-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
@@ -195,7 +195,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
                 .andExpect(jsonPath("$.data.content[0].ownerId").value(2L))
-                .andDo(document("store-order-list",
+                .andDo(document("order-store-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
@@ -275,7 +275,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
                 .andExpect(jsonPath("$.data.content[0].ownerId").value(2L))
-                .andDo(document("search-order-list",
+                .andDo(document("order-search-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
@@ -418,7 +418,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                         .with(user(customerPrincipal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(document("cancel-order-by-customer",
+                .andDo(document("order-cancel-by-customer",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
@@ -458,7 +458,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                         .with(user(ownerPrincipal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(document("reject-order-by-owner",
+                .andDo(document("order-reject-by-owner",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
@@ -482,7 +482,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                         .with(user(managerPrincipal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(document("cancel-order-by-manager",
+                .andDo(document("order-cancel-by-manager",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
@@ -510,7 +510,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(document("change-order-status-by-owner",
+                .andDo(document("order-change-status-by-owner",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
@@ -593,7 +593,7 @@ public class OrderControllerTest extends ControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(document("change-order-status-by-manager",
+                .andDo(document("order-change-status-by-manager",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
