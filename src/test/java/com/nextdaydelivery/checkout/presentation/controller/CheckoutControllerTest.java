@@ -87,7 +87,7 @@ class CheckoutControllerTest extends ControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderNo").value("CHK-20260310-1"))
-                .andDo(document("checkout/request-checkout",
+                .andDo(document("checkout-request",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(

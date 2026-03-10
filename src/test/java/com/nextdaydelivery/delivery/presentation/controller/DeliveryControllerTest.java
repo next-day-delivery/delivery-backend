@@ -69,7 +69,7 @@ class DeliveryControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value("SUCCESS")) // isSuccess -> result로 변경
                 .andExpect(jsonPath("$.code").value("200"))
-                .andDo(document("change-delievery-status-by-owner",
+                .andDo(document("delivery-change-status-by-owner",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
@@ -99,7 +99,7 @@ class DeliveryControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(jsonPath("$.result").value("SUCCESS")) // isSuccess -> result로 변경
                 .andExpect(jsonPath("$.code").value("200"))
-                .andDo(document("change-delievery-status-by-manager",
+                .andDo(document("delivery-change-status-by-manager",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
