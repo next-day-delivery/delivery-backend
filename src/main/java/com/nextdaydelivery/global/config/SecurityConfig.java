@@ -44,6 +44,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_URLS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                        .requestMatchers("/docs/**").permitAll()
+//                        .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/actuator/**").hasRole("MASTER")
                         .anyRequest().authenticated()
                 )
