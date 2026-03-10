@@ -2,11 +2,12 @@ package com.nextdaydelivery.order.presentation.controller;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.order.application.service.OrderService;
-import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.order.presentation.dto.response.OrderReviewStatusResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -32,17 +33,17 @@ public class OrderController {
                                                                 @RequestParam(required = false) UUID cursor,
                                                                 @RequestParam(required = false, defaultValue = "10") int size) {
         OrderSearchRequest request = OrderSearchRequest.builder()
-                .lastReadOrderId(cursor)
-                .customerId(userId)
-                .build();
+            .lastReadOrderId(cursor)
+            .customerId(userId)
+            .build();
         Slice<OrderListResponse> response = orderService.getOrdersByCustomer(request, size);
         return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
     @PostMapping("/search")
     public CommonResponse<Slice<OrderListResponse>> getAllOrders(
-            @RequestBody OrderSearchRequest request,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+        @RequestBody OrderSearchRequest request,
+        @RequestParam(required = false, defaultValue = "10") int size) {
         Slice<OrderListResponse> response = orderService.getOrdersByManager(request, size);
         return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
@@ -54,10 +55,10 @@ public class OrderController {
                                                                    @RequestParam(required = false) UUID cursor,
                                                                    @RequestParam(required = false, defaultValue = "10") int size) {
         OrderSearchRequest request = OrderSearchRequest.builder()
-                .storeId(storeId)
-                .lastReadOrderId(cursor)
-                .status(active ? OrderStatus.getActiveStatus() : null)
-                .build();
+            .storeId(storeId)
+            .lastReadOrderId(cursor)
+            .status(active ? OrderStatus.getActiveStatus() : null)
+            .build();
         Slice<OrderListResponse> response = orderService.getStoreOrders(storeId, request, userId, size);
         return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
@@ -103,6 +104,13 @@ public class OrderController {
                                                                @RequestHeader("X-User-Id") Long userId) {
         OrderDetailResponse response = orderService.getOrderDetail(orderId, userId);
         return CommonResponse.onSuccess(HttpStatus.OK, response);
+    }
+
+    @GetMapping("/{orderId}/review")
+    public CommonResponse<OrderReviewStatusResponse> getReviewStatus(
+        @PathVariable UUID orderId
+    ) {
+        return CommonResponse.onSuccess(orderService.getReviewStatus(orderId));
     }
 
 }

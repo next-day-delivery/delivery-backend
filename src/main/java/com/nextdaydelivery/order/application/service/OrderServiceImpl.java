@@ -4,7 +4,7 @@ import com.nextdaydelivery.global.config.PaginationConfig;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.domain.entity.Order;
-import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
 import com.nextdaydelivery.order.domain.repository.dto.OrderSearchCritera;
@@ -13,6 +13,8 @@ import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
+import com.nextdaydelivery.order.presentation.dto.response.OrderReviewStatusResponse;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -32,7 +34,7 @@ public class OrderServiceImpl implements OrderService {
         //유효한 유저인지 검증
         int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
-                validatedPageSize);
+            validatedPageSize);
         return orderSlices.map(slice -> OrderListResponse.ofCustomer(slice, request.customerId()));
     }
 
@@ -40,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
     public Slice<OrderListResponse> getOrdersByManager(OrderSearchRequest request, int size) {
         int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
-                validatedPageSize);
+            validatedPageSize);
         return orderSlices.map(OrderListResponse::from);
     }
 
@@ -49,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
         //유저가 해당 가게 사장인지 검증
         int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
-                validatedPageSize);
+            validatedPageSize);
         return orderSlices.map(OrderListResponse::from);
 
     }
@@ -57,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDetailResponse getOrderDetail(UUID orderId, Long userId) {
         OrderDetails details = orderRepository.findByIdWithDetails(orderId)
-                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
         validateOrderAccess(details);
         return OrderDetailResponse.from(details, userId);
     }
@@ -104,22 +106,27 @@ public class OrderServiceImpl implements OrderService {
 
     private Order getOrderWithLock(UUID orderId) {
         return orderRepository.findByIdWithLock(orderId)
-                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
     }
 
     private Order getOrderByCustomerIdWithLock(UUID orderId, Long customerId) {
         return orderRepository.findByIdAndCustomerIdWithLock(orderId, customerId)
-                .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_ORDER));
+            .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_ORDER));
     }
 
     private Order getOrderByOwnerIdWithLock(UUID orderId, Long ownerId) {
         return orderRepository.findByIdAndOwnerIdWithLock(orderId, ownerId)
-                .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER));
+            .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER));
     }
 
     private void validateOrderAccess(OrderDetails details) {
         //권한 검증 - 유저는 자기 주문인지,
     }
 
-
+    @Override
+    public OrderReviewStatusResponse getReviewStatus(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(NoSuchElementException::new);
+        return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
+    }
 }

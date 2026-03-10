@@ -1,4 +1,4 @@
-package com.nextdaydelivery.order.domain.enums;
+package com.nextdaydelivery.order.domain.entity.enums;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

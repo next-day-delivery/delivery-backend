@@ -1,15 +1,17 @@
 package com.nextdaydelivery.review.domain.repository;
 
 import com.nextdaydelivery.review.domain.entity.Review;
-import java.util.List;
+import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
-    List<Review> findByStoreStoreId(UUID storeId);
+    Page<Review> findByUserUserId(Long userId, Pageable pageable);
 
-    List<Review> findByUserUserId(Long userId);
+    Page<Review> findByStoreStoreIdAndReviewStatus(UUID storeId, ReviewStatus reviewStatus, Pageable pageable);
 }
