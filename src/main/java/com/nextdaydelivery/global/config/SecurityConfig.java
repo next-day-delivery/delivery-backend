@@ -25,7 +25,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_POST_URLS = {
             "/api/users",
-            "/api/auth/sign-in"
+            "/api/auth/sign-in",
+            "/api/health"
     };
 
     private static final String[] PUBLIC_GET_URLS = {
