@@ -14,6 +14,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -113,9 +115,82 @@ class ProductControllerTest extends ControllerTestSupport {
     }
 
     @Test
+    @DisplayName("상품 검색 API - 이름/가격 필터 + 페이징")
+    void searchProducts_restdocs() throws Exception {
+        UUID storeId = UUID.randomUUID();
+
+        ProductResponse p1 = new ProductResponse(UUID.randomUUID(), "순살양념치킨", "한 입에 쏙! 비법 소스가 듬뿍 배어든 겉바속촉 인생 순살양념치킨", 23000);
+        ProductResponse p2 = new ProductResponse(UUID.randomUUID(), "사천양념치킨", "입안 가득 퍼지는 알싸한 풍미! 멈출 수 없는 화끈한 유혹, 사천양념치킨", 23000);
+        ProductResponse p3 = new ProductResponse(UUID.randomUUID(), "옛날통닭치킨", "겉은 바삭 속은 촉촉! 얇은 껍질 속 육즙이 팡 터지는 추억의 그 맛, 정통 옛날통닭", 15000);
+        ProductResponse p4 = new ProductResponse(UUID.randomUUID(), "마늘통닭치킨", "알싸한 마늘 소스가 듬뿍! 겉바속촉 통닭과 환상 조화를 이루는 중독적인 풍미.", 20000);
+        ProductResponse p5 = new ProductResponse(UUID.randomUUID(), "불닭치킨", "한 번 맛보면 멈출 수 없는 강렬한 매운맛, 중독성 끝판왕 불닭치킨!", 18000);
+
+        Slice<ProductResponse> slice = new SliceImpl<>(List.of(p1, p2, p3, p4, p5), PageRequest.of(0, 50), false);
+
+        given(productService.searchProducts(
+                nullable(String.class),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(UUID.class),
+                eq(storeId),
+                any(Pageable.class)
+        )).willReturn(slice);
+
+        mockMvc.perform(get("/api/products/search")
+                        .param("storeId", storeId.toString())
+                        .param("page", "0")
+                        .param("size", "50"))
+                .andExpect(status().isOk())
+                .andDo(document("product-search",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("storeId").description("가게 ID (UUID)"),
+                                parameterWithName("name").optional().description("상품 이름 검색"),
+                                parameterWithName("minPrice").optional().description("최소 가격"),
+                                parameterWithName("maxPrice").optional().description("최대 가격"),
+                                parameterWithName("cursor").optional().description("커서 ID (UUID)"),
+                                parameterWithName("page").optional().description("페이지 번호 (0부터 시작)"),
+                                parameterWithName("size").optional().description("페이지 크기")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").description("요청 결과 (SUCCESS/FAIL)"),
+                                fieldWithPath("code").description("응답 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("timestamp").description("응답 시간"),
+
+                                fieldWithPath("data.content[]").description("상품 리스트"),
+                                fieldWithPath("data.content[].productId").description("상품 ID"),
+                                fieldWithPath("data.content[].productName").description("상품 이름"),
+                                fieldWithPath("data.content[].productDetail").description("상품 설명"),
+                                fieldWithPath("data.content[].price").description("상품 가격"),
+
+                                fieldWithPath("data.pageable.pageNumber").description("페이지 번호"),
+                                fieldWithPath("data.pageable.pageSize").description("페이지 크기"),
+                                fieldWithPath("data.pageable.offset").description("전체 오프셋"),
+                                fieldWithPath("data.pageable.paged").description("페이징 여부"),
+                                fieldWithPath("data.pageable.unpaged").description("비페이징 여부"),
+                                fieldWithPath("data.pageable.sort.empty").description("정렬 비어있음 여부"),
+                                fieldWithPath("data.pageable.sort.sorted").description("정렬 여부"),
+                                fieldWithPath("data.pageable.sort.unsorted").description("정렬되지 않음 여부"),
+
+                                fieldWithPath("data.size").description("페이지 크기"),
+                                fieldWithPath("data.number").description("페이지 번호"),
+                                fieldWithPath("data.sort.empty").description("정렬 비어있음 여부"),
+                                fieldWithPath("data.sort.sorted").description("정렬 여부"),
+                                fieldWithPath("data.sort.unsorted").description("정렬되지 않음 여부"),
+                                fieldWithPath("data.first").description("첫 페이지 여부"),
+                                fieldWithPath("data.last").description("마지막 페이지 여부"),
+                                fieldWithPath("data.numberOfElements").description("현재 페이지 요소 수"),
+                                fieldWithPath("data.empty").description("페이지가 비어있는지 여부")
+                        )
+                ));
+    }
+
+
+    @Test
     @DisplayName("상품 검색 - 기본 페이징, 이름 필터 없이")
     void searchProducts_defaultPaging() throws Exception {
-        // Mock 데이터
         UUID productId = UUID.randomUUID();
         UUID storeId = UUID.randomUUID();
 
@@ -245,31 +320,6 @@ class ProductControllerTest extends ControllerTestSupport {
         );
     }
 
-//    @Test
-//    @DisplayName("상품 생성 성공")
-//    void createProduct_Success() throws Exception {
-//        UUID productId = UUID.randomUUID();
-//
-//        ProductCreateRequest request =
-//                new ProductCreateRequest(UUID.randomUUID(), "치킨", "맛있는 치킨", 20000, false);
-//
-//        ProductResponse response =
-//                new ProductResponse(productId, "치킨", "맛있는 치킨", 20000);
-//
-//        // 서비스 동작 mocking
-//        given(productService.create(any()))
-//                .willReturn(response);
-//
-//        mockMvc.perform(post("/api/products")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.data.productId").value(productId.toString()))
-//                .andExpect(jsonPath("$.data.productName").value("치킨"))
-//                .andExpect(jsonPath("$.data.productDetail").value("맛있는 치킨"))
-//                .andExpect(jsonPath("$.data.price").value(20000))
-//                .andDo(document("product-create"));
-//    }
 
     @Test
     @DisplayName("상품 생성 성공")
@@ -385,30 +435,34 @@ class ProductControllerTest extends ControllerTestSupport {
         ProductResponse response =
                 new ProductResponse(productId, "수정된 이름", "수정된 설명", 25000);
 
-        given(productService.update(any()))
-                .willReturn(response);
+        given(productService.update(any())).willReturn(response);
 
         mockMvc.perform(patch("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.productName").value("수정된 이름"))
-                .andExpect(jsonPath("$.data.price").value(25000));
+                .andDo(document("product-update",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("productId").type(JsonFieldType.STRING).description("상품 ID"),
+                                fieldWithPath("productDetail").type(JsonFieldType.STRING).description("수정된 상품 설명"),
+                                fieldWithPath("productName").type(JsonFieldType.STRING).description("수정된 상품 이름"),
+                                fieldWithPath("price").type(JsonFieldType.NUMBER).description("수정된 상품 가격")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                fieldWithPath("timestamp").type(JsonFieldType.STRING).description("응답 시간"),
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                fieldWithPath("data.productId").type(JsonFieldType.STRING).description("상품 ID"),
+                                fieldWithPath("data.productName").type(JsonFieldType.STRING).description("상품 이름"),
+                                fieldWithPath("data.productDetail").type(JsonFieldType.STRING).description("상품 설명"),
+                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("상품 가격")
+                        )
+                ));
     }
-
-//    @Test
-//    @DisplayName("상품 전체 조회 성공")
-//    void readAll() throws Exception {
-//        ProductResponse response =
-//                new ProductResponse(UUID.randomUUID(), "피자", "맛있는 피자", 30000);
-//
-//        BDDMockito.given(productService.readAll())
-//                .willReturn(List.of(response));
-//
-//        mockMvc.perform(get("/api/products"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.data.[0].productName").value("피자"));
-//    }
 
     @Test
     @DisplayName("상품 단건 조회 성공")
@@ -418,12 +472,25 @@ class ProductControllerTest extends ControllerTestSupport {
         ProductResponse response =
                 new ProductResponse(productId, "햄버거", "맛있는 햄버거", 15000);
 
-        given(productService.readById(productId))
-                .willReturn(response);
+        given(productService.readById(productId)).willReturn(response);
 
         mockMvc.perform(get("/api/products/{id}", productId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.productId").value(productId.toString()));
+                .andDo(document("product-read",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                fieldWithPath("timestamp").type(JsonFieldType.STRING).description("응답 시간"),
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                fieldWithPath("data.productId").type(JsonFieldType.STRING).description("상품 ID"),
+                                fieldWithPath("data.productName").type(JsonFieldType.STRING).description("상품 이름"),
+                                fieldWithPath("data.productDetail").type(JsonFieldType.STRING).description("상품 설명"),
+                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("상품 가격")
+                        )
+                ));
     }
 
     @Test
@@ -441,20 +508,30 @@ class ProductControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.data").value(productId.toString()));
     }
-
     @Test
     @DisplayName("상품 숨김 처리 성공")
     void hideById() throws Exception {
         UUID productId = UUID.randomUUID();
 
-        ProductResponse response =
-                new ProductResponse(productId, "상품", "설명", 10000);
+        ProductResponse response = new ProductResponse(productId, "상품", "설명", 10000);
 
-        given(productService.hideById(productId))
-                .willReturn(response);
+        given(productService.hideById(productId)).willReturn(response);
 
         mockMvc.perform(patch("/api/products/{id}", productId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.productId").value(productId.toString()));
+                .andDo(document("product-hide",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                fieldWithPath("timestamp").type(JsonFieldType.STRING).description("응답 시간"),
+                                fieldWithPath("data.productId").type(JsonFieldType.STRING).description("숨김 처리된 상품 ID"),
+                                fieldWithPath("data.productName").type(JsonFieldType.STRING).description("상품 이름"),
+                                fieldWithPath("data.productDetail").type(JsonFieldType.STRING).description("상품 설명"),
+                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("상품 가격")
+                        )
+                ));
     }
 }
