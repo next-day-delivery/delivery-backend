@@ -41,36 +41,17 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Transactional
     public CheckoutResponse createOrUpdateCheckout(CheckoutRequest request, Long userId) {
         List<CartItemSummary> cartItems = cartItemRepository.findActiveCartItemsByUserId(userId);
-        if (cartItems.isEmpty()) {
-            throw new BusinessException(CartErrorCode.CART_EMPTY);
-        }
-        Checkout activeCheckout = checkoutRepository.findActivePendingByCartId(request.cartId(),
-                CheckoutStatus.PAYMENT_PENDING).orElse(null);
+        validateCartAndAmount(cartItems, request);
+
         String requestHash = generateHash(cartItems, request);
 
-        if (activeCheckout != null) {
-            validateCheckoutAccess(activeCheckout, userId);
-            if (activeCheckout.isExpired()) {
-                activeCheckout.markExpired();
-            } else if (activeCheckout.isSameSnapshot(requestHash, request.amount())) {
-                return CheckoutResponse.from(activeCheckout);
-            } else {
-                activeCheckout.markExpired();
-            }
-        }
+        return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
+                .filter(active -> isUsable(active, userId, requestHash, request.amount()))
+                .map(CheckoutResponse::from)
+                .orElseGet(() -> createNewCheckout(request, userId, requestHash, cartItems));
 
-        JsonNode snapshot = buildOrderSnapshot(cartItems, request, userId);
-        Checkout newCheckout = Checkout.of(request, userId, requestHash, generateOrderNumber(userId),
-                snapshot);
-        try {
-            checkoutRepository.saveAndFlush(newCheckout);
-            return CheckoutResponse.from(newCheckout);
-        } catch (DataIntegrityViolationException e) {
-            return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
-                    .map(CheckoutResponse::from)
-                    .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
-        }
     }
+
 
     @Transactional
     @Override
@@ -79,6 +60,48 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_NOT_FOUND));
         checkout.validate(userId, request.orderNo(), request.amount());
         return checkout;
+    }
+
+    private boolean isUsable(Checkout active, Long userId, String requestHash, Long amount) {
+        validateCheckoutAccess(active, userId);
+        if (active.isExpired() || !active.isSameSnapshot(requestHash, amount)) {
+            active.markExpired();
+            return false;
+        }
+        return true;
+    }
+
+    private CheckoutResponse createNewCheckout(CheckoutRequest request, Long userId, String requestHash,
+                                               List<CartItemSummary> cartItems) {
+        JsonNode snapshot = buildOrderSnapshot(cartItems, request, userId);
+        Checkout newCheckout = Checkout.of(request, userId, requestHash, generateOrderNumber(userId), snapshot);
+
+        try {
+            return CheckoutResponse.from(checkoutRepository.saveAndFlush(newCheckout));
+        } catch (DataIntegrityViolationException e) {
+            return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
+                    .map(CheckoutResponse::from)
+                    .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
+        }
+    }
+
+    private void validateCartAndAmount(List<CartItemSummary> cartItems, CheckoutRequest request) {
+        if (cartItems.isEmpty()) {
+            throw new BusinessException(CartErrorCode.CART_EMPTY);
+        }
+
+        UUID actualCartId = cartItems.get(0).cartId();
+        if (!actualCartId.equals(request.cartId())) {
+            throw new BusinessException(CartErrorCode.CART_ID_MISMATCH);
+        }
+
+        long serverCalculatedTotal = cartItems.stream()
+                .mapToLong(item -> item.price().longValue() * item.quantity())
+                .sum();
+
+        if (serverCalculatedTotal != request.amount()) {
+            throw new BusinessException(CheckoutErrorCode.AMOUNT_MISMATCH);
+        }
     }
 
 

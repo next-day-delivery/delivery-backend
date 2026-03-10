@@ -11,7 +11,7 @@ public interface CheckoutRepository {
     Optional<Checkout> findActivePendingByCartId(UUID cartId,
                                                  CheckoutStatus status);
 
-    void saveAndFlush(Checkout checkout);
+    Checkout saveAndFlush(Checkout checkout);
 
     Optional<Checkout> findById(UUID checkoutId);
 }

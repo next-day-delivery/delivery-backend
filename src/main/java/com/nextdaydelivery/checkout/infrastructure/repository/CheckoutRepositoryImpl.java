@@ -19,8 +19,8 @@ public class CheckoutRepositoryImpl implements CheckoutRepository {
     }
 
     @Override
-    public void saveAndFlush(Checkout checkout) {
-        jpaRepository.saveAndFlush(checkout);
+    public Checkout saveAndFlush(Checkout checkout) {
+        return jpaRepository.saveAndFlush(checkout);
     }
 
     @Override
