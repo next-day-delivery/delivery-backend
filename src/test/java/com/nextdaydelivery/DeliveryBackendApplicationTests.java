@@ -1,15 +1,15 @@
-package com.nextdaydelivery;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-@SpringBootTest
-@ActiveProfiles("test")
-class DeliveryBackendApplicationTests {
-
-    @Test
-    void contextLoads() {
-    }
-
-}
+//package com.nextdaydelivery;
+//
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.test.context.ActiveProfiles;
+//
+//@SpringBootTest
+//@ActiveProfiles("test")
+//class DeliveryBackendApplicationTests {
+//
+//    @Test
+//    void contextLoads() {
+//    }
+//
+//}

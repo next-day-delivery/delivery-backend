@@ -25,4 +25,5 @@ public interface UserRepository {
     boolean existsByNickname(String nickname);
 
     boolean existsByEmail(String email);
+
 }

@@ -10,7 +10,7 @@ import static com.querydsl.core.group.GroupBy.list;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.domain.entity.Order;
-import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
 import com.nextdaydelivery.order.domain.repository.dto.OrderSearchCritera;
@@ -61,31 +61,31 @@ public class OrderRepositoryImpl implements OrderRepository {
     public Optional<OrderDetails> findByIdWithDetails(UUID orderId) {
 
         Map<UUID, OrderDetails> result = queryFactory
-                .from(order)
-                .leftJoin(orderLine).on(orderLine.order.eq(order))
-                .leftJoin(orderLine.product, product)
-                .join(order.store, store)
-                .where(order.orderId.eq(orderId))
-                .transform(
-                        groupBy(order.orderId).as(new QOrderDetails(
-                                order.orderId,
-                                order.user.userId,
-                                store.storeId,
-                                store.user.userId,
-                                store.name,
-                                GroupBy.sum(orderLine.price.multiply(orderLine.quantity)),
-                                order.orderStatus.stringValue(),
-                                order.address,
-                                order.createdAt,
-                                list(new QOrderLineInfo(
-                                        orderLine.orderLineId,
-                                        product.productId,
-                                        product.productName,
-                                        orderLine.price,
-                                        orderLine.quantity
-                                ))
-                        ))
-                );
+            .from(order)
+            .leftJoin(orderLine).on(orderLine.order.eq(order))
+            .leftJoin(orderLine.product, product)
+            .join(order.store, store)
+            .where(order.orderId.eq(orderId))
+            .transform(
+                groupBy(order.orderId).as(new QOrderDetails(
+                    order.orderId,
+                    order.user.userId,
+                    store.storeId,
+                    store.user.userId,
+                    store.name,
+                    GroupBy.sum(orderLine.price.multiply(orderLine.quantity)),
+                    order.orderStatus.stringValue(),
+                    order.address,
+                    order.createdAt,
+                    list(new QOrderLineInfo(
+                        orderLine.orderLineId,
+                        product.productId,
+                        product.productName,
+                        orderLine.price,
+                        orderLine.quantity
+                    ))
+                ))
+            );
         return Optional.ofNullable(result.get(orderId));
     }
 
@@ -94,55 +94,55 @@ public class OrderRepositoryImpl implements OrderRepository {
         LocalDateTime cursorTime = null;
         if (critera.lastReadOrderId() != null) {
             cursorTime = queryFactory.select(order.createdAt)
-                    .from(order)
-                    .where(order.orderId.eq(critera.lastReadOrderId()))
-                    .fetchOne();
+                .from(order)
+                .where(order.orderId.eq(critera.lastReadOrderId()))
+                .fetchOne();
             if (cursorTime == null) {
                 throw new BusinessException(OrderErrorCode.INVALID_CURSOR);
             }
         }
         List<UUID> orderIds = queryFactory
-                .select(order.orderId)
-                .from(order)
-                .where(
-                        ltOrderId(cursorTime, critera.lastReadOrderId()),
-                        customerIdEq(critera.customerId()),
-                        storeIdEq(critera.storeId()),
-                        statusIn(critera.status()),
-                        dateBetween(critera.startDate(), critera.endDate())
-                )
-                .orderBy(order.createdAt.desc(), order.orderId.desc())
-                .limit(size + 1)
-                .fetch();
+            .select(order.orderId)
+            .from(order)
+            .where(
+                ltOrderId(cursorTime, critera.lastReadOrderId()),
+                customerIdEq(critera.customerId()),
+                storeIdEq(critera.storeId()),
+                statusIn(critera.status()),
+                dateBetween(critera.startDate(), critera.endDate())
+            )
+            .orderBy(order.createdAt.desc(), order.orderId.desc())
+            .limit(size + 1)
+            .fetch();
         if (orderIds.isEmpty()) {
             return new SliceImpl<>(Collections.emptyList(), PageRequest.ofSize(size), false);
         }
 
         Map<UUID, OrderSlice> results = queryFactory
-                .from(order)
-                .leftJoin(orderLine).on(orderLine.order.eq(order))
-                .leftJoin(orderLine.product, product)
-                .join(order.store, store)
-                .where(order.orderId.in(orderIds))
-                .orderBy(order.createdAt.desc(), order.orderId.desc())
-                .transform(GroupBy.groupBy(order.orderId).as(new QOrderSlice(
-                        order.orderId,
-                        order.user.userId,
-                        store.storeId,
-                        store.user.userId,
-                        store.name,
-                        GroupBy.sum(orderLine.price.multiply(orderLine.quantity)), order.orderStatus.stringValue(),
-                        order.address,
-                        order.createdAt,
-                        GroupBy.list(new QOrderLineInfo(
-                                orderLine.orderLineId,
-                                product.productId,
-                                product.productName,
-                                orderLine.price,
-                                orderLine.quantity
-                        ))
+            .from(order)
+            .leftJoin(orderLine).on(orderLine.order.eq(order))
+            .leftJoin(orderLine.product, product)
+            .join(order.store, store)
+            .where(order.orderId.in(orderIds))
+            .orderBy(order.createdAt.desc(), order.orderId.desc())
+            .transform(GroupBy.groupBy(order.orderId).as(new QOrderSlice(
+                order.orderId,
+                order.user.userId,
+                store.storeId,
+                store.user.userId,
+                store.name,
+                GroupBy.sum(orderLine.price.multiply(orderLine.quantity)), order.orderStatus.stringValue(),
+                order.address,
+                order.createdAt,
+                GroupBy.list(new QOrderLineInfo(
+                    orderLine.orderLineId,
+                    product.productId,
+                    product.productName,
+                    orderLine.price,
+                    orderLine.quantity
+                ))
 
-                )));
+            )));
         List<OrderSlice> content = new ArrayList<>(results.values());
         content.sort((o1, o2) -> {
             int res = o2.createdAt().compareTo(o1.createdAt());
@@ -170,7 +170,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             return null;
         }
         return order.createdAt.lt(lastTime)
-                .or(order.createdAt.eq(lastTime).and(order.orderId.lt(lastOrderId)));
+            .or(order.createdAt.eq(lastTime).and(order.orderId.lt(lastOrderId)));
     }
 
     private BooleanExpression storeIdEq(UUID storeId) {
