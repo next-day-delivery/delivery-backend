@@ -3,7 +3,7 @@ package com.nextdaydelivery.order.domain.entity;
 import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
-import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -65,4 +65,14 @@ public class Order extends CreatedAuditEntity {
             throw new BusinessException(OrderErrorCode.CANCEL_TIMEOUT);
         }
     }
+
+    public void markAsReviewed() {
+        this.reviewedAt = LocalDateTime.now();
+    }
+
+    public boolean isReviewed() {
+        return this.reviewedAt != null;
+    }
+
+
 }
