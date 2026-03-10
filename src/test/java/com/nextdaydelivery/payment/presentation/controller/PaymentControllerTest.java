@@ -2,6 +2,13 @@ package com.nextdaydelivery.payment.presentation.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -30,6 +38,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(PaymentController.class)
+@AutoConfigureRestDocs
 class PaymentControllerTest {
 
     @Autowired
@@ -49,7 +58,7 @@ class PaymentControllerTest {
 
     @BeforeEach
     void setUp() {
-        
+
         mockUser = new AuthUserDto(1L, UserRole.CUSTOMER);
         principal = new PrincipalDetails(mockUser);
     }
@@ -88,6 +97,27 @@ class PaymentControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderNumber").value(orderNo))
-                .andExpect(jsonPath("$.data.paymentStatus").value("COMPLETED"));
+                .andExpect(jsonPath("$.data.paymentStatus").value("COMPLETED"))
+                .andDo(document("payment/confirm-payment",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("checkoutId").description("체크아웃 식별 ID (UUID)"),
+                                fieldWithPath("orderNo").description("주문 번호 (CHK-... 포맷)"),
+                                fieldWithPath("paymentKey").description("결제 대행사(PG)로부터 발급받은 승인 키"),
+                                fieldWithPath("amount").description("결제 승인 요청 금액 (최종 확인용)")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").description("응답 결과 (SUCCESS/FAIL)"),
+                                fieldWithPath("code").description("상태 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("timestamp").description("응답 시간"),
+
+                                fieldWithPath("data.orderId").description("최종 생성된 주문 식별 ID (UUID)"),
+                                fieldWithPath("data.orderNumber").description("최종 주문 번호"),
+                                fieldWithPath("data.checkoutStatus").description("체크아웃 상태 (COMPLETED 등)"),
+                                fieldWithPath("data.paymentStatus").description("결제 처리 상태 (DONE, CANCELED 등)")
+                        )
+                ));
     }
 }
