@@ -2,8 +2,6 @@ package com.nextdaydelivery.checkout.application.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nextdaydelivery.cart.application.service.CartService;
-import com.nextdaydelivery.cart.domain.repository.CartRepository;
 import com.nextdaydelivery.cart_item.domain.repository.CartItemRepository;
 import com.nextdaydelivery.cart_item.domain.repository.CartItemSummary;
 import com.nextdaydelivery.checkout.domain.entity.Checkout;
@@ -31,11 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CheckoutServiceImpl implements CheckoutService {
-    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final CheckoutRepository checkoutRepository;
     private final ObjectMapper objectMapper;
-    private final CartService cartService;
 
 
     @Transactional
@@ -80,6 +76,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             return CheckoutResponse.from(checkoutRepository.saveAndFlush(newCheckout));
         } catch (DataIntegrityViolationException e) {
             return checkoutRepository.findActivePendingByCartId(request.cartId(), CheckoutStatus.PAYMENT_PENDING)
+                    .filter(active -> isUsable(active, userId, requestHash, request.amount()))
                     .map(CheckoutResponse::from)
                     .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
         }
@@ -93,6 +90,10 @@ public class CheckoutServiceImpl implements CheckoutService {
         UUID actualCartId = cartItems.get(0).cartId();
         if (!actualCartId.equals(request.cartId())) {
             throw new BusinessException(CartErrorCode.CART_ID_MISMATCH);
+        }
+        UUID actualStoreId = cartItems.get(0).storeId();
+        if (!actualStoreId.equals(request.storeId())) {
+            throw new BusinessException(CheckoutErrorCode.INVALID_ARGUMENT);
         }
 
         long serverCalculatedTotal = cartItems.stream()
