@@ -70,7 +70,7 @@ public class PaymentConfirmFacade {
 
         paymentService.markCompleted(payment, order);
         checkoutService.markPaid(checkout, result.paymentKey());
-        cartService.deleteActiveCart(user.getUserId());
+        cartService.completeCart(user.getUserId());
 
         return order;
     }
@@ -83,7 +83,7 @@ public class PaymentConfirmFacade {
         paymentService.markFailed(payment);
         checkoutService.expireCheckout(checkout);
     }
-    
+
     @Transactional
     protected void compensateAndExpire(
             Checkout checkout,

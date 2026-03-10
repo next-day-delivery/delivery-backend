@@ -141,8 +141,8 @@ public class OrderServiceImpl implements OrderService {
                     return OrderLine.create(
                             savedOrder,
                             product,
-                            item.quantity().longValue(),
-                            item.price()
+                            item.quantity(),
+                            item.price().longValue()
                     );
                 })
                 .toList();

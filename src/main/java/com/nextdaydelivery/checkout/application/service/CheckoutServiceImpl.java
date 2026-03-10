@@ -2,12 +2,16 @@ package com.nextdaydelivery.checkout.application.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nextdaydelivery.cart.application.service.CartService;
+import com.nextdaydelivery.cart.domain.repository.CartRepository;
+import com.nextdaydelivery.cart_item.domain.repository.CartItemRepository;
+import com.nextdaydelivery.cart_item.domain.repository.CartItemSummary;
 import com.nextdaydelivery.checkout.domain.entity.Checkout;
 import com.nextdaydelivery.checkout.domain.enums.CheckoutStatus;
 import com.nextdaydelivery.checkout.domain.repository.CheckoutRepository;
-import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutItemRequest;
 import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutRequest;
 import com.nextdaydelivery.checkout.presentation.dto.response.CheckoutResponse;
+import com.nextdaydelivery.global.domain.error.CartErrorCode;
 import com.nextdaydelivery.global.domain.error.CheckoutErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.application.dto.OrderSnapshot;
@@ -15,6 +19,7 @@ import com.nextdaydelivery.payment.presentation.dto.request.PaymentConfirmReques
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +31,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CheckoutServiceImpl implements CheckoutService {
-
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final CheckoutRepository checkoutRepository;
     private final ObjectMapper objectMapper;
+    private final CartService cartService;
 
 
     @Transactional
     public CheckoutResponse createOrUpdateCheckout(CheckoutRequest request, Long userId) {
+        List<CartItemSummary> cartItems = cartItemRepository.findActiveCartItemsByUserId(userId);
+        if (cartItems.isEmpty()) {
+            throw new BusinessException(CartErrorCode.CART_EMPTY);
+        }
         Checkout activeCheckout = checkoutRepository.findActivePendingByCartId(request.cartId(),
                 CheckoutStatus.PAYMENT_PENDING).orElse(null);
-        String requestHash = generateHash(request);
+        String requestHash = generateHash(cartItems, request);
 
         if (activeCheckout != null) {
             validateCheckoutAccess(activeCheckout, userId);
@@ -48,7 +59,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             }
         }
 
-        JsonNode snapshot = buildOrderSnapshot(request, userId);
+        JsonNode snapshot = buildOrderSnapshot(cartItems, request, userId);
         Checkout newCheckout = Checkout.of(request, userId, requestHash, generateOrderNumber(userId),
                 snapshot);
         try {
@@ -60,7 +71,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                     .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
         }
     }
-    
+
     @Transactional
     @Override
     public Checkout getValidatedCheckout(PaymentConfirmRequest request, Long userId) {
@@ -71,9 +82,9 @@ public class CheckoutServiceImpl implements CheckoutService {
     }
 
 
-    private String generateHash(CheckoutRequest request) {
-        String itemsPart = request.items().stream()
-                .sorted(Comparator.comparing(CheckoutItemRequest::productId))
+    private String generateHash(List<CartItemSummary> items, CheckoutRequest request) {
+        String itemsPart = items.stream()
+                .sorted(Comparator.comparing(CartItemSummary::productId))
                 .map(item -> item.productId() + ":" + item.quantity() + ":" + item.price())
                 .collect(Collectors.joining("|"));
         String rawPayload = String.format("cart:%s|store:%s|amount:%d|items:%s",
@@ -92,8 +103,8 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
     }
 
-    private JsonNode buildOrderSnapshot(CheckoutRequest request, Long userId) {
-        OrderSnapshot snapshot = OrderSnapshot.from(request, userId);
+    private JsonNode buildOrderSnapshot(List<CartItemSummary> items, CheckoutRequest request, Long userId) {
+        OrderSnapshot snapshot = OrderSnapshot.from(items, request, userId);
         return objectMapper.valueToTree(snapshot);
     }
 

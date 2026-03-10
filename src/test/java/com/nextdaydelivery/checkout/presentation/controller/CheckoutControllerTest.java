@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextdaydelivery.checkout.application.service.CheckoutService;
 import com.nextdaydelivery.checkout.domain.enums.CheckoutStatus;
-import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutItemRequest;
 import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutRequest;
 import com.nextdaydelivery.checkout.presentation.dto.response.CheckoutResponse;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
