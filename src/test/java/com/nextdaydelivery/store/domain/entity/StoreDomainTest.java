@@ -2,7 +2,7 @@ package com.nextdaydelivery.store.domain.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.nextdaydelivery.store.presentation.dto.StoreResponse;
+import com.nextdaydelivery.store.presentation.dto.response.StoreResponse;
 import com.nextdaydelivery.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +17,7 @@ class StoreDomainTest {
         // 1. Given
         Store store = createBaseStore("원래 이름", "원래 상세주소");
         StoreAddress newAddress = StoreAddress.builder()
-                .sido("경기도").sigungu("성남시").dong("판교동").build();
+            .sido("경기도").sigungu("성남시").dong("판교동").build();
 
         // 2. When
         store.update("바뀐 이름", "바뀐 상세주소", newAddress);
@@ -49,13 +49,13 @@ class StoreDomainTest {
     void store_response_mapping_logic() {
         // 1. Given
         StoreAddress address = StoreAddress.builder()
-                .sido("서울특별시").sigungu("강남구").dong("역삼동").build();
+            .sido("서울특별시").sigungu("강남구").dong("역삼동").build();
         Store store = Store.builder()
-                .user(User.builder().nickname("사장님").build())
-                .storeAddress(address)
-                .name("치킨집")
-                .detailAddress("테헤란로 123")
-                .build();
+            .user(User.builder().nickname("사장님").build())
+            .storeAddress(address)
+            .name("치킨집")
+            .detailAddress("테헤란로 123")
+            .build();
 
         List<String> categories = List.of("치킨", "야식");
 
@@ -71,10 +71,10 @@ class StoreDomainTest {
     // 테스트용 헬퍼 메서드
     private Store createBaseStore(String name, String detailAddress) {
         return Store.builder()
-                .user(User.builder().build())
-                .storeAddress(StoreAddress.builder().build())
-                .name(name)
-                .detailAddress(detailAddress)
-                .build();
+            .user(User.builder().build())
+            .storeAddress(StoreAddress.builder().build())
+            .name(name)
+            .detailAddress(detailAddress)
+            .build();
     }
 }

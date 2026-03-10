@@ -1,26 +1,27 @@
 package com.nextdaydelivery.review.application.service;
 
+import com.nextdaydelivery.global.security.dto.AuthUserDto;
 import com.nextdaydelivery.review.domain.entity.Review;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.review.presentation.dto.response.ReviewList;
-import com.nextdaydelivery.user.domain.entity.User;
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ReviewService {
-    List<ReviewList> getReview(UUID storeId);
+    Page<ReviewList> getReview(UUID storeId, Pageable pageable);
 
     Review saveReview(
         ReviewCreateRequest request,
         UUID orderId,
-        User user
+        AuthUserDto authUser
     );
 
-    List<ReviewList> getMyReview(Long userId);
+    Page<ReviewList> getMyReview(Long userId, Pageable pageable);
 
-    Review updateMyReviewStatus(UUID reviewId);
+    Review updateMyReviewStatus(AuthUserDto authUser, UUID reviewId);
 
-    Review updateMyReview(UUID reviewId, ReviewCreateRequest request);
+    Review updateMyReview(AuthUserDto authUser, UUID reviewId, ReviewCreateRequest request);
 
-    void deleteMyReview(UUID reviewId);
+    void deleteMyReview(AuthUserDto authUser, UUID reviewId);
 }

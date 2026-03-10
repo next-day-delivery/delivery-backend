@@ -1,6 +1,6 @@
 package com.nextdaydelivery.review.domain.entity;
 
-import com.nextdaydelivery.global.domain.entity.CreatedAuditEntity;
+import com.nextdaydelivery.global.domain.entity.BaseAuditEntity;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ import org.hibernate.annotations.GenericGenerator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Review extends CreatedAuditEntity {
+public class Review extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -55,12 +56,18 @@ public class Review extends CreatedAuditEntity {
     @Column(name = "content", length = 255)
     private String content; // 리뷰 내용
 
-    @Column(name = "rating")
-    private Integer rating; // 별점 (INT) // Null 허용이라 int 대신 Integer 사용
+    @Column(name = "rating", nullable = false)
+    private Integer rating; // 별점 (INT)
 
     @Enumerated(EnumType.STRING)
     @Column(name = "review_status", nullable = false)
     private ReviewStatus reviewStatus; // 리뷰 상태 (VISIBLE, HIDDEN)
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 레코드 삭제 시간
+
+    @Column(name = "deleted_by", length = 100)
+    private String deletedBy; // 레코드 삭제자
 
     public void toggleStatus() {
         this.reviewStatus = (this.reviewStatus == ReviewStatus.VISIBLE)
@@ -90,6 +97,11 @@ public class Review extends CreatedAuditEntity {
 
     public static Review create(ReviewCreateRequest request, User user, Order order, Store store) {
         return new Review(request.content(), request.rating(), ReviewStatus.VISIBLE, user, order, store);
+    }
+
+    public void delete(String deletedBy) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedBy;
     }
 
     public static Review of(

@@ -15,7 +15,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,8 +24,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "p_cart")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Cart {
 
     @Id
@@ -46,4 +43,27 @@ public class Cart {
     @Enumerated(EnumType.STRING) // DB에 문자열(ACTIVE 등)로 저장
     @Column(name = "status", nullable = false)
     private CartStatus status; // 상태 (ACTIVE, INACTIVE, COMPLETED)
+
+    @Builder
+    private Cart(User user, Store store, CartStatus status) {
+        this.user = user;
+        this.store = store;
+        this.status = status;
+    }
+
+    public static Cart createActive(User user, Store store) {
+        return Cart.builder()
+                .user(user)
+                .store(store)
+                .status(CartStatus.ACTIVE)
+                .build(); // 이제 안전하게 객체만 생성됩니다.
+    }
+
+    public void markInactive() {
+        this.status = CartStatus.INACTIVE;
+    }
+
+    public void markCompleted() {
+        this.status = CartStatus.COMPLETED;
+    }
 }

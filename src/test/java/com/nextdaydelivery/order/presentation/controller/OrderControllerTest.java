@@ -20,7 +20,7 @@ import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.global.security.jwt.JwtAuthenticationFilter;
 import com.nextdaydelivery.global.security.jwt.JwtValidator;
 import com.nextdaydelivery.order.application.service.OrderService;
-import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.entity.enums.OrderStatus;
 import com.nextdaydelivery.order.presentation.dto.request.OrderSearchRequest;
 import com.nextdaydelivery.order.presentation.dto.request.OrderStatusRequest;
 import com.nextdaydelivery.order.presentation.dto.response.OrderDetailResponse;
@@ -51,7 +51,7 @@ public class OrderControllerTest {
 
     @MockitoBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
-    
+
     @MockitoBean
     private OrderService orderService;
 
@@ -63,27 +63,27 @@ public class OrderControllerTest {
     void getMyOrders_Success() throws Exception {
         UUID orderId = UUID.randomUUID();
         OrderListResponse responseDto = OrderListResponse.builder()
-                .orderId(orderId)
-                .storeName("맛집")
-                .totalPrice(10000L)
-                .orderStatus(OrderStatus.ORDER_ACCEPTED.toString())
-                .createdAt(LocalDateTime.now())
-                .build();
+            .orderId(orderId)
+            .storeName("맛집")
+            .totalPrice(10000L)
+            .orderStatus(OrderStatus.ORDER_ACCEPTED.toString())
+            .createdAt(LocalDateTime.now())
+            .build();
 
         Slice<OrderListResponse> slice = new SliceImpl<>(List.of(responseDto), PageRequest.of(0, 10), true);
 
         given(orderService.getOrdersByCustomer(any(), eq(10))).willReturn(slice);
 
         mockMvc.perform(get("/api/orders/me")
-                        .header("X-User-Id", 1L)
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].orderId").value(orderId.toString()))
-                .andExpect(jsonPath("$.data.content[0].storeName").value("맛집"))
-                .andExpect(jsonPath("$.data.content[0].totalPrice").value(10000L))
-                .andExpect(jsonPath("$.data.content[0].orderStatus").value(OrderStatus.ORDER_ACCEPTED.toString()))
-                .andDo(print());
+                .header("X-User-Id", 1L)
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].orderId").value(orderId.toString()))
+            .andExpect(jsonPath("$.data.content[0].storeName").value("맛집"))
+            .andExpect(jsonPath("$.data.content[0].totalPrice").value(10000L))
+            .andExpect(jsonPath("$.data.content[0].orderStatus").value(OrderStatus.ORDER_ACCEPTED.toString()))
+            .andDo(print());
     }
 
 
@@ -92,19 +92,19 @@ public class OrderControllerTest {
     void getStoreOrders_Success() throws Exception {
         UUID storeId = UUID.randomUUID();
         OrderListResponse responseDto = OrderListResponse.builder()
-                .storeId(storeId)
-                .ownerId(2L)
-                .build();
+            .storeId(storeId)
+            .ownerId(2L)
+            .build();
         Slice<OrderListResponse> slice = new SliceImpl<>(List.of(responseDto), PageRequest.of(0, 10), true);
         given(orderService.getStoreOrders(eq(storeId), any(), eq(2L), eq(10))).willReturn(slice);
         mockMvc.perform(get("/api/orders/store/{storeId}", storeId)
-                        .header("X-User-Id", 2L)
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
-                .andExpect(jsonPath("$.data.content[0].ownerId").value(2L))
-                .andDo(print());
+                .header("X-User-Id", 2L)
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
+            .andExpect(jsonPath("$.data.content[0].ownerId").value(2L))
+            .andDo(print());
     }
 
     @Test
@@ -112,23 +112,23 @@ public class OrderControllerTest {
     void searchOrders_Success() throws Exception {
         UUID storeId = UUID.randomUUID();
         OrderSearchRequest request = OrderSearchRequest.builder()
-                .storeId(storeId)
-                .build();
+            .storeId(storeId)
+            .build();
         OrderListResponse responseDto = OrderListResponse.builder()
-                .storeId(storeId)
-                .ownerId(2L)
-                .build();
+            .storeId(storeId)
+            .ownerId(2L)
+            .build();
         Slice<OrderListResponse> slice = new SliceImpl<>(List.of(responseDto), PageRequest.of(0, 10), true);
         given(orderService.getOrdersByManager(any(), eq(10))).willReturn(slice);
         mockMvc.perform(post("/api/orders/search")
-                        .header("X-User-Id", 3L)
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
-                .andExpect(jsonPath("$.data.content[0].ownerId").value(2L))
-                .andDo(print());
+                .header("X-User-Id", 3L)
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].storeId").value(storeId.toString()))
+            .andExpect(jsonPath("$.data.content[0].ownerId").value(2L))
+            .andDo(print());
     }
 
     @Test
@@ -136,16 +136,16 @@ public class OrderControllerTest {
     void getOrderDetails_Success() throws Exception {
         UUID orderId = UUID.randomUUID();
         OrderDetailResponse response = OrderDetailResponse.builder()
-                .orderId(orderId)
-                .customerId(1L)
-                .build();
+            .orderId(orderId)
+            .customerId(1L)
+            .build();
         given(orderService.getOrderDetail(eq(orderId), any())).willReturn(response);
         mockMvc.perform(get("/api/orders/{orderId}", orderId)
-                        .header("X-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderId").value(orderId.toString()))
-                .andExpect(jsonPath("$.data.customerId").value(1L))
-                .andDo(print());
+                .header("X-User-Id", 1L))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.orderId").value(orderId.toString()))
+            .andExpect(jsonPath("$.data.customerId").value(1L))
+            .andDo(print());
 
     }
 
@@ -155,12 +155,12 @@ public class OrderControllerTest {
     void getOrderDetails_Failure() throws Exception {
         UUID orderId = UUID.randomUUID();
         given(orderService.getOrderDetail(eq(orderId), any())).willThrow(
-                new BusinessException(OrderErrorCode.NOT_YOUR_ORDER));
+            new BusinessException(OrderErrorCode.NOT_YOUR_ORDER));
         mockMvc.perform(get("/api/orders/{orderId}", orderId)
-                        .header("X-User-Id", 1L))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value(OrderErrorCode.NOT_YOUR_ORDER.getMessage()))
-                .andDo(print());
+                .header("X-User-Id", 1L))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.message").value(OrderErrorCode.NOT_YOUR_ORDER.getMessage()))
+            .andDo(print());
     }
 
 
@@ -169,12 +169,12 @@ public class OrderControllerTest {
     void getStoreOrderDetail_Failure() throws Exception {
         UUID orderId = UUID.randomUUID();
         given(orderService.getOrderDetail(eq(orderId), eq(1L))).willThrow(
-                new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER));
+            new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER));
         mockMvc.perform(get("/api/orders/{orderId}", orderId)
-                        .header("X-User-Id", 1L))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value(OrderErrorCode.NOT_YOUR_STORE_ORDER.getMessage()))
-                .andDo(print());
+                .header("X-User-Id", 1L))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.message").value(OrderErrorCode.NOT_YOUR_STORE_ORDER.getMessage()))
+            .andDo(print());
     }
 
 
@@ -182,10 +182,10 @@ public class OrderControllerTest {
     @DisplayName("주문 취소 성공 - 5분 이내")
     void cancelOrder_Success() throws Exception {
         mockMvc.perform(post("/api/orders/{orderId}/cancel", UUID.randomUUID())
-                        .header("X-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 1L))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
         verify(orderService, times(1)).cancelOrderByCustomer(any(), any());
 
     }
@@ -195,15 +195,15 @@ public class OrderControllerTest {
     void cancelOrder_Failure() throws Exception {
         UUID orderId = UUID.randomUUID();
         doThrow(new BusinessException(OrderErrorCode.CANCEL_TIMEOUT))
-                .when(orderService).cancelOrderByCustomer(eq(orderId), any());
+            .when(orderService).cancelOrderByCustomer(eq(orderId), any());
 
         mockMvc.perform(post("/api/orders/{orderId}/cancel", orderId)
-                        .header("X-User-Id", 1L))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.result").value(Result.FAIL.name()))
-                .andExpect(jsonPath("$.code").value("O004"))
-                .andExpect(jsonPath("$.message").value("주문 후 5분이 경과하여 취소할 수 없습니다."))
-                .andDo(print());
+                .header("X-User-Id", 1L))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.result").value(Result.FAIL.name()))
+            .andExpect(jsonPath("$.code").value("O004"))
+            .andExpect(jsonPath("$.message").value("주문 후 5분이 경과하여 취소할 수 없습니다."))
+            .andDo(print());
     }
 
     @Test
@@ -211,10 +211,10 @@ public class OrderControllerTest {
     void rejectOrderByOwner_Success() throws Exception {
         UUID orderId = UUID.randomUUID();
         mockMvc.perform(post("/api/orders/{orderId}/reject", orderId)
-                        .header("X-User-Id", 2L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 2L))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
         verify(orderService, times(1)).rejectOrder(eq(orderId), any());
 
     }
@@ -224,10 +224,10 @@ public class OrderControllerTest {
     void cancelOrderByManager_Success() throws Exception {
         UUID orderId = UUID.randomUUID();
         mockMvc.perform(post("/api/orders/{orderId}/cancel/manager", orderId)
-                        .header("X-User-Id", 3L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 3L))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
         verify(orderService, times(1)).cancelOrderByManager(eq(orderId));
 
     }
@@ -239,12 +239,12 @@ public class OrderControllerTest {
         UUID orderId = UUID.randomUUID();
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_ACCEPTED);
         mockMvc.perform(patch("/api/orders/{orderId}/status", orderId)
-                        .header("X-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
         verify(orderService, times(1)).changeOrderStatusByOwner(any(), eq(orderId), eq(1L));
 
     }
@@ -256,12 +256,12 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_COOKED);
         mockMvc.perform(patch("/api/orders/{orderId}/status", orderId)
-                        .header("X-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
         verify(orderService, times(1)).changeOrderStatusByOwner(any(), eq(orderId), eq(1L));
 
     }
@@ -273,12 +273,12 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_COMPLETED);
         mockMvc.perform(patch("/api/orders/{orderId}/status", orderId)
-                        .header("X-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
 
         verify(orderService, times(1)).changeOrderStatusByOwner(any(), eq(orderId), eq(1L));
 
@@ -292,16 +292,16 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_COOKED);
         doThrow(new BusinessException(OrderErrorCode.INVALID_STATUS_CHANGE))
-                .when(orderService).changeOrderStatusByOwner(any(), eq(orderId), eq(1L));
+            .when(orderService).changeOrderStatusByOwner(any(), eq(orderId), eq(1L));
         mockMvc.perform(patch("/api/orders/{orderId}/status", orderId)
-                        .header("X-User-Id", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.result").value(Result.FAIL.name()))
-                .andExpect(jsonPath("$.code").value("O005"))
-                .andExpect(jsonPath("$.message").value("변경 불가능한 주문 상태입니다."))
-                .andDo(print());
+                .header("X-User-Id", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.result").value(Result.FAIL.name()))
+            .andExpect(jsonPath("$.code").value("O005"))
+            .andExpect(jsonPath("$.message").value("변경 불가능한 주문 상태입니다."))
+            .andDo(print());
     }
 
     @Test
@@ -311,12 +311,12 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_ACCEPTED);
         mockMvc.perform(patch("/api/orders/{orderId}/status/manager", orderId)
-                        .header("X-User-Id", 3L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 3L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
 
         verify(orderService, times(1)).changeOrderStatusByManager(any(), eq(orderId));
 
@@ -329,12 +329,12 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_COOKED);
         mockMvc.perform(patch("/api/orders/{orderId}/status/manager", orderId)
-                        .header("X-User-Id", 3L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 3L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
 
         verify(orderService, times(1)).changeOrderStatusByManager(any(), eq(orderId));
 
@@ -348,12 +348,12 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_COMPLETED);
         mockMvc.perform(patch("/api/orders/{orderId}/status/manager", orderId)
-                        .header("X-User-Id", 3L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
-                .andDo(print());
+                .header("X-User-Id", 3L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.result").value(Result.SUCCESS.name()))
+            .andDo(print());
         verify(orderService, times(1)).changeOrderStatusByManager(any(), eq(orderId));
 
     }
@@ -366,16 +366,16 @@ public class OrderControllerTest {
 
         OrderStatusRequest request = new OrderStatusRequest(OrderStatus.ORDER_COOKED);
         doThrow(new BusinessException(OrderErrorCode.INVALID_STATUS_CHANGE))
-                .when(orderService).changeOrderStatusByManager(any(), eq(orderId));
+            .when(orderService).changeOrderStatusByManager(any(), eq(orderId));
         mockMvc.perform(patch("/api/orders/{orderId}/status/manager", orderId)
-                        .header("X-User-Id", 3L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.result").value(Result.FAIL.name()))
-                .andExpect(jsonPath("$.code").value("O005"))
-                .andExpect(jsonPath("$.message").value("변경 불가능한 주문 상태입니다."))
-                .andDo(print());
+                .header("X-User-Id", 3L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.result").value(Result.FAIL.name()))
+            .andExpect(jsonPath("$.code").value("O005"))
+            .andExpect(jsonPath("$.message").value("변경 불가능한 주문 상태입니다."))
+            .andDo(print());
 
     }
 

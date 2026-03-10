@@ -7,6 +7,7 @@ CREATE TABLE p_store
     user_id          BIGINT        NOT NULL,
     store_address_id BIGINT        NOT NULL,
     name             VARCHAR(100)  NOT NULL,
+    rating_total     INTEGER       NOT NULL DEFAULT 0,
     rating_avg       DECIMAL(2, 1) NOT NULL DEFAULT 0.0,
     review_count     INTEGER       NOT NULL DEFAULT 0,
     detail_address   VARCHAR(255),

@@ -71,6 +71,7 @@ public class UserRepositoryImpl implements UserRepository {
         return Optional.ofNullable(result);
     }
 
+
     @Override
     public Page<ManagerResponse> findManagersWithPagination(Pageable pageable) {
         List<ManagerResponse> content = queryFactory

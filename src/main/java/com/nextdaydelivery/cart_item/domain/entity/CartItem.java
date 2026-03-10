@@ -1,6 +1,8 @@
 package com.nextdaydelivery.cart_item.domain.entity;
 
 import com.nextdaydelivery.cart.domain.entity.Cart;
+import com.nextdaydelivery.global.domain.error.CartErrorCode;
+import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.product.domain.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +14,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +23,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name = "p_cart_item")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class CartItem {
 
     @Id
@@ -42,4 +41,35 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product; // 상품 PK
+
+    @Builder
+    private CartItem(Cart cart, Product product, Long quantity) {
+        this.cart = cart;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
+    public static CartItem create(Cart cart, Product product, Long quantity) {
+        return CartItem.builder()
+                .cart(cart)
+                .product(product)
+                .quantity(quantity)
+                .build();
+    }
+
+    public void increaseQuantity(Long quantity) {
+        validateQuantity(quantity);
+        this.quantity += quantity;
+    }
+
+    public void changeQuantity(Long quantity) {
+        validateQuantity(quantity);
+        this.quantity = quantity;
+    }
+
+    private void validateQuantity(Long quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new BusinessException(CartErrorCode.INVALID_CART_ITEM_QUANTITY);
+        }
+    }
 }
