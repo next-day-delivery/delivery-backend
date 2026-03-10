@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,6 +41,19 @@ public class UserApiController {
     ) {
         Long userId = principal.getAuthUserDto().userId();
         userService.updateAddress(userId, request);
+
+        return CommonResponse.onSuccess(null);
+    }
+
+    @DeleteMapping("/me")
+    @RequireOwnerRole
+    @RequireCustomerRole
+    public CommonResponse<Void> deleteUser(
+            @AuthenticationPrincipal PrincipalDetails principal
+    ) {
+        Long userId = principal.getAuthUserDto().userId();
+
+        userService.deleteUser(userId);
 
         return CommonResponse.onSuccess(null);
     }

@@ -81,4 +81,17 @@ public class UserService {
         UserAddress newAddress = UserAddress.create(oldAddress.getUser(), request.address());
         userAddressRepository.save(newAddress);
     }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        String deleterId = String.valueOf(userId);
+
+        user.markAsDeleted(deleterId);
+
+        userAddressRepository.findActiveAddressByUserId(userId)
+                .ifPresent(address -> address.markAsDeleted(deleterId));
+    }
 }
