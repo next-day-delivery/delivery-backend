@@ -26,7 +26,6 @@ import com.nextdaydelivery.product.domain.entity.Product;
 import com.nextdaydelivery.product.domain.repository.ProductRepository;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.repository.StoreRepository;
-import com.nextdaydelivery.store.domain.service.StoreService;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import java.util.List;
@@ -50,7 +49,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderLineRepository orderLineRepository;
 
 
-    private final StoreService storeService;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -166,6 +164,7 @@ public class OrderServiceImpl implements OrderService {
         return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
     }
 
+    @Transactional
     @Override
     public void completeOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
