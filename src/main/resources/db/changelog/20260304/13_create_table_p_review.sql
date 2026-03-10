@@ -7,12 +7,16 @@ CREATE TABLE p_review
     user_id       BIGINT       NOT NULL,
     order_id      UUID         NOT NULL,
     store_id      UUID         NOT NULL,
-    content       VARCHAR(255),
+    content       VARCHAR(255) NOT NULL,
     rating        INTEGER      NOT NULL,
     review_status VARCHAR(30)  NOT NULL,
 
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by    VARCHAR(100) NOT NULL,
+    updated_at    TIMESTAMP,
+    updated_by    VARCHAR(100),
+    deleted_at    TIMESTAMP,
+    deleted_by    VARCHAR(100),
 
     CONSTRAINT fk_review_user
         FOREIGN KEY (user_id)

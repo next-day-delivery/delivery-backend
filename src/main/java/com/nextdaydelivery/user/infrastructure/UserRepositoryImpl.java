@@ -23,14 +23,14 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean existsByUniqueFields(String username, String email, String nickname) {
         Integer fetchOne = queryFactory
-                .selectOne()
-                .from(user)
-                .where(
-                        user.username.eq(username)
-                                .or(user.email.eq(email))
-                                .or(user.nickname.eq(nickname))
-                )
-                .fetchFirst();
+            .selectOne()
+            .from(user)
+            .where(
+                user.username.eq(username)
+                    .or(user.email.eq(email))
+                    .or(user.nickname.eq(nickname))
+            )
+            .fetchFirst();
 
         return fetchOne != null;
     }
@@ -38,5 +38,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> findByUsername(String username) {
         return userJpaRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return userJpaRepository.findById(userId);
     }
 }

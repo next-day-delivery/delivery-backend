@@ -43,10 +43,13 @@ public class Store extends BaseAuditEntity {
     private String name; // 가게명
 
     @Column(name = "rating_avg", precision = 2, scale = 1)
-    private BigDecimal ratingAvg; // 가게 평점 (DECIMAL 2,1) // double 타입으로 변경해도 무방할듯
+    private BigDecimal ratingAvg; // 가게 평점 (DECIMAL 2,1)
 
     @Column(name = "review_count")
     private Integer reviewCount; // 리뷰 수 (INT)
+
+    @Column(name = "rating_total")
+    private Integer ratingTotal; // 별점 총합 (INT)
 
     @Column(name = "detail_address", length = 255)
     private String detailAddress; // 상세 주소
@@ -77,4 +80,21 @@ public class Store extends BaseAuditEntity {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
     }
+
+    // 리뷰 저장 시
+    public void addReview(int rating) {
+        this.ratingTotal += rating;
+        this.reviewCount++;
+        this.ratingAvg = BigDecimal.valueOf((double) ratingTotal / reviewCount);
+    }
+
+    // 리뷰 삭제 시
+    public void removeReview(int rating) {
+        this.ratingTotal -= rating;
+        this.reviewCount--;
+        this.ratingAvg = reviewCount == 0
+            ? BigDecimal.ZERO
+            : BigDecimal.valueOf((double) ratingTotal / reviewCount);
+    }
+
 }
