@@ -2,6 +2,7 @@ package com.nextdaydelivery.payment.infrastructure;
 
 import com.nextdaydelivery.payment.domain.entity.Payment;
 import com.nextdaydelivery.payment.domain.enums.PaymentStatus;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,7 @@ public interface PaymentJpaRepository extends JpaRepository<Payment, UUID> {
 
     @Query("SELECT COUNT(p) > 0 FROM Payment p WHERE p.orderNo = :orderNo")
     boolean existsByOrderNo(@Param("orderNo") String orderNo);
+
+    @Query("SELECT p FROM Payment p WHERE p.order.orderId = :orderId")
+    Optional<Payment> findByOrderId(@Param("orderId") UUID orderId);
 }

@@ -96,5 +96,13 @@ public class PaymentServiceImpl implements PaymentService {
         payment.cancelFail();
     }
 
+    @Transactional
+    @Override
+    public void cancelPayment(Order order) {
+        Payment payment = paymentRepository.findByOrderId(order.getOrderId())
+                .orElseThrow(() -> new BusinessException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+        markCanceled(payment);
+    }
+
 
 }

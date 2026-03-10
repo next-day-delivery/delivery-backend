@@ -49,7 +49,7 @@ class PaymentControllerTest {
 
     @BeforeEach
     void setUp() {
-        // 인증된 유저 정보 세팅 (OWNER 권한)
+        
         mockUser = new AuthUserDto(1L, UserRole.CUSTOMER);
         principal = new PrincipalDetails(mockUser);
     }

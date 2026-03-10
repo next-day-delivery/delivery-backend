@@ -26,6 +26,7 @@ import com.nextdaydelivery.product.domain.repository.ProductRepository;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.repository.StoreRepository;
 import com.nextdaydelivery.user.domain.entity.User;
+import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -75,36 +76,36 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDetailResponse getOrderDetail(UUID orderId, Long userId) {
+    public OrderDetailResponse getOrderDetail(UUID orderId, Long userId, UserRole role) {
         OrderDetails details = orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
-        validateOrderAccess(details);
+        validateOrderAccess(details, userId, role);
         return OrderDetailResponse.from(details, userId);
     }
 
     @Transactional
     @Override
-    public void cancelOrderByCustomer(UUID orderId, Long userId) {
+    public Order cancelOrderByCustomer(UUID orderId, Long userId) {
         Order order = getOrderByCustomerIdWithLock(orderId, userId);
         order.validateCancelableTime();
         order.changeStatus(OrderStatus.ORDER_CANCELED);
-        //환불 이벤트 발행
+        return order;
     }
 
     @Transactional
     @Override
-    public void cancelOrderByManager(UUID orderId) {
+    public Order cancelOrderByManager(UUID orderId) {
         Order order = getOrderWithLock(orderId);
         order.changeStatus(OrderStatus.ORDER_CANCELED);
-        //환불 이벤트 발행
+        return order;
     }
 
     @Transactional
     @Override
-    public void rejectOrder(UUID orderId, Long userId) {
+    public Order rejectOrder(UUID orderId, Long userId) {
         Order order = getOrderByOwnerIdWithLock(orderId, userId);
         order.changeStatus(OrderStatus.ORDER_REJECTED);
-        //환불 이벤트 발행
+        return order;
     }
 
     @Transactional
@@ -120,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderWithLock(orderId);
         order.changeStatus(request.orderStatus());
     }
+
     @Override
     public Order createFromCheckout(Checkout checkout, User user) {
         OrderSnapshot snapshot = deserializeSnapshot(checkout.getOrderSnapshot());
@@ -163,8 +165,26 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER));
     }
 
-    private void validateOrderAccess(OrderDetails details) {
-        //권한 검증 - 유저는 자기 주문인지,
+    private void validateOrderAccess(OrderDetails details, Long userId, UserRole role) {
+
+        if (role == UserRole.MANAGER || role == UserRole.MASTER) {
+            return;
+        }
+
+        if (role == UserRole.CUSTOMER) {
+            if (!details.customerId().equals(userId)) {
+                throw new BusinessException(OrderErrorCode.NOT_YOUR_ORDER);
+            }
+            return;
+        }
+
+        if (role == UserRole.OWNER) {
+            if (!details.ownerId().equals(userId)) {
+                throw new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER);
+            }
+            return;
+        }
+        throw new BusinessException(OrderErrorCode.ACCESS_DENIED);
     }
 
     @Override

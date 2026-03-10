@@ -16,8 +16,8 @@ public enum OrderErrorCode implements ErrorCode {
     ORDER_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "O007", "주문 생성에 필요한 체크아웃 스냅샷을 찾을 수 없습니다."),
     ORDER_SNAPSHOT_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "O008", "주문 스냅샷 데이터를 읽는 중 오류가 발생했습니다."),
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "O009", "해당 주문의 가게를 찾을 수 없습니다."),
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "O010", "해당 주문의 상품을 찾을 수 없습니다.");
-
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "O010", "해당 주문의 상품을 찾을 수 없습니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "O011", "허용되지 않은 권한입니다.");
 
     private final HttpStatus status;
     private final String code;

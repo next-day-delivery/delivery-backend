@@ -23,4 +23,5 @@ public interface PaymentService {
 
     void markCancelFailed(Payment payment);
 
+    void cancelPayment(Order order);
 }
