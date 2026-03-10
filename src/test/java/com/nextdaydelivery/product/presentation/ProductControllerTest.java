@@ -45,52 +45,61 @@ class ProductControllerTest extends ControllerTestSupport {
     @DisplayName("허용된 pageSize(30) 요청 시 그대로 전달된다")
     void pageable_size_30() throws Exception {
 
-        when(productService.readAll(any()))
-                .thenReturn(List.of(
+        when(productService.searchProducts(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new SliceImpl<>(List.of(
                         new ProductResponse(UUID.randomUUID(), "상품", "설명", 1000)
-                ));
+                )));
 
-        mockMvc.perform(get("/api/products")
+        mockMvc.perform(get("/api/products/search")
                         .param("page", "0")
                         .param("size", "30"))
                 .andExpect(status().isOk());
 
-        verify(productService).readAll(argThat(pageable ->
-                pageable.getPageNumber() == 0 &&
-                        pageable.getPageSize() == 30
-        ));
+        verify(productService).searchProducts(
+                any(), any(), any(), any(), any(),
+                argThat(pageable ->
+                        pageable.getPageNumber() == 0 &&
+                                pageable.getPageSize() == 30
+                )
+        );
     }
 
     @Test
     @DisplayName("허용되지 않은 pageSize(100) 요청 시 10으로 변경된다")
     void pageable_invalid_size() throws Exception {
 
-        when(productService.readAll(any()))
-                .thenReturn(List.of());
+        when(productService.searchProducts(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new SliceImpl<>(List.of()));
 
-        mockMvc.perform(get("/api/products")
+        mockMvc.perform(get("/api/products/search")
                         .param("page", "0")
                         .param("size", "100"))
                 .andExpect(status().isOk());
 
-        verify(productService).readAll(argThat(pageable ->
-                pageable.getPageSize() == 10
-        ));
+        verify(productService).searchProducts(
+                any(), any(), any(), any(), any(),
+                argThat(pageable ->
+                        pageable.getPageSize() == 10
+                )
+        );
     }
 
     @Test
     @DisplayName("pageSize 미입력 시 기본값 10")
     void pageable_default() throws Exception {
 
-        when(productService.readAll(any()))
-                .thenReturn(List.of());
+        when(productService.searchProducts(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new SliceImpl<>(List.of()));
 
-        mockMvc.perform(get("/api/products"))
+        mockMvc.perform(get("/api/products/search"))
                 .andExpect(status().isOk());
 
-        verify(productService).readAll(argThat(pageable ->
-                pageable.getPageSize() == 10
-        ));
+        verify(productService).searchProducts(
+                any(), any(), any(), any(), any(),
+                argThat(pageable ->
+                        pageable.getPageSize() == 10
+                )
+        );
     }
 
     @Test
