@@ -21,7 +21,7 @@ public class StoreCategoryServiceImpl implements StoreCategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    @Transactional // 부모 서비스에서 트랜잭션이 시작되었겠지만, 안전을 위해 붙여줍니다.
+    @Transactional
     public void createStoreCategory(Store store, Category category) {
         if (storeCategoryRepository.existsByStoreAndCategory(store, category)) {
             return;

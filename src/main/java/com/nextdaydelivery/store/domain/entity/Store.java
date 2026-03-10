@@ -68,6 +68,7 @@ public class Store extends BaseAuditEntity {
         this.detailAddress = detailAddress;
         this.ratingAvg = BigDecimal.ZERO; // 초기값 0.0
         this.reviewCount = 0;             // 초기값 0
+        this.ratingTotal = 0;
     }
 
     public void update(String name, String detailAddress, StoreAddress address) {
@@ -99,8 +100,8 @@ public class Store extends BaseAuditEntity {
         this.ratingTotal -= rating;
         this.reviewCount--;
         this.ratingAvg = reviewCount == 0
-            ? BigDecimal.ZERO
-            : BigDecimal.valueOf((double) ratingTotal / reviewCount);
+                ? BigDecimal.ZERO
+                : BigDecimal.valueOf((double) ratingTotal / reviewCount);
     }
 
 }
