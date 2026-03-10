@@ -7,6 +7,7 @@ import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.user.application.UserService;
 import com.nextdaydelivery.user.presentation.dto.request.AddressUpdateRequest;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
+import com.nextdaydelivery.user.presentation.dto.request.UserProfileUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,20 @@ public class UserApiController {
     ) {
         Long userId = principal.getAuthUserDto().userId();
         userService.updateAddress(userId, request);
+
+        return CommonResponse.onSuccess(null);
+    }
+
+    @PatchMapping("/me")
+    @RequireOwnerRole
+    @RequireCustomerRole
+    public CommonResponse<Void> updateMyProfile(
+            @Valid @RequestBody UserProfileUpdateRequest request,
+            @AuthenticationPrincipal PrincipalDetails principal
+    ) {
+        Long userId = principal.getAuthUserDto().userId();
+
+        userService.updateMyProfile(userId, request);
 
         return CommonResponse.onSuccess(null);
     }

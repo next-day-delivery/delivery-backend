@@ -11,6 +11,7 @@ import com.nextdaydelivery.user.presentation.dto.request.AddressUpdateRequest;
 import com.nextdaydelivery.user.presentation.dto.request.CustomerSignUpRequest;
 import com.nextdaydelivery.user.presentation.dto.request.OwnerSignUpRequest;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
+import com.nextdaydelivery.user.presentation.dto.request.UserProfileUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,6 +81,22 @@ public class UserService {
 
         UserAddress newAddress = UserAddress.create(oldAddress.getUser(), request.address());
         userAddressRepository.save(newAddress);
+    }
+
+    @Transactional
+    public void updateMyProfile(Long userId, UserProfileUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (!user.getNickname().equals(request.nickname()) && userRepository.existsByNickname(request.nickname())) {
+            throw new BusinessException(UserErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        if (!user.getEmail().equals(request.email()) && userRepository.existsByEmail(request.email())) {
+            throw new BusinessException(UserErrorCode.DUPLICATE_EMAIL);
+        }
+
+        user.updateProfile(request.nickname(), request.email());
     }
 
     @Transactional
