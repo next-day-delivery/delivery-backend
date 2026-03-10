@@ -31,14 +31,15 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         // 조회 조건
         BooleanExpression predicate = nameCondition(name)
                 .and(priceCondition(minPrice, maxPrice))
-                .and(cursorCondition(cursorId));
+                .and(cursorCondition(cursorId))
+                .and(product.deletedAt.isNull());
 
         // Querydsl 조회: createdAt DESC, productId DESC
         List<Product> contents = queryFactory
                 .selectFrom(product)
                 .where(predicate)
                 .orderBy(product.createdAt.desc(), product.productId.desc())
-                .limit(pageSize + 1)  // hasNext 판단
+                .limit(pageSize + 1)
                 .fetch();
 
         boolean hasNext = contents.size() > pageSize;
@@ -66,16 +67,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         return predicate;
     }
 
-    /**
-     * cursorId 기준으로 커서 페이징 조회된 결과 중 마지막 productId(cursor)보다 작은 데이터를 가져옵니다. createdAt 기준 DESC 정렬 + UUID DESC tie-break
-     */
     private BooleanExpression cursorCondition(UUID cursorId) {
         if (cursorId == null) {
             return null;
         }
 
-        // 커서 Product의 createdAt을 내부적으로 가져오기 위해 서브쿼리
-        // 간단히 Querydsl에서 join 없이 처리 가능
         Product cursorProduct = queryFactory
                 .selectFrom(product)
                 .where(product.productId.eq(cursorId))
