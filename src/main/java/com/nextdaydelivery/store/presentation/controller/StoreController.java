@@ -55,8 +55,11 @@ public class StoreController {
     @PatchMapping("/{storeId}")
     public CommonResponse<StoreResponse> updateStore(
             @PathVariable UUID storeId,
-            @Valid @RequestBody StoreUpdateRequest request) {
-        StoreResponse response = storeService.updateStore(storeId, request);
+            @Valid @RequestBody StoreUpdateRequest request,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        String updatedBy = String.valueOf(principalDetails.getAuthUserDto().userId());
+        StoreResponse response = storeService.updateStore(storeId, request, updatedBy);
         return CommonResponse.onSuccess(response);
     }
 

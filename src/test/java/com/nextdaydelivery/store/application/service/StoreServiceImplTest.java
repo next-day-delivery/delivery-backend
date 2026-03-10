@@ -152,13 +152,22 @@ class StoreServiceImplTest {
     @Test
     @DisplayName("가게 삭제 - 성공")
     void deleteStore_success() {
+        // 1. 준비 (Given)
         UUID storeId = UUID.randomUUID();
-        Store store = createMockStore(createMockUser(), createMockAddress());
+        Long userId = 1L; // 삭제를 시도하는 유저 ID
+        User user = createMockUser(); // 이 안에서 userId가 1L로 설정되어 있음
+        Store store = createMockStore(user, createMockAddress());
+
+        // storeId로 가게 조회 시 store 반환
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
 
-        storeService.deleteStore(storeId, "admin");
+        // [추가] 삭제자 ID(1L)로 유저 조회 시 user 반환
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
-        // Soft Delete 확인 (엔티티 내부 필드 체크)
+        // 2. 실행 (When)
+        storeService.deleteStore(storeId, String.valueOf(userId));
+
+        // 3. 검증 (Then)
         assertThat(ReflectionTestUtils.getField(store, "deletedAt")).isNotNull();
     }
 }

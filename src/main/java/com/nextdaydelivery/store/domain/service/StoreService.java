@@ -20,7 +20,7 @@ public interface StoreService {
 
     // 3. 가게 정보 수정 (StoreUpdateResponse 대신 StoreResponse 재사용)
     // 수정 후 변경된 전체 상세 데이터를 보여주는 것이 프론트엔드 작업에 유리합니다.
-    StoreResponse updateStore(UUID storeId, StoreUpdateRequest request);
+    StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, String updatedBy);
 
     // 4. 가게 삭제
     void deleteStore(UUID storeId, String deletedBy);

@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,9 +77,17 @@ public class StoreServiceImpl implements StoreService {
 
     @Transactional
     @Override
-    public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request) {
+    public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, String updatedBy) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 가게가 존재하지 않습니다."));
+
+        User user = userRepository.findById(Long.valueOf(updatedBy))
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        // 소유권 검사 ( 본인 가게인 지 )
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new IllegalArgumentException("가게의 소유주만 가게를 수정할 수 있습니다.");
+        }
 
         // 주소 및 카테고리 업데이트
         StoreAddress newAddress = storeAddressService.getOrCreateAddress(
@@ -100,6 +109,14 @@ public class StoreServiceImpl implements StoreService {
     public void deleteStore(UUID storeId, String deletedBy) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 가게가 존재하지 않습니다."));
+
+        User user = userRepository.findById(Long.valueOf(deletedBy))
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        // 소유권 검사 ( 본인 가게인 지 )
+        if (!user.getUserId().equals(store.getUser().getUserId())) {
+            throw new IllegalArgumentException("가게의 소유주만 가게를 수정할 수 있습니다.");
+        }
         store.delete(deletedBy);
     }
 
@@ -111,7 +128,7 @@ public class StoreServiceImpl implements StoreService {
         List<Store> stores = storePage.getContent();
 
         if (stores.isEmpty()) {
-            return Page.empty(pageable);
+            return new PageImpl<>(List.of(), pageable, storePage.getTotalElements());
         }
 
         // 2. 카테고리 일괄 조회 (Querydsl - 1번, N+1 방지)

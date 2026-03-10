@@ -131,7 +131,9 @@ class StoreControllerTest extends ControllerTestSupport {
                 new BigDecimal("4.8"), 100, List.of("치킨")
         );
 
-        given(storeService.updateStore(eq(storeId), any(StoreUpdateRequest.class))).willReturn(response);
+        String updatedBy = String.valueOf(mockUser.userId());
+
+        given(storeService.updateStore(eq(storeId), any(StoreUpdateRequest.class), eq(updatedBy))).willReturn(response);
 
         mockMvc.perform(patch("/api/stores/{storeId}", storeId)
                         .with(user(principal)).with(csrf())
