@@ -6,6 +6,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -41,12 +50,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@AutoConfigureRestDocs
 @WebMvcTest(CartController.class)
 @Import(SecurityConfig.class)
 class CartControllerTest extends ControllerTestSupport {
@@ -92,6 +103,20 @@ class CartControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.productId").value(productId.toString()))
                 .andExpect(jsonPath("$.quantity").value(2L))
                 .andExpect(jsonPath("$.cartStatus").value(CartStatus.ACTIVE.name()))
+                .andDo(document("cart-add-item",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("productId").description("장바구니에 담을 상품 ID"),
+                                fieldWithPath("quantity").description("추가할 수량")
+                        ),
+                        responseFields(
+                                fieldWithPath("cartId").description("장바구니 ID"),
+                                fieldWithPath("storeId").description("가게 ID"),
+                                fieldWithPath("productId").description("상품 ID"),
+                                fieldWithPath("quantity").description("장바구니 내 수량"),
+                                fieldWithPath("cartStatus").description("장바구니 상태")
+                        )))
                 .andDo(print());
 
         verify(cartService).addCartItem(eq(1L), any(ReqPostCartItemDto.class));
@@ -196,6 +221,18 @@ class CartControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.items[0].quantity").value(2L))
                 .andExpect(jsonPath("$.items[1].productId").value(secondProductId.toString()))
                 .andExpect(jsonPath("$.items[1].productName").value("콜라"))
+                .andDo(document("cart-get-active-items",
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("cartId").description("장바구니 ID"),
+                                fieldWithPath("storeId").description("가게 ID"),
+                                fieldWithPath("cartStatus").description("장바구니 상태"),
+                                fieldWithPath("items[]").description("장바구니 품목 목록"),
+                                fieldWithPath("items[].productId").description("상품 ID"),
+                                fieldWithPath("items[].productName").description("상품 이름"),
+                                fieldWithPath("items[].price").description("상품 가격"),
+                                fieldWithPath("items[].quantity").description("상품 수량")
+                        )))
                 .andDo(print());
 
         verify(cartService).getActiveCartItems(1L);
@@ -256,6 +293,22 @@ class CartControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.productId").value(productId.toString()))
                 .andExpect(jsonPath("$.quantity").value(5L))
                 .andExpect(jsonPath("$.cartStatus").value(CartStatus.ACTIVE.name()))
+                .andDo(document("cart-update-item",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("productId").description("수량을 변경할 상품 ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("quantity").description("변경할 수량")
+                        ),
+                        responseFields(
+                                fieldWithPath("cartId").description("장바구니 ID"),
+                                fieldWithPath("storeId").description("가게 ID"),
+                                fieldWithPath("productId").description("상품 ID"),
+                                fieldWithPath("quantity").description("변경된 수량"),
+                                fieldWithPath("cartStatus").description("장바구니 상태")
+                        )))
                 .andDo(print());
 
         verify(cartService).updateCartItem(eq(1L), eq(productId), any(ReqPatchCartItemDto.class));
@@ -313,6 +366,10 @@ class CartControllerTest extends ControllerTestSupport {
                         .with(csrf()))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""))
+                .andDo(document("cart-delete-item",
+                        pathParameters(
+                                parameterWithName("productId").description("삭제할 상품 ID")
+                        )))
                 .andDo(print());
 
         verify(cartService).deleteCartItem(1L, productId);
@@ -343,6 +400,7 @@ class CartControllerTest extends ControllerTestSupport {
                         .with(csrf()))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""))
+                .andDo(document("cart-delete-active-cart"))
                 .andDo(print());
 
         verify(cartService).deleteActiveCart(1L);

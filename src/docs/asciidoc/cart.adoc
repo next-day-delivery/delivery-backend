@@ -1,0 +1,71 @@
+= Delivery Backend API
+:toc: left
+:toclevels: 3
+:toc-title: 목차
+:source-highlighter: highlightjs
+
+== Cart API
+
+=== 장바구니 품목 추가
+==== Request Example
+include::{snippets}/cart-add-item/http-request.adoc[]
+==== Request Fields
+include::{snippets}/cart-add-item/request-fields.adoc[]
+==== Request Body
+include::{snippets}/cart-add-item/request-body.adoc[]
+==== Response Example
+include::{snippets}/cart-add-item/http-response.adoc[]
+==== Response Fields
+include::{snippets}/cart-add-item/response-fields.adoc[]
+==== Response Body
+include::{snippets}/cart-add-item/response-body.adoc[]
+==== Curl Example
+include::{snippets}/cart-add-item/curl-request.adoc[]
+
+=== 활성 장바구니 조회
+==== Request Example
+include::{snippets}/cart-get-active-items/http-request.adoc[]
+==== Response Example
+include::{snippets}/cart-get-active-items/http-response.adoc[]
+==== Response Fields
+include::{snippets}/cart-get-active-items/response-fields.adoc[]
+==== Response Body
+include::{snippets}/cart-get-active-items/response-body.adoc[]
+==== Curl Example
+include::{snippets}/cart-get-active-items/curl-request.adoc[]
+
+=== 장바구니 품목 수량 수정
+==== Request Example
+include::{snippets}/cart-update-item/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/cart-update-item/path-parameters.adoc[]
+==== Request Fields
+include::{snippets}/cart-update-item/request-fields.adoc[]
+==== Request Body
+include::{snippets}/cart-update-item/request-body.adoc[]
+==== Response Example
+include::{snippets}/cart-update-item/http-response.adoc[]
+==== Response Fields
+include::{snippets}/cart-update-item/response-fields.adoc[]
+==== Response Body
+include::{snippets}/cart-update-item/response-body.adoc[]
+==== Curl Example
+include::{snippets}/cart-update-item/curl-request.adoc[]
+
+=== 장바구니 품목 삭제
+==== Request Example
+include::{snippets}/cart-delete-item/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/cart-delete-item/path-parameters.adoc[]
+==== Response Example
+include::{snippets}/cart-delete-item/http-response.adoc[]
+==== Curl Example
+include::{snippets}/cart-delete-item/curl-request.adoc[]
+
+=== 장바구니 삭제
+==== Request Example
+include::{snippets}/cart-delete-active-cart/http-request.adoc[]
+==== Response Example
+include::{snippets}/cart-delete-active-cart/http-response.adoc[]
+==== Curl Example
+include::{snippets}/cart-delete-active-cart/curl-request.adoc[]
