@@ -72,4 +72,8 @@ public class UserAddress extends BaseAuditEntity {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deleterId;
     }
+
+    public String getAddressText() {
+        return this.address;
+    }
 }
