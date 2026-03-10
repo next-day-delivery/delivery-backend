@@ -5,6 +5,7 @@ import static com.nextdaydelivery.user.domain.entity.QUserAddress.userAddress;
 import com.nextdaydelivery.user.domain.entity.UserAddress;
 import com.nextdaydelivery.user.domain.repository.UserAddressRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,7 @@ public class UserAddressRepositoryImpl implements UserAddressRepository {
                         userAddress.user.userId.eq(userId),
                         userAddress.deletedAt.isNull()
                 )
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetchOne();
 
         return Optional.ofNullable(result);
