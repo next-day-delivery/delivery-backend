@@ -74,19 +74,21 @@ Local profile Spring Boot 애플리케이션을 실행합니다. (데이터베�
 - **Review**: `p_review`
 - **AI Engagement**: `p_ai_response`
 
-*(※ 완성된 ERD 다이어그램 이미지 캡처본이나 링크를 아래에 첨부하세요)*
-
-![ERD Image]()
+<img width="2043" height="1011" alt="Screenshot 2026-03-10 at 12 37 15" src="https://github.com/user-attachments/assets/d1d8f63c-cf1c-4e6e-a085-ec66ca21b609" />
 
 ## ⚙️ Architecture
 
+### Server Architecture
+
+<img width="629" height="342" alt="Screenshot 2026-03-10 at 13 02 17" src="https://github.com/user-attachments/assets/1aed01c6-22f4-4744-adde-69f68d689c6f" />
+
 ### Infra Architecture
 
-![Infra Architecture Image]()
+<img width="777" height="532" alt="Screenshot 2026-03-10 at 13 02 59" src="https://github.com/user-attachments/assets/b62fa865-ea91-4d17-afdd-b70fbf9d8fb6" />
 
 ### CI/CD Pipeline
 
-![CI/CD Pipeline Image]()
+<img width="1190" height="436" alt="Screenshot 2026-03-10 at 13 03 48" src="https://github.com/user-attachments/assets/44b87e3d-ae68-464a-bf9d-6a66bffccaf8" />
 
 ## 📚 API 문서
 
