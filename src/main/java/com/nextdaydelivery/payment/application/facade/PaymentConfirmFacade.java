@@ -1,11 +1,13 @@
-package com.nextdaydelivery.payment.application.service;
+package com.nextdaydelivery.payment.application.facade;
 
+import com.nextdaydelivery.cart.application.service.CartService;
 import com.nextdaydelivery.checkout.application.service.CheckoutService;
 import com.nextdaydelivery.checkout.domain.entity.Checkout;
 import com.nextdaydelivery.global.domain.error.PaymentErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.application.service.OrderService;
 import com.nextdaydelivery.order.domain.entity.Order;
+import com.nextdaydelivery.payment.application.service.PaymentService;
 import com.nextdaydelivery.payment.domain.entity.Payment;
 import com.nextdaydelivery.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.nextdaydelivery.payment.presentation.dto.response.PaymentConfirmResponse;
@@ -18,13 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentConfirmFacadeImpl implements PaymentConfirmFacade {
+public class PaymentConfirmFacade {
     private final PaymentService paymentService;
     private final CheckoutService checkoutService;
     private final OrderService orderService;
     private final UserService userService;
+    private final CartService cartService;
 
-    @Override
+
     public PaymentConfirmResponse confirm(PaymentConfirmRequest request, Long userId) {
         User user = userService.getById(userId);
         Checkout checkout = checkoutService.getValidatedCheckout(request, userId);
@@ -67,8 +70,7 @@ public class PaymentConfirmFacadeImpl implements PaymentConfirmFacade {
 
         paymentService.markCompleted(payment, order);
         checkoutService.markPaid(checkout, result.paymentKey());
-
-        // 장바구니 비우기
+        cartService.deleteActiveCart(user.getUserId());
 
         return order;
     }

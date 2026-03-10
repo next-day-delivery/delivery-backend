@@ -13,7 +13,7 @@ import com.nextdaydelivery.checkout.domain.enums.CheckoutStatus;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
 import com.nextdaydelivery.global.security.jwt.JwtValidator;
 import com.nextdaydelivery.global.security.principal.PrincipalDetails;
-import com.nextdaydelivery.payment.application.service.PaymentConfirmFacade;
+import com.nextdaydelivery.payment.application.facade.PaymentConfirmFacade;
 import com.nextdaydelivery.payment.domain.enums.PaymentStatus;
 import com.nextdaydelivery.payment.presentation.dto.request.PaymentConfirmRequest;
 import com.nextdaydelivery.payment.presentation.dto.response.PaymentConfirmResponse;

@@ -17,7 +17,7 @@ import com.nextdaydelivery.checkout.presentation.dto.response.CheckoutResponse;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
 import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.global.support.ControllerTestSupport;
-import com.nextdaydelivery.payment.application.service.PaymentConfirmFacade;
+import com.nextdaydelivery.payment.application.facade.PaymentConfirmFacade;
 import com.nextdaydelivery.payment.domain.enums.PaymentMethod;
 import com.nextdaydelivery.payment.presentation.controller.PaymentController;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
