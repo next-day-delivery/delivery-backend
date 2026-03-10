@@ -36,4 +36,5 @@ public interface OrderService {
 
     Order createFromCheckout(Checkout checkout, User user);
 
+    void completeOrder(UUID orderId);
 }

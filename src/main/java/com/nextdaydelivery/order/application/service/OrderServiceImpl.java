@@ -11,6 +11,7 @@ import com.nextdaydelivery.order.application.dto.OrderSnapshot;
 import com.nextdaydelivery.order.domain.entity.Order;
 import com.nextdaydelivery.order.domain.entity.OrderLine;
 import com.nextdaydelivery.order.domain.enums.OrderStatus;
+import com.nextdaydelivery.order.domain.event.OrderCookedEvent;
 import com.nextdaydelivery.order.domain.repository.OrderLineRepository;
 import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import com.nextdaydelivery.order.domain.repository.dto.OrderDetails;
@@ -25,12 +26,14 @@ import com.nextdaydelivery.product.domain.entity.Product;
 import com.nextdaydelivery.product.domain.repository.ProductRepository;
 import com.nextdaydelivery.store.domain.entity.Store;
 import com.nextdaydelivery.store.domain.repository.StoreRepository;
+import com.nextdaydelivery.store.domain.service.StoreService;
 import com.nextdaydelivery.user.domain.entity.User;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,11 +49,14 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderLineRepository orderLineRepository;
 
+
+    private final StoreService storeService;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
 
     @Override
     public Slice<OrderListResponse> getOrdersByCustomer(OrderSearchRequest request, int size) {
-        //유효한 유저인지 검증
         int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
                 validatedPageSize);
@@ -67,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Slice<OrderListResponse> getStoreOrders(UUID storeId, OrderSearchRequest request, Long userId, int size) {
-        //유저가 해당 가게 사장인지 검증
+        validateStoreOwner(storeId, userId);
         int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
                 validatedPageSize);
@@ -113,6 +119,7 @@ public class OrderServiceImpl implements OrderService {
     public void changeOrderStatusByOwner(OrderStatusRequest request, UUID orderId, Long userId) {
         Order order = getOrderByOwnerIdWithLock(orderId, userId);
         order.changeStatus(request.orderStatus());
+        publishOrderCookedEventIfNecessary(order);
     }
 
     @Transactional
@@ -120,6 +127,7 @@ public class OrderServiceImpl implements OrderService {
     public void changeOrderStatusByManager(OrderStatusRequest request, UUID orderId) {
         Order order = getOrderWithLock(orderId);
         order.changeStatus(request.orderStatus());
+        publishOrderCookedEventIfNecessary(order);
     }
 
     @Transactional
@@ -149,6 +157,27 @@ public class OrderServiceImpl implements OrderService {
 
         orderLineRepository.saveAll(orderLines);
         return savedOrder;
+    }
+
+    @Override
+    public OrderReviewStatusResponse getReviewStatus(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(NoSuchElementException::new);
+        return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
+    }
+
+    @Override
+    public void completeOrder(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
+
+        order.changeStatus(OrderStatus.ORDER_COMPLETED);
+    }
+
+    private void publishOrderCookedEventIfNecessary(Order order) {
+        if (order.getOrderStatus() == OrderStatus.ORDER_COOKED) {
+            applicationEventPublisher.publishEvent(new OrderCookedEvent(order.getOrderId()));
+        }
     }
 
     private Order getOrderWithLock(UUID orderId) {
@@ -188,12 +217,6 @@ public class OrderServiceImpl implements OrderService {
         throw new BusinessException(OrderErrorCode.ACCESS_DENIED);
     }
 
-    @Override
-    public OrderReviewStatusResponse getReviewStatus(UUID orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(NoSuchElementException::new);
-        return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
-    }
 
     private OrderSnapshot deserializeSnapshot(JsonNode jsonNode) {
         if (jsonNode == null || jsonNode.isNull()) {
@@ -204,6 +227,12 @@ public class OrderServiceImpl implements OrderService {
             return objectMapper.treeToValue(jsonNode, OrderSnapshot.class);
         } catch (JsonProcessingException e) {
             throw new BusinessException(OrderErrorCode.ORDER_SNAPSHOT_PARSE_ERROR);
+        }
+    }
+
+    private void validateStoreOwner(UUID storeId, Long userId) {
+        if (!storeRepository.existsByIdAndUserId(storeId, userId)) {
+            throw new BusinessException(OrderErrorCode.NOT_YOUR_STORE_ORDER);
         }
     }
 }
