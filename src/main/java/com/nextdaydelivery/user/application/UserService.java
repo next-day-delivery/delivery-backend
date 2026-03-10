@@ -91,12 +91,18 @@ public class UserService {
         if (!user.getNickname().equals(request.nickname()) && userRepository.existsByNickname(request.nickname())) {
             throw new BusinessException(UserErrorCode.DUPLICATE_NICKNAME);
         }
-
         if (!user.getEmail().equals(request.email()) && userRepository.existsByEmail(request.email())) {
             throw new BusinessException(UserErrorCode.DUPLICATE_EMAIL);
         }
 
         user.updateProfile(request.nickname(), request.email());
+
+        try {
+            userRepository.flush();
+
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(UserErrorCode.DUPLICATE_PROFILE_INFO);
+        }
     }
 
     @Transactional
