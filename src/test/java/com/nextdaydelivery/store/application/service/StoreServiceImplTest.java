@@ -165,7 +165,7 @@ class StoreServiceImplTest {
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
         // 2. 실행 (When)
-        storeService.deleteStore(storeId, String.valueOf(userId));
+        storeService.deleteStore(storeId, userId);
 
         // 3. 검증 (Then)
         assertThat(ReflectionTestUtils.getField(store, "deletedAt")).isNotNull();

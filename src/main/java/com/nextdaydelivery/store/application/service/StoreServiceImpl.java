@@ -77,11 +77,11 @@ public class StoreServiceImpl implements StoreService {
 
     @Transactional
     @Override
-    public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, String updatedBy) {
+    public StoreResponse updateStore(UUID storeId, StoreUpdateRequest request, Long updatedBy) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 가게가 존재하지 않습니다."));
 
-        User user = userRepository.findById(Long.valueOf(updatedBy))
+        User user = userRepository.findById(updatedBy)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
         // 소유권 검사 ( 본인 가게인 지 )
@@ -106,18 +106,18 @@ public class StoreServiceImpl implements StoreService {
 
     @Transactional
     @Override
-    public void deleteStore(UUID storeId, String deletedBy) {
+    public void deleteStore(UUID storeId, Long deletedBy) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 가게가 존재하지 않습니다."));
 
-        User user = userRepository.findById(Long.valueOf(deletedBy))
+        User user = userRepository.findById(deletedBy)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
         // 소유권 검사 ( 본인 가게인 지 )
         if (!user.getUserId().equals(store.getUser().getUserId())) {
-            throw new IllegalArgumentException("가게의 소유주만 가게를 수정할 수 있습니다.");
+            throw new IllegalArgumentException("가게의 소유주만 가게를 삭제할 수 있습니다.");
         }
-        store.delete(deletedBy);
+        store.delete(String.valueOf(deletedBy));
     }
 
     @Transactional(readOnly = true)

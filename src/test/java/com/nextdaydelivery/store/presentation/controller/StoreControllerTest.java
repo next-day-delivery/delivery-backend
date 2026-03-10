@@ -122,6 +122,7 @@ class StoreControllerTest extends ControllerTestSupport {
     @Test
     @DisplayName("가게 정보 수정 - 성공")
     void updateStore() throws Exception {
+        // 1. 테스트 데이터 준비
         UUID storeId = UUID.randomUUID();
         StoreUpdateRequest request = new StoreUpdateRequest(
                 "수정된 가게", "서울", "강남구", "역삼동", "수정주소", List.of(UUID.randomUUID())
@@ -131,10 +132,17 @@ class StoreControllerTest extends ControllerTestSupport {
                 new BigDecimal("4.8"), 100, List.of("치킨")
         );
 
-        String updatedBy = String.valueOf(mockUser.userId());
+        // [중요] 매처 밖에서 미리 값을 추출합니다.
+        Long userId = mockUser.userId();
 
-        given(storeService.updateStore(eq(storeId), any(StoreUpdateRequest.class), eq(updatedBy))).willReturn(response);
+        // 2. Mock 설정 (매처를 중첩해서 사용하지 마세요!)
+        given(storeService.updateStore(
+                eq(storeId),
+                any(StoreUpdateRequest.class),
+                eq(userId) // 깔끔하게 eq() 하나만 사용
+        )).willReturn(response);
 
+        // 3. 실행 및 검증
         mockMvc.perform(patch("/api/stores/{storeId}", storeId)
                         .with(user(principal)).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

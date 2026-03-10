@@ -58,7 +58,7 @@ public class StoreController {
             @Valid @RequestBody StoreUpdateRequest request,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        String updatedBy = String.valueOf(principalDetails.getAuthUserDto().userId());
+        Long updatedBy = principalDetails.getAuthUserDto().userId();
         StoreResponse response = storeService.updateStore(storeId, request, updatedBy);
         return CommonResponse.onSuccess(response);
     }
@@ -70,7 +70,7 @@ public class StoreController {
     public CommonResponse<String> deleteStoreUsingUserDetails(
             @PathVariable UUID storeId,
             @AuthenticationPrincipal PrincipalDetails principalDetails) { // 실제 서비스에선 인증 객체(User)에서 추출 권장
-        String deletedBy = String.valueOf(principalDetails.getAuthUserDto().userId());
+        Long deletedBy = principalDetails.getAuthUserDto().userId();
         storeService.deleteStore(storeId, deletedBy);
         return CommonResponse.onSuccess("가게가 성공적으로 삭제되었습니다.");
     }
