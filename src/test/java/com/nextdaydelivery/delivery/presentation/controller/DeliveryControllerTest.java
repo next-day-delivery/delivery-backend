@@ -26,7 +26,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(DeliveryController.class)
+@WebMvcTest(controllers = {DeliveryController.class})
 class DeliveryControllerTest {
 
     @Autowired

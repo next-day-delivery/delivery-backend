@@ -14,7 +14,8 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -43,6 +45,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@WebMvcTest(controllers = {ProductController.class})
 @AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureRestDocs
 class ProductControllerTest extends ControllerTestSupport {
@@ -119,11 +122,16 @@ class ProductControllerTest extends ControllerTestSupport {
     void searchProducts_restdocs() throws Exception {
         UUID storeId = UUID.randomUUID();
 
-        ProductResponse p1 = new ProductResponse(UUID.randomUUID(), "순살양념치킨", "한 입에 쏙! 비법 소스가 듬뿍 배어든 겉바속촉 인생 순살양념치킨", 23000);
-        ProductResponse p2 = new ProductResponse(UUID.randomUUID(), "사천양념치킨", "입안 가득 퍼지는 알싸한 풍미! 멈출 수 없는 화끈한 유혹, 사천양념치킨", 23000);
-        ProductResponse p3 = new ProductResponse(UUID.randomUUID(), "옛날통닭치킨", "겉은 바삭 속은 촉촉! 얇은 껍질 속 육즙이 팡 터지는 추억의 그 맛, 정통 옛날통닭", 15000);
-        ProductResponse p4 = new ProductResponse(UUID.randomUUID(), "마늘통닭치킨", "알싸한 마늘 소스가 듬뿍! 겉바속촉 통닭과 환상 조화를 이루는 중독적인 풍미.", 20000);
-        ProductResponse p5 = new ProductResponse(UUID.randomUUID(), "불닭치킨", "한 번 맛보면 멈출 수 없는 강렬한 매운맛, 중독성 끝판왕 불닭치킨!", 18000);
+        ProductResponse p1 = new ProductResponse(UUID.randomUUID(), "순살양념치킨", "한 입에 쏙! 비법 소스가 듬뿍 배어든 겉바속촉 인생 순살양념치킨",
+                23000);
+        ProductResponse p2 = new ProductResponse(UUID.randomUUID(), "사천양념치킨",
+                "입안 가득 퍼지는 알싸한 풍미! 멈출 수 없는 화끈한 유혹, 사천양념치킨", 23000);
+        ProductResponse p3 = new ProductResponse(UUID.randomUUID(), "옛날통닭치킨",
+                "겉은 바삭 속은 촉촉! 얇은 껍질 속 육즙이 팡 터지는 추억의 그 맛, 정통 옛날통닭", 15000);
+        ProductResponse p4 = new ProductResponse(UUID.randomUUID(), "마늘통닭치킨",
+                "알싸한 마늘 소스가 듬뿍! 겉바속촉 통닭과 환상 조화를 이루는 중독적인 풍미.", 20000);
+        ProductResponse p5 = new ProductResponse(UUID.randomUUID(), "불닭치킨", "한 번 맛보면 멈출 수 없는 강렬한 매운맛, 중독성 끝판왕 불닭치킨!",
+                18000);
 
         Slice<ProductResponse> slice = new SliceImpl<>(List.of(p1, p2, p3, p4, p5), PageRequest.of(0, 50), false);
 
@@ -508,6 +516,7 @@ class ProductControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.data").value(productId.toString()));
     }
+
     @Test
     @DisplayName("상품 숨김 처리 성공")
     void hideById() throws Exception {
