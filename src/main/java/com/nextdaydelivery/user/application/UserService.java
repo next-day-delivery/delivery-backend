@@ -7,6 +7,8 @@ import com.nextdaydelivery.user.domain.entity.UserAddress;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import com.nextdaydelivery.user.domain.repository.UserAddressRepository;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
+import com.nextdaydelivery.user.presentation.dto.request.CustomerSignUpRequest;
+import com.nextdaydelivery.user.presentation.dto.request.OwnerSignUpRequest;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,6 +34,11 @@ public class UserService {
             throw new BusinessException(UserErrorCode.USER_ALREADY_EXISTS);
         }
 
+        String resolvedAddress = switch (request) {
+            case CustomerSignUpRequest c -> c.deliveryAddress();
+            case OwnerSignUpRequest o -> o.businessAddress();
+        };
+
         String encodedPassword = passwordEncoder.encode(request.password());
 
         User newUser = User.create(
@@ -48,7 +55,7 @@ public class UserService {
 
             UserAddress newAddress = UserAddress.create(
                     savedUser,
-                    request.address()
+                    resolvedAddress
             );
             userAddressRepository.save(newAddress);
 

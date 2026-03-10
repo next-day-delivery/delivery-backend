@@ -14,6 +14,7 @@ import com.nextdaydelivery.user.domain.entity.UserAddress;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import com.nextdaydelivery.user.domain.repository.UserAddressRepository;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
+import com.nextdaydelivery.user.presentation.dto.request.CustomerSignUpRequest;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ class UserServiceTest {
     @DisplayName("회원가입 성공: 중복 없는 정상 데이터가 주어지면 비밀번호를 암호화하여 유저와 주소를 모두 저장한다.")
     void signUp_Success() {
         // given
-        PublicSignUpRequest request = new PublicSignUpRequest(
+        CustomerSignUpRequest request = new CustomerSignUpRequest(
                 "tester", "TestPassword1!", "테스터", "test@test.com", UserRole.CUSTOMER, "서울특별시 강남구"
         );
 
@@ -82,14 +83,14 @@ class UserServiceTest {
         assertThat(capturedUser.getPassword()).isNotEqualTo(request.password());
 
         UserAddress capturedAddress = addressCaptor.getValue();
-        assertThat(capturedAddress.getAddress()).isEqualTo(request.address());
+        assertThat(capturedAddress.getAddress()).isEqualTo(request.deliveryAddress());
     }
 
     @Test
     @DisplayName("회원가입 실패: 이미 존재하는 아이디, 이메일, 닉네임 중 하나라도 중복되면 예외가 발생한다.")
     void signUp_Fail_DuplicateUser() {
         // given
-        PublicSignUpRequest request = new PublicSignUpRequest(
+        PublicSignUpRequest request = new CustomerSignUpRequest(
                 "duplicateUser", "TestPassword1!", "중복유저", "dup@test.com", UserRole.CUSTOMER, "서울특별시 강남구"
         );
 
