@@ -27,7 +27,7 @@ jobs:
 
       # 테스트 복구 전까지 임시
       - name: Build jar
-        run: ./gradlew clean bootJar -x test
+        run: ./gradlew clean build
 
       - name: Build Docker image
         run: docker build -t next-day-delivery-api:dev .

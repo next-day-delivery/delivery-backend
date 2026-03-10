@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_URLS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/docs/**").permitAll() // rest docs 생성 시 접근 가능한 설정
                         .requestMatchers("/actuator/**").hasRole("MASTER")
                         .anyRequest().authenticated()
                 )
