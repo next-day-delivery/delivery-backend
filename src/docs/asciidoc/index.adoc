@@ -204,3 +204,21 @@ include::{snippets}/manager-delete/response-fields.adoc[]
 include::{snippets}/manager-delete/response-body.adoc[]
 ==== Curl Example
 include::{snippets}/manager-delete/curl-request.adoc[]
+
+== Auth API
+
+=== 로그인
+==== Request Example
+include::{snippets}/auth-sign-in/http-request.adoc[]
+==== Request Fields
+include::{snippets}/auth-sign-in/request-fields.adoc[]
+==== Request Body
+include::{snippets}/auth-sign-in/request-body.adoc[]
+==== Response Example
+include::{snippets}/auth-sign-in/http-response.adoc[]
+==== Response Fields
+include::{snippets}/auth-sign-in/response-fields.adoc[]
+==== Response Body
+include::{snippets}/auth-sign-in/response-body.adoc[]
+==== Curl Example
+include::{snippets}/auth-sign-in/curl-request.adoc[]
