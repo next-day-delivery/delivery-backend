@@ -10,7 +10,7 @@ RUN chmod +x ./gradlew
 
 COPY src src
 
-RUN ./gradlew --no-daemon bootJar test
+RUN ./gradlew --no-daemon build
 
 FROM eclipse-temurin:21-jre-jammy
 
