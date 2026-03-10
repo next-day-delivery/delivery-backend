@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -158,7 +159,7 @@ public class OrderServiceImpl implements OrderService {
         return new OrderReviewStatusResponse(order.isReviewed(), order.getReviewedAt());
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void completeOrder(UUID orderId) {
         Order order = orderRepository.findByIdWithLock(orderId)

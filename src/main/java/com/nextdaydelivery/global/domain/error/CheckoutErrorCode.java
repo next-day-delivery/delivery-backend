@@ -15,7 +15,7 @@ public enum CheckoutErrorCode implements ErrorCode {
     CHECKOUT_EXPIRED(HttpStatus.BAD_REQUEST, "C006", "결제 가능 시간이 만료되어 결제할 수 없습니다."),
     INVALID_CHECKOUT_STATUS(HttpStatus.BAD_REQUEST, "C007", "결제 가능 상태가 아닙니다."),
     AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "C008", "결제 예정 금액이 변경되었습니다. 장바구니를 다시 확인해 주세요."),
-    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "C009", "결제 예정 금액이 변경되었습니다. 장바구니를 다시 확인해 주세요.");
+    INVALID_ARGUMENT(HttpStatus.BAD_REQUEST, "C009", "입력된 가게 아이디가 유효하지 않습니다.");
     private final HttpStatus status;
     private final String code;
     private final String message;
