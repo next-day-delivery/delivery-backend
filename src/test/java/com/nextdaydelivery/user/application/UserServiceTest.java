@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 import com.nextdaydelivery.global.domain.error.UserErrorCode;
@@ -14,8 +15,11 @@ import com.nextdaydelivery.user.domain.entity.UserAddress;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import com.nextdaydelivery.user.domain.repository.UserAddressRepository;
 import com.nextdaydelivery.user.domain.repository.UserRepository;
+import com.nextdaydelivery.user.presentation.dto.request.AddressUpdateRequest;
 import com.nextdaydelivery.user.presentation.dto.request.CustomerSignUpRequest;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -105,5 +109,73 @@ class UserServiceTest {
         then(passwordEncoder).shouldHaveNoInteractions();
         then(userRepository).should(times(0)).save(any());
         then(userAddressRepository).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("주소 변경 성공: 새로운 주소가 입력되면 기존 주소는 만료 처리되고 새 주소가 저장된다.")
+    void updateAddress_Success() {
+        // given
+        Long userId = 1L;
+        AddressUpdateRequest request = new AddressUpdateRequest("서울특별시 서초구 신주소");
+
+        User mockUser = User.builder().username("tester").build();
+        ReflectionTestUtils.setField(mockUser, "userId", userId);
+
+        UserAddress oldAddress = UserAddress.create(mockUser, "서울특별시 강남구 구주소");
+        ReflectionTestUtils.setField(oldAddress, "userAddressId", UUID.randomUUID());
+
+        given(userAddressRepository.findActiveAddressByUserId(userId))
+                .willReturn(Optional.of(oldAddress));
+
+        // when
+        userService.updateAddress(userId, request);
+
+        // then
+        assertThat(oldAddress.getDeletedAt()).isNotNull();
+        assertThat(oldAddress.getDeletedBy()).isEqualTo(String.valueOf(userId));
+
+        then(userAddressRepository).should(times(1)).save(addressCaptor.capture());
+
+        UserAddress capturedNewAddress = addressCaptor.getValue();
+        assertThat(capturedNewAddress.getAddress()).isEqualTo(request.address());
+        assertThat(capturedNewAddress.getUser()).isEqualTo(mockUser);
+    }
+
+    @Test
+    @DisplayName("주소 변경 성공 (최적화): 기존 주소와 100% 동일한 주소가 들어오면 저장 로직을 생략(Short-circuit)한다.")
+    void updateAddress_Success_SameAddress_ShortCircuit() {
+        // given
+        Long userId = 1L;
+        AddressUpdateRequest request = new AddressUpdateRequest("서울특별시 강남구 그대로");
+
+        User mockUser = User.builder().username("tester").build();
+        UserAddress oldAddress = UserAddress.create(mockUser, "서울특별시 강남구 그대로");
+
+        given(userAddressRepository.findActiveAddressByUserId(userId))
+                .willReturn(Optional.of(oldAddress));
+
+        // when
+        userService.updateAddress(userId, request);
+
+        // then
+        assertThat(oldAddress.getDeletedAt()).isNull();
+        then(userAddressRepository).should(never()).save(any(UserAddress.class));
+    }
+
+    @Test
+    @DisplayName("주소 변경 실패: 활성화된 기존 주소를 찾을 수 없으면 예외가 발생한다.")
+    void updateAddress_Fail_AddressNotFound() {
+        Long userId = 1L;
+        AddressUpdateRequest request = new AddressUpdateRequest("서울특별시 서초구 신주소");
+
+        given(userAddressRepository.findActiveAddressByUserId(userId))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.updateAddress(userId, request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(UserErrorCode.ADDRESS_NOT_FOUND.getMessage());
+
+        then(userAddressRepository).should(never()).save(any(UserAddress.class));
     }
 }
