@@ -67,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Slice<OrderListResponse> getStoreOrders(UUID storeId, OrderSearchRequest request, Long userId, int size) {
         validateStoreOwner(storeId, userId);
-        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
+        Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.of(request, storeId),
                 size);
         return orderSlices.map(OrderListResponse::from);
 
