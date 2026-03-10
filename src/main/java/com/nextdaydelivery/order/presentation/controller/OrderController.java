@@ -15,6 +15,7 @@ import com.nextdaydelivery.order.presentation.dto.response.OrderListResponse;
 import com.nextdaydelivery.order.presentation.dto.response.OrderReviewStatusResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,12 +39,12 @@ public class OrderController {
     @GetMapping("/me")
     public CommonResponse<Slice<OrderListResponse>> getMyOrders(@AuthenticationPrincipal PrincipalDetails details,
                                                                 @RequestParam(required = false) UUID cursor,
-                                                                @RequestParam(required = false, defaultValue = "10") int size) {
+                                                                Pageable pageable) {
         OrderSearchRequest request = OrderSearchRequest.builder()
                 .lastReadOrderId(cursor)
                 .customerId(details.getAuthUserDto().userId())
                 .build();
-        Slice<OrderListResponse> response = orderService.getOrdersByCustomer(request, size);
+        Slice<OrderListResponse> response = orderService.getOrdersByCustomer(request, pageable.getPageSize());
         return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
@@ -51,8 +52,8 @@ public class OrderController {
     @PostMapping("/search")
     public CommonResponse<Slice<OrderListResponse>> getAllOrders(
             @RequestBody OrderSearchRequest request,
-            @RequestParam(required = false, defaultValue = "10") int size) {
-        Slice<OrderListResponse> response = orderService.getOrdersByManager(request, size);
+            Pageable pageable) {
+        Slice<OrderListResponse> response = orderService.getOrdersByManager(request, pageable.getPageSize());
         return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 
@@ -62,14 +63,14 @@ public class OrderController {
                                                                    @RequestParam(required = false, defaultValue = "false") Boolean active,
                                                                    @AuthenticationPrincipal PrincipalDetails details,
                                                                    @RequestParam(required = false) UUID cursor,
-                                                                   @RequestParam(required = false, defaultValue = "10") int size) {
+                                                                   Pageable pageable) {
         OrderSearchRequest request = OrderSearchRequest.builder()
                 .storeId(storeId)
                 .lastReadOrderId(cursor)
                 .status(active ? OrderStatus.getActiveStatus() : null)
                 .build();
         Slice<OrderListResponse> response = orderService.getStoreOrders(storeId, request, details.getAuthUserDto()
-                .userId(), size);
+                .userId(), pageable.getPageSize());
         return CommonResponse.onSuccess(HttpStatus.OK, response);
     }
 

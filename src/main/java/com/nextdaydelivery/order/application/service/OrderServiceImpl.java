@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextdaydelivery.checkout.domain.entity.Checkout;
-import com.nextdaydelivery.global.config.PaginationConfig;
 import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.application.dto.OrderSnapshot;
@@ -42,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final PaginationConfig paginationConfig;
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
     private final OrderLineRepository orderLineRepository;
@@ -54,26 +52,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Slice<OrderListResponse> getOrdersByCustomer(OrderSearchRequest request, int size) {
-        int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
-                validatedPageSize);
+                size);
         return orderSlices.map(slice -> OrderListResponse.ofCustomer(slice, request.customerId()));
     }
 
     @Override
     public Slice<OrderListResponse> getOrdersByManager(OrderSearchRequest request, int size) {
-        int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
-                validatedPageSize);
+                size);
         return orderSlices.map(OrderListResponse::from);
     }
 
     @Override
     public Slice<OrderListResponse> getStoreOrders(UUID storeId, OrderSearchRequest request, Long userId, int size) {
         validateStoreOwner(storeId, userId);
-        int validatedPageSize = paginationConfig.getValidatedSize(size);
         Slice<OrderSlice> orderSlices = orderRepository.searchOrders(OrderSearchCritera.from(request),
-                validatedPageSize);
+                size);
         return orderSlices.map(OrderListResponse::from);
 
     }
