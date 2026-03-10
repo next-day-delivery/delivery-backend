@@ -18,6 +18,7 @@ import com.nextdaydelivery.user.domain.repository.UserRepository;
 import com.nextdaydelivery.user.presentation.dto.request.AddressUpdateRequest;
 import com.nextdaydelivery.user.presentation.dto.request.CustomerSignUpRequest;
 import com.nextdaydelivery.user.presentation.dto.request.PublicSignUpRequest;
+import com.nextdaydelivery.user.presentation.dto.request.UserProfileUpdateRequest;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -188,6 +189,121 @@ class UserServiceTest {
                     .hasMessageContaining(UserErrorCode.ADDRESS_NOT_FOUND.getMessage());
 
             then(userAddressRepository).should(never()).save(any(UserAddress.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("내 정보 수정 (updateMyProfile)")
+    class UpdateMyProfileTest {
+
+        @Test
+        @DisplayName("성공: 닉네임과 이메일이 모두 새롭게 변경되며 중복이 없으면 정상 업데이트된다.")
+        void updateMyProfile_Success() {
+            // given
+            Long userId = 1L;
+            User mockUser = User.builder()
+                    .username("tester")
+                    .nickname("기존닉네임")
+                    .email("old@test.com")
+                    .build();
+            ReflectionTestUtils.setField(mockUser, "userId", userId);
+
+            UserProfileUpdateRequest request = new UserProfileUpdateRequest("새로운닉네임", "new@test.com");
+
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
+
+            given(userRepository.existsByNickname(request.nickname())).willReturn(false);
+            given(userRepository.existsByEmail(request.email())).willReturn(false);
+
+            // when
+            userService.updateMyProfile(userId, request);
+
+            // then
+            assertThat(mockUser.getNickname()).isEqualTo("새로운닉네임");
+            assertThat(mockUser.getEmail()).isEqualTo("new@test.com");
+        }
+
+        @Test
+        @DisplayName("성공 (최적화): 닉네임과 이메일이 기존과 100% 동일하면 단락 평가(Short-circuit)로 인해 DB 쿼리가 발생하지 않는다.")
+        void updateMyProfile_Success_ShortCircuit() {
+            // given
+            Long userId = 1L;
+            User mockUser = User.builder()
+                    .nickname("유지되는닉네임")
+                    .email("keep@test.com")
+                    .build();
+
+            UserProfileUpdateRequest request = new UserProfileUpdateRequest("유지되는닉네임", "keep@test.com");
+
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
+
+            // when
+            userService.updateMyProfile(userId, request);
+
+            // then
+            assertThat(mockUser.getNickname()).isEqualTo("유지되는닉네임");
+            assertThat(mockUser.getEmail()).isEqualTo("keep@test.com");
+
+            then(userRepository).should(never()).existsByNickname(any());
+            then(userRepository).should(never()).existsByEmail(any());
+        }
+
+        @Test
+        @DisplayName("실패: 변경하려는 닉네임이 이미 다른 유저에 의해 사용 중이면 예외가 발생한다.")
+        void updateMyProfile_Fail_DuplicateNickname() {
+            // given
+            Long userId = 1L;
+            User mockUser = User.builder().nickname("기존닉네임").build();
+            UserProfileUpdateRequest request = new UserProfileUpdateRequest("중복닉네임", "new@test.com");
+
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
+            given(userRepository.existsByNickname("중복닉네임")).willReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> userService.updateMyProfile(userId, request))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(UserErrorCode.DUPLICATE_NICKNAME.getMessage());
+
+            then(userRepository).should(never()).existsByEmail(any());
+        }
+
+        @Test
+        @DisplayName("실패: 닉네임은 기존과 동일하거나 통과했지만, 변경하려는 이메일이 중복이면 예외가 발생한다.")
+        void updateMyProfile_Fail_DuplicateEmail() {
+            // given
+            Long userId = 1L;
+            User mockUser = User.builder()
+                    .nickname("기존닉네임")
+                    .email("old@test.com")
+                    .build();
+
+            UserProfileUpdateRequest request = new UserProfileUpdateRequest("기존닉네임", "중복이메일@test.com");
+
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
+
+            given(userRepository.existsByEmail("중복이메일@test.com")).willReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> userService.updateMyProfile(userId, request))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(UserErrorCode.DUPLICATE_EMAIL.getMessage());
+
+            then(userRepository).should(never()).existsByNickname(any());
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 유저의 식별자로 프로필 수정을 요청하면 예외가 발생한다.")
+        void updateMyProfile_Fail_UserNotFound() {
+            // given
+            Long userId = 999L;
+            UserProfileUpdateRequest request = new UserProfileUpdateRequest("새로운닉네임", "new@test.com");
+
+            given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> userService.updateMyProfile(userId, request))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(UserErrorCode.USER_NOT_FOUND.getMessage());
         }
     }
 
