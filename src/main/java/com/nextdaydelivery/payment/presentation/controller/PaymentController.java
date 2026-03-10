@@ -1,6 +1,7 @@
 package com.nextdaydelivery.payment.presentation.controller;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
+import com.nextdaydelivery.global.security.annotation.RequireCustomerRole;
 import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.payment.application.service.PaymentConfirmFacade;
 import com.nextdaydelivery.payment.presentation.dto.request.PaymentConfirmRequest;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
     private final PaymentConfirmFacade paymentApprovalFacade;
 
-
+    @RequireCustomerRole
     @PostMapping("/confirm")
     public CommonResponse<PaymentConfirmResponse> confirmPayment(@RequestBody PaymentConfirmRequest request,
                                                                  @AuthenticationPrincipal

@@ -4,6 +4,7 @@ import com.nextdaydelivery.checkout.application.service.CheckoutService;
 import com.nextdaydelivery.checkout.presentation.dto.request.CheckoutRequest;
 import com.nextdaydelivery.checkout.presentation.dto.response.CheckoutResponse;
 import com.nextdaydelivery.global.dto.CommonResponse;
+import com.nextdaydelivery.global.security.annotation.RequireCustomerRole;
 import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CheckoutController {
     private final CheckoutService checkoutService;
 
-
+    @RequireCustomerRole
     @PostMapping("/request")
     public CommonResponse<CheckoutResponse> requestCheckout(@RequestBody @Valid CheckoutRequest request,
                                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
