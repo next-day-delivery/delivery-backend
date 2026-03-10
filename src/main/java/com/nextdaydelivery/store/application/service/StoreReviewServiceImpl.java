@@ -32,4 +32,9 @@ public class StoreReviewServiceImpl implements StoreReviewService {
     public void minusReviewSummary(Store store, int rating) {
         store.removeReview(rating);
     }
+
+    @Override
+    public void updateReviewSummary(Store store, int oldRating, int newRating) {
+        store.updateReview(oldRating, newRating);
+    }
 }

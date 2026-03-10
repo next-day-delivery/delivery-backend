@@ -11,5 +11,7 @@ public interface StoreReviewService {
 
     void plusReviewSummary(Store store, int rating);
 
+    void updateReviewSummary(Store store, int oldRating, int newRating);
+
     void minusReviewSummary(Store store, int rating);
 }

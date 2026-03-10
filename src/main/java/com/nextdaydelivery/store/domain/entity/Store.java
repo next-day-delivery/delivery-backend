@@ -88,6 +88,12 @@ public class Store extends BaseAuditEntity {
         this.ratingAvg = BigDecimal.valueOf((double) ratingTotal / reviewCount);
     }
 
+    // 리뷰 수정 시
+    public void updateReview(int oldRating, int newRating) {
+        this.ratingTotal = this.ratingTotal - oldRating + newRating;
+        this.ratingAvg = BigDecimal.valueOf((double) ratingTotal / reviewCount);
+    }
+
     // 리뷰 삭제 시
     public void removeReview(int rating) {
         this.ratingTotal -= rating;

@@ -78,6 +78,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new BusinessException(AuthErrorCode.FORBIDDEN); // 403
         }
 
+        storeReviewService.updateReviewSummary(review.getStore(), review.getRating(), request.rating());
         review.updateReview(request.content(), request.rating());
         return review;
     }
