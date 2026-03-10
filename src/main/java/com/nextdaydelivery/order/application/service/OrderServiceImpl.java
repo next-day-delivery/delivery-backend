@@ -161,7 +161,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public void completeOrder(UUID orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithLock(orderId)
                 .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
 
         order.changeStatus(OrderStatus.ORDER_COMPLETED);
