@@ -47,18 +47,20 @@ public class ProductRepositoryImpl implements ProductRepository {
                                              Integer minPrice,
                                              Integer maxPrice,
                                              UUID cursorId,
+                                             UUID storeId,
                                              Pageable pageable) {
 
         int pageSize = pageable.getPageSize();
 
-        BooleanExpression predicate = nameCondition(name)
-                .and(priceCondition(minPrice, maxPrice))
-                .and(cursorCondition(cursorId))
-                .and(product.deletedAt.isNull());
-
         List<Product> contents = queryFactory
                 .selectFrom(product)
-                .where(predicate)
+                .where(
+                        nameCondition(name),
+                        priceCondition(minPrice, maxPrice),
+                        cursorCondition(cursorId),
+                        storeCondition(storeId),
+                        product.deletedAt.isNull()
+                )
                 .orderBy(product.createdAt.desc(), product.productId.desc())
                 .limit(pageSize + 1)
                 .fetch();
@@ -107,5 +109,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                         product.createdAt.eq(cursorProduct.getCreatedAt())
                                 .and(product.productId.lt(cursorId))
                 );
+    }
+
+    private BooleanExpression storeCondition(UUID storeId) {
+        return storeId == null ? null : product.store.storeId.eq(storeId);
     }
 }

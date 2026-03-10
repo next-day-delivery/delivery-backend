@@ -106,9 +106,9 @@ public class ProductServiceImpl implements ProductService {
             Integer minPrice,
             Integer maxPrice,
             UUID cursorId,
-            Pageable pageable) {
+            UUID storeId, Pageable pageable) {
 
-        return productRepository.searchByConditions(name, minPrice, maxPrice, cursorId, pageable)
+        return productRepository.searchByConditions(name, minPrice, maxPrice, cursorId, storeId, pageable)
                 .map(ProductResponse::from);
     }
 

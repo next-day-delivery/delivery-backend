@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -100,18 +98,26 @@ class ProductControllerTest extends ControllerTestSupport {
     void searchProducts_defaultPaging() throws Exception {
         // Mock 데이터
         UUID productId = UUID.randomUUID();
-        ProductResponse response = new ProductResponse(productId, "상품", "설명", 10000);
+        UUID storeId = UUID.randomUUID();
+
+        ProductResponse response =
+                new ProductResponse(productId, "상품", "설명", 10000);
 
         Slice<ProductResponse> slice = new SliceImpl<>(
                 List.of(response)
         );
 
-        // Mockito matcher 수정: 모든 파라미터를 matcher로 감싸기
         given(productService.searchProducts(
-                any(), any(), any(), any(), any(Pageable.class)
+                nullable(String.class),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(UUID.class),
+                eq(storeId),
+                any(Pageable.class)
         )).willReturn(slice);
 
         mockMvc.perform(get("/api/products/search")
+                        .param("storeId", storeId.toString())   // 필수
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -120,9 +126,13 @@ class ProductControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.data.content[0].productDetail").value("설명"))
                 .andExpect(jsonPath("$.data.content[0].price").value(10000));
 
-        // 서비스 호출 검증
         verify(productService).searchProducts(
-                any(), any(), any(), any(), any(Pageable.class)
+                nullable(String.class),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(UUID.class),
+                eq(storeId),
+                any(Pageable.class)
         );
     }
 
@@ -130,7 +140,10 @@ class ProductControllerTest extends ControllerTestSupport {
     @DisplayName("상품 검색 - 이름 필터 적용")
     void searchProducts_withNameFilter() throws Exception {
         UUID productId = UUID.randomUUID();
-        ProductResponse response = new ProductResponse(productId, "피자", "맛있는 피자", 30000);
+        UUID storeId = UUID.randomUUID();
+
+        ProductResponse response =
+                new ProductResponse(productId, "피자", "맛있는 피자", 30000);
 
         Slice<ProductResponse> slice = new SliceImpl<>(
                 List.of(response)
@@ -138,23 +151,32 @@ class ProductControllerTest extends ControllerTestSupport {
 
         String searchName = "피자";
 
-        // Mockito 매처 통일
         given(productService.searchProducts(
-                eq(searchName), nullable(Integer.class), nullable(Integer.class), nullable(UUID.class), any(Pageable.class)
+                eq(searchName),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(UUID.class),
+                eq(storeId),                 // storeId 필수
+                any(Pageable.class)
         )).willReturn(slice);
 
         mockMvc.perform(get("/api/products/search")
+                        .param("storeId", storeId.toString())   // 반드시 전달
                         .param("name", searchName)
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
-                // Slice 때문에 content 안으로 접근
                 .andExpect(jsonPath("$.data.content[0].productName").value("피자"))
                 .andExpect(jsonPath("$.data.content[0].productDetail").value("맛있는 피자"))
                 .andExpect(jsonPath("$.data.content[0].price").value(30000));
 
         verify(productService).searchProducts(
-                eq(searchName), nullable(Integer.class), nullable(Integer.class), nullable(UUID.class), any(Pageable.class)
+                eq(searchName),
+                nullable(Integer.class),
+                nullable(Integer.class),
+                nullable(UUID.class),
+                eq(storeId),
+                any(Pageable.class)
         );
     }
 
@@ -162,7 +184,10 @@ class ProductControllerTest extends ControllerTestSupport {
     @DisplayName("상품 검색 - 가격 범위 필터 적용")
     void searchProducts_withPriceFilter() throws Exception {
         UUID productId = UUID.randomUUID();
-        ProductResponse response = new ProductResponse(productId, "햄버거", "맛있는 햄버거", 15000);
+        UUID storeId = UUID.randomUUID();
+
+        ProductResponse response =
+                new ProductResponse(productId, "햄버거", "맛있는 햄버거", 15000);
 
         Slice<ProductResponse> slice = new SliceImpl<>(
                 List.of(response)
@@ -172,10 +197,16 @@ class ProductControllerTest extends ControllerTestSupport {
         int maxPrice = 20000;
 
         given(productService.searchProducts(
-                nullable(String.class), eq(minPrice), eq(maxPrice), nullable(UUID.class), any(Pageable.class)
+                nullable(String.class),
+                eq(minPrice),
+                eq(maxPrice),
+                nullable(UUID.class),
+                eq(storeId),              // storeId는 필수
+                any(Pageable.class)
         )).willReturn(slice);
 
         mockMvc.perform(get("/api/products/search")
+                        .param("storeId", storeId.toString())   // 반드시 전달
                         .param("minPrice", String.valueOf(minPrice))
                         .param("maxPrice", String.valueOf(maxPrice))
                         .param("page", "0")
@@ -186,7 +217,12 @@ class ProductControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.data.content[0].price").value(15000));
 
         verify(productService).searchProducts(
-                nullable(String.class), eq(minPrice), eq(maxPrice), nullable(UUID.class), any(Pageable.class)
+                nullable(String.class),
+                eq(minPrice),
+                eq(maxPrice),
+                nullable(UUID.class),
+                eq(storeId),
+                any(Pageable.class)
         );
     }
 

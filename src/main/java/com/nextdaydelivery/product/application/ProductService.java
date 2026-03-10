@@ -25,5 +25,6 @@ public interface ProductService {
                                           Integer minPrice,
                                           Integer maxPrice,
                                           UUID cursorId,
+                                          UUID storeId,
                                           Pageable pageable);
 }

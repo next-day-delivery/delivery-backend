@@ -71,10 +71,12 @@ public class ProductController {
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice,
             @RequestParam(required = false) UUID cursor,
+            @RequestParam(required = false) UUID storeId,
             Pageable pageable
     ) {
         return CommonResponse.onSuccess(
-                productService.searchProducts(name, minPrice, maxPrice, cursor, pageable)
+                HttpStatus.OK,
+                productService.searchProducts(name, minPrice, maxPrice, cursor, storeId, pageable)
         );
     }
 }

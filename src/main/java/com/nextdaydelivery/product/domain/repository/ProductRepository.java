@@ -16,6 +16,7 @@ public interface ProductRepository {
                                       Integer minPrice,
                                       Integer maxPrice,
                                       UUID cursorId,
+                                      UUID storeId,
                                       Pageable pageable);
 
 
