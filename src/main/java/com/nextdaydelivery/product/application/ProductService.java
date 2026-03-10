@@ -13,8 +13,6 @@ public interface ProductService {
 
     ProductResponse update(ProductUpdateRequest updateRequest);
 
-    List<ProductResponse> readAll(Pageable pageable);
-
     ProductResponse readById(UUID id);
 
     UUID deleteById(UUID id);

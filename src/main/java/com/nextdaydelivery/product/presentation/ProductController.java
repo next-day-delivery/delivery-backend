@@ -43,11 +43,6 @@ public class ProductController {
         return CommonResponse.onSuccess(HttpStatus.OK, productService.update(updateRequest));
     }
 
-    @GetMapping
-    public CommonResponse<List<ProductResponse>> readAll(Pageable pageable) {
-        return CommonResponse.onSuccess(HttpStatus.OK, productService.readAll(pageable));
-    }
-
     @GetMapping("/{id}")
     public CommonResponse<ProductResponse> readById(@PathVariable UUID id) {
         return CommonResponse.onSuccess(HttpStatus.OK, productService.readById(id));

@@ -65,16 +65,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductResponse> readAll(Pageable pageable) {
-        return productRepository.findAll()
-                .stream()
-                .filter(product -> !product.isHidden())
-                .map(this::response)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public ProductResponse readById(UUID id) {
         Product product = findById(id);
 
