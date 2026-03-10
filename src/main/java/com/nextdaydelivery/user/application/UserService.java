@@ -117,4 +117,9 @@ public class UserService {
         userAddressRepository.findActiveAddressByUserId(userId)
                 .ifPresent(address -> address.markAsDeleted(deleterId));
     }
+
+    public User getById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(UserErrorCode.USER_NOT_FOUND));
+    }
 }
