@@ -1,8 +1,9 @@
 package com.nextdaydelivery.review.presentation.controller;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
-import com.nextdaydelivery.global.security.annotation.AuthUser;
+import com.nextdaydelivery.global.security.annotation.RequireCustomerRole;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.review.application.service.ReviewService;
 import com.nextdaydelivery.review.domain.entity.Review;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
@@ -17,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,7 @@ public class ReviewControllerImpl implements ReviewController {
 
     private final ReviewService reviewService;
 
-    //가게 리뷰 전체 조회
+    //가게 리뷰 전체 조회 (인증 불필요)
     @Override
     @GetMapping("/{storeId}")
     public ResponseEntity<CommonResponse<Page<ReviewList>>> reviewGet(
@@ -43,59 +44,67 @@ public class ReviewControllerImpl implements ReviewController {
         return ResponseEntity.ok(CommonResponse.onSuccess(reviewService.getReview(storeId, pageable)));
     }
 
-    //내 리뷰 저장 ( 주문 내역 -> (주문 내역 리스트 표시) -> 리뷰 작성 클릭 -> 리뷰 작성, 별점 선택 )
+    //내 리뷰 저장
     @Override
+    @RequireCustomerRole
     @PostMapping("/write/{orderId}")
     public ResponseEntity<CommonResponse<ReviewSaveResponse>> reviewPost(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @Valid @RequestBody ReviewCreateRequest request,
         @PathVariable UUID orderId) {
+        AuthUserDto authUser = principalDetails.getAuthUserDto();
         Review savedReview = reviewService.saveReview(request, orderId, authUser);
         return ResponseEntity.ok(CommonResponse.onSuccess(ReviewSaveResponse.from(savedReview)));
     }
 
-    //내가 작성한 리뷰 전체 조회 ( my 배민 -> 리뷰 관리 탭 )
+    //내가 작성한 리뷰 전체 조회
     @Override
+    @RequireCustomerRole
     @GetMapping("/me")
     public ResponseEntity<CommonResponse<Page<ReviewList>>> myReviewListGet(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
+        AuthUserDto authUser = principalDetails.getAuthUserDto();
         return ResponseEntity.ok(CommonResponse.onSuccess(reviewService.getMyReview(authUser.userId(), pageable)));
     }
 
-
-    //내 리뷰 공개 범위 전환( 전체 공개, 숨기기 )
+    //내 리뷰 공개 범위 전환
     @Override
+    @RequireCustomerRole
     @PatchMapping("/me/{reviewId}/visibility")
     public ResponseEntity<CommonResponse<ReviewStatusResponse>> ReviewStatusUpdate(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @PathVariable UUID reviewId
     ) {
+        AuthUserDto authUser = principalDetails.getAuthUserDto();
         Review updatedReview = reviewService.updateMyReviewStatus(authUser, reviewId);
-
         return ResponseEntity.ok(CommonResponse.onSuccess(ReviewStatusResponse.from(updatedReview)));
     }
 
-    //내 리뷰 삭제 (내 리뷰가 보이는 모든 곳에 수정,삭제 버튼 있음)
+    //내 리뷰 삭제
     @Override
-    @DeleteMapping("/me/{reviewId}")
+    @RequireCustomerRole
+    @PatchMapping("/me/{reviewId}/delete")
     public ResponseEntity<CommonResponse<Void>> reviewDelete(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @PathVariable UUID reviewId
     ) {
+        AuthUserDto authUser = principalDetails.getAuthUserDto();
         reviewService.deleteMyReview(authUser, reviewId);
         return ResponseEntity.ok(CommonResponse.onSuccess());
     }
 
-    //내 리뷰 수정 (내 리뷰가 보이는 모든 곳에 수정,삭제 버튼 있음)
+    //내 리뷰 수정
     @Override
+    @RequireCustomerRole
     @PatchMapping("/me/{reviewId}")
     public ResponseEntity<CommonResponse<ReviewSaveResponse>> reviewUpdate(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @PathVariable UUID reviewId,
         @Valid @RequestBody ReviewCreateRequest request
     ) {
+        AuthUserDto authUser = principalDetails.getAuthUserDto();
         Review updatedReview = reviewService.updateMyReview(authUser, reviewId, request);
         return ResponseEntity.ok(CommonResponse.onSuccess(ReviewSaveResponse.from(updatedReview)));
     }

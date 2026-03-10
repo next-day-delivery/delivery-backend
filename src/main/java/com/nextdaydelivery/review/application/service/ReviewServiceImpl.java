@@ -46,8 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
         Store store = order.getStore();
         Review review = Review.create(request, user, order, store);
 
-        //TODO : 주문 테이블에 리뷰 완료 표시 해주는 기능 추가해야함
-
+        order.markAsReviewed();
         storeReviewService.plusReviewSummary(store, request.rating());
         return reviewRepository.save(review);
     }

@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.global.support.ControllerTestSupport;
 import com.nextdaydelivery.review.application.service.ReviewService;
 import com.nextdaydelivery.review.domain.entity.Review;
@@ -22,7 +22,6 @@ import com.nextdaydelivery.review.domain.entity.enums.ReviewStatus;
 import com.nextdaydelivery.review.presentation.dto.request.ReviewCreateRequest;
 import com.nextdaydelivery.review.presentation.dto.response.ReviewList;
 import com.nextdaydelivery.user.domain.entity.enums.UserRole;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -33,10 +32,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 @WebMvcTest(ReviewControllerImpl.class)
 public class ReviewControllerImplTest extends ControllerTestSupport {
@@ -52,9 +50,10 @@ public class ReviewControllerImplTest extends ControllerTestSupport {
 
     private RequestPostProcessor mockAuth() {
         AuthUserDto authUser = new AuthUserDto(1L, UserRole.CUSTOMER);
+        PrincipalDetails principalDetails = new PrincipalDetails(authUser);
         return authentication(new UsernamePasswordAuthenticationToken(
-            authUser, null,
-            Collections.singletonList(new SimpleGrantedAuthority(UserRole.CUSTOMER.getAuthority()))
+            principalDetails, null,
+            principalDetails.getAuthorities()
         ));
     }
 
@@ -154,7 +153,7 @@ public class ReviewControllerImplTest extends ControllerTestSupport {
 
         //when & then
         mockMvc.perform(
-                delete("/api/reviews/me/{reviewId}", reviewId)
+                patch("/api/reviews/me/{reviewId}/delete", reviewId)
                     .with(mockAuth())
                     .with(csrf())
             )
