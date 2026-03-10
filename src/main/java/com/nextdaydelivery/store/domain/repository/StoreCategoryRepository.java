@@ -20,6 +20,9 @@ public interface StoreCategoryRepository {
     // 가게의 첫 번째 카테고리만 조회 (목록 조회 시 대표 카테고리용)
     Optional<StoreCategory> findFirstByStore(Store store);
 
+    // 목록조회 n+1 해결
+    List<StoreCategory> findAllByStoreIn(List<Store> storeIds);
+
     // 삭제 (수정/삭제 시 사용)
     void deleteByStore(Store store);
 }
