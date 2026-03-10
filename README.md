@@ -61,7 +61,7 @@ docker-compose up -d
 
 ### 3. 애플리케이션 실행
 
-Local profile Spring Boot 애플리케이션을 실행합니다. (데이터베이스 테이블, 인덱스 생성 및 변경사항은 DB 실행 시 Liquibase에 의해 자동 마이그레이션 됩니다.)
+Local profile 설정으로 Spring Boot 애플리케이션을 실행합니다. (데이터베이스 테이블, 인덱스 생성 및 변경사항은 DB 실행 시 Liquibase에 의해 자동 마이그레이션 됩니다.)
 
 ## 📊 ERD
 
