@@ -2,6 +2,14 @@ package com.nextdaydelivery.delivery.presentation.controller;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -20,6 +28,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -27,6 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(DeliveryController.class)
+@AutoConfigureRestDocs
 class DeliveryControllerTest {
 
     @Autowired
@@ -58,7 +68,19 @@ class DeliveryControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value("SUCCESS")) // isSuccess -> result로 변경
-                .andExpect(jsonPath("$.code").value("200"));
+                .andExpect(jsonPath("$.code").value("200"))
+                .andDo(document("change-delievery-status-by-owner",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("deliveryId").description("배달 식별 ID (UUID)")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").description("응답 결과 (SUCCESS/FAIL)"),
+                                fieldWithPath("code").description("HTTP 상태 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("timestamp").description("응답 시간"))
+                ));
 
         verify(deliveryService).updateDeliveryStatusByOwner(eq(deliveryId), eq(DeliveryStatus.DELIVERY_ING),
                 eq(userId));
@@ -76,7 +98,19 @@ class DeliveryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(jsonPath("$.result").value("SUCCESS")) // isSuccess -> result로 변경
-                .andExpect(jsonPath("$.code").value("200"));
+                .andExpect(jsonPath("$.code").value("200"))
+                .andDo(document("change-delievery-status-by-manager",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("deliveryId").description("배달 식별 ID (UUID)")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").description("응답 결과 (SUCCESS/FAIL)"),
+                                fieldWithPath("code").description("HTTP 상태 코드"),
+                                fieldWithPath("message").description("응답 메시지"),
+                                fieldWithPath("timestamp").description("응답 시간"))
+                ));
 
         verify(deliveryService).updateDeliveryStatusByManager(eq(deliveryId), eq(DeliveryStatus.DELIVERY_COMPLETED));
     }
