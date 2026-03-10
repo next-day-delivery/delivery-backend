@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record CustomerSignUpRequest(
         @NotBlank(message = "아이디는 필수입니다.")
@@ -27,9 +28,10 @@ public record CustomerSignUpRequest(
         UserRole role,
 
         @NotBlank(message = "배송 주소는 필수 입력값입니다.")
+        @Size(max = 255)
         String deliveryAddress
 ) implements PublicSignUpRequest {
-    
+
     public CustomerSignUpRequest {
         if (role != UserRole.CUSTOMER) {
             throw new IllegalArgumentException("CUSTOMER 가입 요청의 권한은 CUSTOMER여야 합니다.");

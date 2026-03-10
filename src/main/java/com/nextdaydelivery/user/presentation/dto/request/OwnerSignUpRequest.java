@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record OwnerSignUpRequest(
         @NotBlank(message = "아이디는 필수입니다.")
@@ -27,6 +28,7 @@ public record OwnerSignUpRequest(
         UserRole role,
 
         @NotBlank(message = "사업자 주소는 필수 입력값입니다.")
+        @Size(max = 255)
         String businessAddress
 ) implements PublicSignUpRequest {
 
