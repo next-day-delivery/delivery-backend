@@ -1,6 +1,7 @@
 package com.nextdaydelivery.product.presentation;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
+import com.nextdaydelivery.global.security.annotation.RequireOwnerRole;
 import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
@@ -30,11 +31,13 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
+    @RequireOwnerRole
     public CommonResponse<ProductResponse> create(@Valid @RequestBody ProductCreateRequest createRequest) {
         return CommonResponse.onSuccess(HttpStatus.CREATED, productService.create(createRequest));
     }
 
     @PatchMapping
+    @RequireOwnerRole
     public CommonResponse<ProductResponse> update(
             @Valid @RequestBody ProductUpdateRequest updateRequest) {
         return CommonResponse.onSuccess(HttpStatus.OK, productService.update(updateRequest));
@@ -51,11 +54,13 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @RequireOwnerRole
     public CommonResponse<UUID> deleteById(@PathVariable UUID id) {
         return CommonResponse.onSuccess(HttpStatus.OK, productService.deleteById(id));
     }
 
     @PatchMapping("/{id}")
+    @RequireOwnerRole
     public CommonResponse<ProductResponse> hideById(@PathVariable UUID id) {
         return CommonResponse.onSuccess(HttpStatus.OK, productService.hideById(id));
     }
