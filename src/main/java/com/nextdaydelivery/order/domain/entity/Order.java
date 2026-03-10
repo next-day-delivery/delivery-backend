@@ -53,7 +53,7 @@ public class Order extends CreatedAuditEntity {
     @Column(name = "address")
     private String address; // 배송지 (VARCHAR)
 
-    @Column(name = "order_no", unique = true)
+    @Column(name = "order_no", nullable = false, unique = true)
     private String orderNo;
 
     @Column(name = "reviewed_at")
@@ -82,6 +82,9 @@ public class Order extends CreatedAuditEntity {
 
     @Builder
     public Order(String address, String orderNo, User user, Store store) {
+        if (orderNo == null || orderNo.isBlank()) {
+            throw new IllegalArgumentException("orderNo must not be blank");
+        }
         this.orderStatus = OrderStatus.ORDER_REQUESTED;
         this.user = user;
         this.address = address;

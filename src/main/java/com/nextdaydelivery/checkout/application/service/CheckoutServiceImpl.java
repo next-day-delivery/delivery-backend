@@ -60,7 +60,8 @@ public class CheckoutServiceImpl implements CheckoutService {
                     .orElseThrow(() -> new BusinessException(CheckoutErrorCode.CHECKOUT_CONCURRENCY_ERROR));
         }
     }
-
+    
+    @Transactional
     @Override
     public Checkout getValidatedCheckout(PaymentConfirmRequest request, Long userId) {
         Checkout checkout = checkoutRepository.findById(request.checkoutId())

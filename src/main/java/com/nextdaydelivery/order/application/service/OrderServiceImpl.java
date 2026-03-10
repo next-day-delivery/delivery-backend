@@ -122,6 +122,7 @@ public class OrderServiceImpl implements OrderService {
         order.changeStatus(request.orderStatus());
     }
 
+    @Transactional
     @Override
     public Order createFromCheckout(Checkout checkout, User user) {
         OrderSnapshot snapshot = deserializeSnapshot(checkout.getOrderSnapshot());

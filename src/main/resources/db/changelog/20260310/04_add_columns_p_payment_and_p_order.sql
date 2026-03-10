@@ -24,11 +24,8 @@ ALTER TABLE p_order
     ADD CONSTRAINT uk_order_order_no UNIQUE (order_no);
 
 -- rollback ALTER TABLE p_order DROP CONSTRAINT uk_order_order_no;
--- rollback ALTER TABLE p_order DROP COLUMN order_no;
 -- rollback ALTER TABLE p_payment DROP CONSTRAINT fk_payment_user;
--- rollback ALTER TABLE p_payment DROP CONSTRAINT uk_payment_order_no;
 -- rollback ALTER TABLE p_payment DROP COLUMN payment_key;
 -- rollback ALTER TABLE p_payment DROP COLUMN amount;
 -- rollback ALTER TABLE p_payment DROP COLUMN user_id;
--- rollback ALTER TABLE p_payment DROP COLUMN order_no;
 -- rollback ALTER TABLE p_payment ALTER COLUMN order_id SET NOT NULL;

@@ -52,7 +52,16 @@ public class OrderLine extends BaseAuditEntity {
 
 
     @Builder(access = AccessLevel.PRIVATE)
-    public OrderLine(Order order, Product product, Long quantity, Long price) {
+    private OrderLine(Order order, Product product, Long quantity, Long price) {
+        if (order == null || product == null || quantity == null || price == null) {
+            throw new IllegalArgumentException("order, product, quantity, price must not be null");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("quantity must be positive");
+        }
+        if (price < 0) {
+            throw new IllegalArgumentException("price must not be negative");
+        }
         this.order = order;
         this.product = product;
         this.quantity = quantity;
@@ -60,10 +69,6 @@ public class OrderLine extends BaseAuditEntity {
     }
 
     public static OrderLine create(Order order, Product product, Long quantity, Long price) {
-        return OrderLine.builder().order(order)
-                .product(product)
-                .quantity(quantity)
-                .price(price)
-                .build();
+        return OrderLine.builder().order(order).product(product).quantity(quantity).price(price).build();
     }
 }

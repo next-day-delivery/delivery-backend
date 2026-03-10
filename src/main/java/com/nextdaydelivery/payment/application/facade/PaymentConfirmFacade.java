@@ -83,7 +83,8 @@ public class PaymentConfirmFacade {
         paymentService.markFailed(payment);
         checkoutService.expireCheckout(checkout);
     }
-
+    
+    @Transactional
     protected void compensateAndExpire(
             Checkout checkout,
             Payment payment

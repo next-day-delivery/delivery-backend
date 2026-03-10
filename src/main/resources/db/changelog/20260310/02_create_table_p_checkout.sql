@@ -1,3 +1,4 @@
+--liquibase formatted sql
 -- changeset Sehui:16-create-p-checkout-table
 CREATE TABLE p_checkout
 (
