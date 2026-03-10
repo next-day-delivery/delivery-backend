@@ -45,12 +45,18 @@ public class Cart {
     private CartStatus status; // 상태 (ACTIVE, INACTIVE, COMPLETED)
 
     @Builder
-    public static Cart createActive(User user, Store store, CartStatus status) {
+    private Cart(User user, Store store, CartStatus status) {
+        this.user = user;
+        this.store = store;
+        this.status = status;
+    }
+
+    public static Cart createActive(User user, Store store) {
         return Cart.builder()
-            .user(user)
-            .store(store)
-            .status(status)
-            .build();
+                .user(user)
+                .store(store)
+                .status(CartStatus.ACTIVE)
+                .build(); // 이제 안전하게 객체만 생성됩니다.
     }
 
     public void markInactive() {

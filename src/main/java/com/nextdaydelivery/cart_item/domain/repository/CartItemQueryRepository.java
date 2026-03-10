@@ -12,4 +12,6 @@ public interface CartItemQueryRepository {
     List<CartItemSummary> findActiveCartItemsByUserId(Long userId);
 
     long deleteByCartIdAndProductId(UUID cartId, UUID productId);
+
+    long deleteByCartId(UUID cartId);
 }

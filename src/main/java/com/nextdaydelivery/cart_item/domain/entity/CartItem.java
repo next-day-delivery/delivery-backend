@@ -43,12 +43,18 @@ public class CartItem {
     private Product product; // 상품 PK
 
     @Builder
+    private CartItem(Cart cart, Product product, Long quantity) {
+        this.cart = cart;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
     public static CartItem create(Cart cart, Product product, Long quantity) {
         return CartItem.builder()
-            .cart(cart)
-            .product(product)
-            .quantity(quantity)
-            .build();
+                .cart(cart)
+                .product(product)
+                .quantity(quantity)
+                .build();
     }
 
     public void increaseQuantity(Long quantity) {

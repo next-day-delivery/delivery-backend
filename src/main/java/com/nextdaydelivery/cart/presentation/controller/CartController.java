@@ -6,13 +6,13 @@ import com.nextdaydelivery.cart.presentation.dto.request.ReqPostCartItemDto;
 import com.nextdaydelivery.cart.presentation.dto.response.ResGetCartItemsDto;
 import com.nextdaydelivery.cart.presentation.dto.response.ResPatchCartItemDto;
 import com.nextdaydelivery.cart.presentation.dto.response.ResPostCartItemDto;
-import com.nextdaydelivery.global.security.annotation.AuthUser;
 import com.nextdaydelivery.global.security.annotation.RequireCustomerRole;
-import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,32 +32,45 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<ResPostCartItemDto> addCartItem(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @Valid @RequestBody ReqPostCartItemDto request
     ) {
-        return ResponseEntity.ok(cartService.addCartItem(authUser.userId(), request));
+        Long userId = principalDetails.getAuthUserDto().userId();
+        return ResponseEntity.ok(cartService.addCartItem(userId, request));
     }
 
     @GetMapping
-    public ResponseEntity<ResGetCartItemsDto> getActiveCartItems(@AuthUser AuthUserDto authUser) {
-        return ResponseEntity.ok(cartService.getActiveCartItems(authUser.userId()));
+    public ResponseEntity<ResGetCartItemsDto> getActiveCartItems(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getAuthUserDto().userId();
+        return ResponseEntity.ok(cartService.getActiveCartItems(userId));
     }
 
     @PatchMapping("/{productId}")
     public ResponseEntity<ResPatchCartItemDto> updateCartItem(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal  PrincipalDetails principalDetails,
         @PathVariable UUID productId,
         @Valid @RequestBody ReqPatchCartItemDto request
     ) {
-        return ResponseEntity.ok(cartService.updateCartItem(authUser.userId(), productId, request));
+        Long userId = principalDetails.getAuthUserDto().userId();
+        return ResponseEntity.ok(cartService.updateCartItem(userId, productId, request));
     }
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteCartItem(
-        @AuthUser AuthUserDto authUser,
+        @AuthenticationPrincipal PrincipalDetails principalDetails,
         @PathVariable UUID productId
     ) {
-        cartService.deleteCartItem(authUser.userId(), productId);
+        Long userId = principalDetails.getAuthUserDto().userId();
+        cartService.deleteCartItem(userId, productId);
         return ResponseEntity.noContent().build(); // 응답할 data가 없음.
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteCart(
+        @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long userId = principalDetails.getAuthUserDto().userId();
+        cartService.deleteActiveCart(userId);
+        return ResponseEntity.noContent().build();
     }
 }

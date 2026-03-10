@@ -79,4 +79,12 @@ public class CartItemQueryRepositoryImpl implements CartItemQueryRepository {
             )
             .execute();
     }
+
+    @Override
+    public long deleteByCartId(UUID cartId) {
+        return queryFactory
+            .delete(cartItem)
+            .where(cartItem.cart.cartId.eq(cartId))
+            .execute();
+    }
 }

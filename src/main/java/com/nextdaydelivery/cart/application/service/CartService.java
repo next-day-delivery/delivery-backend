@@ -34,7 +34,6 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
     private final UserJpaRepository userJpaRepository;
 
     @Transactional
@@ -132,10 +131,12 @@ public class CartService {
     }
 
     @Transactional
-    public void completeActiveCart(Long userId) {
+    public void deleteActiveCart(Long userId) {
         validateUser(userId);
+
         Cart activeCart = getActiveCart(userId);
-        activeCart.markCompleted();
+        cartItemRepository.deleteByCartId(activeCart.getCartId());
+        cartRepository.delete(activeCart);
     }
 
     private Product getProduct(UUID productId) {
@@ -153,11 +154,11 @@ public class CartService {
             .map(activeCart -> {
                 if (!activeCart.getStore().getStoreId().equals(targetStore.getStoreId())) {
                     activeCart.markInactive();
-                    return cartRepository.save(Cart.createActive(user, targetStore, CartStatus.ACTIVE));
+                    return cartRepository.save(Cart.createActive(user, targetStore));
                 }
                 return activeCart;
             })
-            .orElseGet(() -> cartRepository.save(Cart.createActive(user, targetStore, CartStatus.ACTIVE)));
+            .orElseGet(() -> cartRepository.save(Cart.createActive(user, targetStore)));
     }
 
     private Cart getActiveCart(Long userId) {
