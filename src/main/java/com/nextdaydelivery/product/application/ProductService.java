@@ -17,7 +17,7 @@ public interface ProductService {
 
     UUID deleteById(UUID id);
 
-    ProductResponse hideById(UUID id);
+    ProductResponse hideById(UUID id, String deletedBy);
 
     Slice<ProductResponse> searchProducts(String name,
                                           Integer minPrice,

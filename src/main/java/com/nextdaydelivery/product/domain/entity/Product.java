@@ -91,7 +91,9 @@ public class Product extends BaseAuditEntity {
         this.productDetail = productDetail;
     }
 
-    public void hide() {
+    public void hide(String deletedBy) {
         this.isHidden = true;
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedBy;
     }
 }
