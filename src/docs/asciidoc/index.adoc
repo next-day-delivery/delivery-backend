@@ -501,6 +501,8 @@ include::{snippets}/review-save/http-request.adoc[]
 include::{snippets}/review-save/path-parameters.adoc[]
 ==== Request Fields
 include::{snippets}/review-save/request-fields.adoc[]
+==== Request Body
+include::{snippets}/review-save/request-body.adoc[]
 ==== Response Example
 include::{snippets}/review-save/http-response.adoc[]
 ==== Response Fields
@@ -549,6 +551,8 @@ include::{snippets}/review-update/http-request.adoc[]
 include::{snippets}/review-update/path-parameters.adoc[]
 ==== Request Fields
 include::{snippets}/review-update/request-fields.adoc[]
+==== Request Body
+include::{snippets}/review-update/request-body.adoc[]
 ==== Response Example
 include::{snippets}/review-update/http-response.adoc[]
 ==== Response Fields
