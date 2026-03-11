@@ -64,7 +64,7 @@ include::{snippets}/product-search/response-body.adoc[]
 ==== Curl Example
 include::{snippets}/product-search/curl-request.adoc[]
 
-=== 상품 숨김 처리
+=== 상품 숨김 처리 (Soft Delete)
 ==== Request Example
 include::{snippets}/product-hide/http-request.adoc[]
 ==== Response Example
@@ -221,6 +221,7 @@ include::{snippets}/auth-sign-in/response-fields.adoc[]
 include::{snippets}/auth-sign-in/response-body.adoc[]
 ==== Curl Example
 include::{snippets}/auth-sign-in/curl-request.adoc[]
+
 == Store API
 
 === 상점 생성
@@ -322,8 +323,6 @@ include::{snippets}/order-store-list/response-fields.adoc[]
 include::{snippets}/order-search-list/http-request.adoc[]
 ==== Query Parameters
 include::{snippets}/order-search-list/query-parameters.adoc[]
-==== Request Fields
-include::{snippets}/order-search-list/request-fields.adoc[]
 ==== Response Example
 include::{snippets}/order-search-list/http-response.adoc[]
 ==== Response Fields
@@ -352,22 +351,26 @@ include::{snippets}/order-reject-by-owner/http-response.adoc[]
 === 주문 강제 취소 [관리자]
 ==== Request Example
 include::{snippets}/order-cancel-by-manager/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/order-cancel-by-manager/path-parameters.adoc[]
 ==== Response Example
 include::{snippets}/order-cancel-by-manager/http-response.adoc[]
 
 === 주문 상태 변경 (수락/조리/완료) [사장님]
 ==== Request Example
 include::{snippets}/order-change-status-by-owner/http-request.adoc[]
-==== Request Fields
-include::{snippets}/order-change-status-by-owner/request-fields.adoc[]
+==== Path Parameters
+include::{snippets}/order-change-status-by-owner/path-parameters.adoc[]
 ==== Response Example
 include::{snippets}/order-change-status-by-owner/http-response.adoc[]
 
 === 주문 상태 변경 (수락/조리/완료) [관리자]
 ==== Request Example
 include::{snippets}/order-change-status-by-manager/http-request.adoc[]
-==== Request Fields
-include::{snippets}/order-change-status-by-manager/request-fields.adoc[]
+
+==== Path Parameters
+include::{snippets}/order-change-status-by-manager/path-parameters.adoc[]
+
 ==== Response Example
 include::{snippets}/order-change-status-by-manager/http-response.adoc[]
 
@@ -378,8 +381,6 @@ include::{snippets}/order-change-status-by-manager/http-response.adoc[]
 include::{snippets}/delivery-change-status-by-owner/http-request.adoc[]
 ==== Path Parameters
 include::{snippets}/delivery-change-status-by-owner/path-parameters.adoc[]
-==== Request Fields
-include::{snippets}/delivery-change-status-by-owner/request-fields.adoc[]
 ==== Response Example
 include::{snippets}/delivery-change-status-by-owner/http-response.adoc[]
 
@@ -388,8 +389,6 @@ include::{snippets}/delivery-change-status-by-owner/http-response.adoc[]
 include::{snippets}/delivery-change-status-by-manager/http-request.adoc[]
 ==== Path Parameters
 include::{snippets}/delivery-change-status-by-manager/path-parameters.adoc[]
-==== Request Fields
-include::{snippets}/delivery-change-status-by-manager/request-fields.adoc[]
 ==== Response Example
 include::{snippets}/delivery-change-status-by-manager/http-response.adoc[]
 
@@ -414,3 +413,69 @@ include::{snippets}/payment-confirm/request-fields.adoc[]
 include::{snippets}/payment-confirm/http-response.adoc[]
 ==== Response Fields
 include::{snippets}/payment-confirm/response-fields.adoc[]
+
+== Cart API
+
+=== 장바구니 품목 추가
+==== Request Example
+include::{snippets}/cart-add-item/http-request.adoc[]
+==== Request Fields
+include::{snippets}/cart-add-item/request-fields.adoc[]
+==== Request Body
+include::{snippets}/cart-add-item/request-body.adoc[]
+==== Response Example
+include::{snippets}/cart-add-item/http-response.adoc[]
+==== Response Fields
+include::{snippets}/cart-add-item/response-fields.adoc[]
+==== Response Body
+include::{snippets}/cart-add-item/response-body.adoc[]
+==== Curl Example
+include::{snippets}/cart-add-item/curl-request.adoc[]
+
+=== 활성 장바구니 조회
+==== Request Example
+include::{snippets}/cart-get-active-items/http-request.adoc[]
+==== Response Example
+include::{snippets}/cart-get-active-items/http-response.adoc[]
+==== Response Fields
+include::{snippets}/cart-get-active-items/response-fields.adoc[]
+==== Response Body
+include::{snippets}/cart-get-active-items/response-body.adoc[]
+==== Curl Example
+include::{snippets}/cart-get-active-items/curl-request.adoc[]
+
+=== 장바구니 품목 수량 수정
+==== Request Example
+include::{snippets}/cart-update-item/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/cart-update-item/path-parameters.adoc[]
+==== Request Fields
+include::{snippets}/cart-update-item/request-fields.adoc[]
+==== Request Body
+include::{snippets}/cart-update-item/request-body.adoc[]
+==== Response Example
+include::{snippets}/cart-update-item/http-response.adoc[]
+==== Response Fields
+include::{snippets}/cart-update-item/response-fields.adoc[]
+==== Response Body
+include::{snippets}/cart-update-item/response-body.adoc[]
+==== Curl Example
+include::{snippets}/cart-update-item/curl-request.adoc[]
+
+=== 장바구니 품목 삭제
+==== Request Example
+include::{snippets}/cart-delete-item/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/cart-delete-item/path-parameters.adoc[]
+==== Response Example
+include::{snippets}/cart-delete-item/http-response.adoc[]
+==== Curl Example
+include::{snippets}/cart-delete-item/curl-request.adoc[]
+
+=== 장바구니 삭제
+==== Request Example
+include::{snippets}/cart-delete-active-cart/http-request.adoc[]
+==== Response Example
+include::{snippets}/cart-delete-active-cart/http-response.adoc[]
+==== Curl Example
+include::{snippets}/cart-delete-active-cart/curl-request.adoc[]

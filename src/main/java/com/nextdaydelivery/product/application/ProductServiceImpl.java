@@ -82,9 +82,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse hideById(UUID id) {
+    public ProductResponse hideById(UUID id, String deletedBy) {
         Product product = findById(id);
-        product.hide();
+        product.hide(deletedBy);
 
         return response(product);
     }
