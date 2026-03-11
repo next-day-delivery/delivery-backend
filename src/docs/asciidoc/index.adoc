@@ -414,3 +414,79 @@ include::{snippets}/payment-confirm/request-fields.adoc[]
 include::{snippets}/payment-confirm/http-response.adoc[]
 ==== Response Fields
 include::{snippets}/payment-confirm/response-fields.adoc[]
+
+== Review API
+
+=== 가게 리뷰 전체 조회
+==== Request Example
+include::{snippets}/review-get-by-store/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/review-get-by-store/path-parameters.adoc[]
+==== Response Example
+include::{snippets}/review-get-by-store/http-response.adoc[]
+==== Response Fields
+include::{snippets}/review-get-by-store/response-fields.adoc[]
+==== Curl Example
+include::{snippets}/review-get-by-store/curl-request.adoc[]
+
+=== 내 리뷰 저장
+==== Request Example
+include::{snippets}/review-save/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/review-save/path-parameters.adoc[]
+==== Request Fields
+include::{snippets}/review-save/request-fields.adoc[]
+==== Response Example
+include::{snippets}/review-save/http-response.adoc[]
+==== Response Fields
+include::{snippets}/review-save/response-fields.adoc[]
+==== Curl Example
+include::{snippets}/review-save/curl-request.adoc[]
+
+=== 내 리뷰 전체 조회
+==== Request Example
+include::{snippets}/review-get-my-list/http-request.adoc[]
+==== Response Example
+include::{snippets}/review-get-my-list/http-response.adoc[]
+==== Response Fields
+include::{snippets}/review-get-my-list/response-fields.adoc[]
+==== Curl Example
+include::{snippets}/review-get-my-list/curl-request.adoc[]
+
+=== 내 리뷰 공개 범위 전환
+==== Request Example
+include::{snippets}/review-toggle-visibility/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/review-toggle-visibility/path-parameters.adoc[]
+==== Response Example
+include::{snippets}/review-toggle-visibility/http-response.adoc[]
+==== Response Fields
+include::{snippets}/review-toggle-visibility/response-fields.adoc[]
+==== Curl Example
+include::{snippets}/review-toggle-visibility/curl-request.adoc[]
+
+=== 내 리뷰 삭제
+==== Request Example
+include::{snippets}/review-delete/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/review-delete/path-parameters.adoc[]
+==== Response Example
+include::{snippets}/review-delete/http-response.adoc[]
+==== Response Fields
+include::{snippets}/review-delete/response-fields.adoc[]
+==== Curl Example
+include::{snippets}/review-delete/curl-request.adoc[]
+
+=== 내 리뷰 수정
+==== Request Example
+include::{snippets}/review-update/http-request.adoc[]
+==== Path Parameters
+include::{snippets}/review-update/path-parameters.adoc[]
+==== Request Fields
+include::{snippets}/review-update/request-fields.adoc[]
+==== Response Example
+include::{snippets}/review-update/http-response.adoc[]
+==== Response Fields
+include::{snippets}/review-update/response-fields.adoc[]
+==== Curl Example
+include::{snippets}/review-update/curl-request.adoc[]
