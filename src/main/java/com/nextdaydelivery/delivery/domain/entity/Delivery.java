@@ -36,7 +36,7 @@ public class Delivery extends BaseAuditEntity {
     private UUID deliveryId; // 배달 PK
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order; // 배달에서 주문을 참조
 
     @Enumerated(EnumType.STRING)

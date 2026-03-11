@@ -43,4 +43,9 @@ public class StoreRepositoryImpl implements StoreRepository {
         // 직접 호출이 가능합니다. 실제 로직은 StoreRepositoryCustomImpl에서 실행됩니다.
         return storeJpaRepository.searchStores(condition, pageable);
     }
+
+    @Override
+    public boolean existsByIdAndUserId(UUID storeId, Long userId) {
+        return storeJpaRepository.existsByIdAndUserId(storeId, userId);
+    }
 }

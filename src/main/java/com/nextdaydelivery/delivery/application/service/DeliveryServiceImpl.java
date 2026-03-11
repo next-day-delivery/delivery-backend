@@ -5,8 +5,10 @@ import com.nextdaydelivery.delivery.domain.enums.DeliveryStatus;
 import com.nextdaydelivery.delivery.domain.event.DeliveryCompletedEvent;
 import com.nextdaydelivery.delivery.domain.repository.DeliveryRepository;
 import com.nextdaydelivery.global.domain.error.DeliveryErrorCode;
+import com.nextdaydelivery.global.domain.error.OrderErrorCode;
 import com.nextdaydelivery.global.exception.BusinessException;
 import com.nextdaydelivery.order.domain.entity.Order;
+import com.nextdaydelivery.order.domain.repository.OrderRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class DeliveryServiceImpl implements DeliveryService {
     private final DeliveryRepository deliveryRepository;
+    private final OrderRepository orderRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -42,9 +45,11 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public UUID createDelivery(Order order) {
+    public void createDelivery(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(OrderErrorCode.ORDER_NOT_FOUND));
         Delivery delivery = Delivery.createDelivery(order);
-        return deliveryRepository.save(delivery).getDeliveryId();
+        deliveryRepository.save(delivery);
     }
 
     private void validateOwner(Delivery delivery, Long userId) {
