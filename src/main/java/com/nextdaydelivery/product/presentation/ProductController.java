@@ -2,17 +2,18 @@ package com.nextdaydelivery.product.presentation;
 
 import com.nextdaydelivery.global.dto.CommonResponse;
 import com.nextdaydelivery.global.security.annotation.RequireOwnerRole;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
 import com.nextdaydelivery.product.application.dto.response.ProductResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -56,8 +57,11 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     @RequireOwnerRole
-    public CommonResponse<ProductResponse> hideById(@PathVariable UUID id) {
-        return CommonResponse.onSuccess(HttpStatus.OK, productService.hideById(id));
+    public CommonResponse<ProductResponse> hideById(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        Long deletedBy = principalDetails.getAuthUserDto().userId();
+        return CommonResponse.onSuccess(HttpStatus.OK, productService.hideById(id, String.valueOf(deletedBy)));
     }
 
     @GetMapping("/search")
