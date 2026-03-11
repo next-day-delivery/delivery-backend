@@ -14,7 +14,10 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -22,18 +25,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.nextdaydelivery.global.security.dto.AuthUserDto;
+import com.nextdaydelivery.global.security.principal.PrincipalDetails;
 import com.nextdaydelivery.global.support.ControllerTestSupport;
 import com.nextdaydelivery.product.application.ProductService;
 import com.nextdaydelivery.product.application.dto.request.ProductCreateRequest;
 import com.nextdaydelivery.product.application.dto.request.ProductUpdateRequest;
 import com.nextdaydelivery.product.application.dto.response.ProductResponse;
+import com.nextdaydelivery.user.domain.entity.enums.UserRole;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -43,7 +50,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@AutoConfigureMockMvc(addFilters = false)
+@WebMvcTest(controllers = {ProductController.class})
 @AutoConfigureRestDocs
 class ProductControllerTest extends ControllerTestSupport {
 
@@ -52,6 +59,15 @@ class ProductControllerTest extends ControllerTestSupport {
 
     @MockitoBean
     private ProductService productService;
+
+    private AuthUserDto mockUser;
+    private PrincipalDetails principal;
+
+    @BeforeEach
+    void setUp() {
+        mockUser = new AuthUserDto(1L, UserRole.OWNER);
+        principal = new PrincipalDetails(mockUser);
+    }
 
     @Test
     @DisplayName("허용된 pageSize(30) 요청 시 그대로 전달된다")
@@ -64,7 +80,8 @@ class ProductControllerTest extends ControllerTestSupport {
 
         mockMvc.perform(get("/api/products/search")
                         .param("page", "0")
-                        .param("size", "30"))
+                        .param("size", "30")
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk());
 
         verify(productService).searchProducts(
@@ -85,7 +102,8 @@ class ProductControllerTest extends ControllerTestSupport {
 
         mockMvc.perform(get("/api/products/search")
                         .param("page", "0")
-                        .param("size", "100"))
+                        .param("size", "100")
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk());
 
         verify(productService).searchProducts(
@@ -103,7 +121,8 @@ class ProductControllerTest extends ControllerTestSupport {
         when(productService.searchProducts(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new SliceImpl<>(List.of()));
 
-        mockMvc.perform(get("/api/products/search"))
+        mockMvc.perform(get("/api/products/search")
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk());
 
         verify(productService).searchProducts(
@@ -119,11 +138,16 @@ class ProductControllerTest extends ControllerTestSupport {
     void searchProducts_restdocs() throws Exception {
         UUID storeId = UUID.randomUUID();
 
-        ProductResponse p1 = new ProductResponse(UUID.randomUUID(), "순살양념치킨", "한 입에 쏙! 비법 소스가 듬뿍 배어든 겉바속촉 인생 순살양념치킨", 23000);
-        ProductResponse p2 = new ProductResponse(UUID.randomUUID(), "사천양념치킨", "입안 가득 퍼지는 알싸한 풍미! 멈출 수 없는 화끈한 유혹, 사천양념치킨", 23000);
-        ProductResponse p3 = new ProductResponse(UUID.randomUUID(), "옛날통닭치킨", "겉은 바삭 속은 촉촉! 얇은 껍질 속 육즙이 팡 터지는 추억의 그 맛, 정통 옛날통닭", 15000);
-        ProductResponse p4 = new ProductResponse(UUID.randomUUID(), "마늘통닭치킨", "알싸한 마늘 소스가 듬뿍! 겉바속촉 통닭과 환상 조화를 이루는 중독적인 풍미.", 20000);
-        ProductResponse p5 = new ProductResponse(UUID.randomUUID(), "불닭치킨", "한 번 맛보면 멈출 수 없는 강렬한 매운맛, 중독성 끝판왕 불닭치킨!", 18000);
+        ProductResponse p1 = new ProductResponse(UUID.randomUUID(), "순살양념치킨", "한 입에 쏙! 비법 소스가 듬뿍 배어든 겉바속촉 인생 순살양념치킨",
+                23000);
+        ProductResponse p2 = new ProductResponse(UUID.randomUUID(), "사천양념치킨",
+                "입안 가득 퍼지는 알싸한 풍미! 멈출 수 없는 화끈한 유혹, 사천양념치킨", 23000);
+        ProductResponse p3 = new ProductResponse(UUID.randomUUID(), "옛날통닭치킨",
+                "겉은 바삭 속은 촉촉! 얇은 껍질 속 육즙이 팡 터지는 추억의 그 맛, 정통 옛날통닭", 15000);
+        ProductResponse p4 = new ProductResponse(UUID.randomUUID(), "마늘통닭치킨",
+                "알싸한 마늘 소스가 듬뿍! 겉바속촉 통닭과 환상 조화를 이루는 중독적인 풍미.", 20000);
+        ProductResponse p5 = new ProductResponse(UUID.randomUUID(), "불닭치킨", "한 번 맛보면 멈출 수 없는 강렬한 매운맛, 중독성 끝판왕 불닭치킨!",
+                18000);
 
         Slice<ProductResponse> slice = new SliceImpl<>(List.of(p1, p2, p3, p4, p5), PageRequest.of(0, 50), false);
 
@@ -139,7 +163,8 @@ class ProductControllerTest extends ControllerTestSupport {
         mockMvc.perform(get("/api/products/search")
                         .param("storeId", storeId.toString())
                         .param("page", "0")
-                        .param("size", "50"))
+                        .param("size", "50")
+                        .with(user(principal)))
                 .andExpect(status().isOk())
                 .andDo(document("product-search",
                         preprocessRequest(prettyPrint()),
@@ -213,7 +238,8 @@ class ProductControllerTest extends ControllerTestSupport {
         mockMvc.perform(get("/api/products/search")
                         .param("storeId", storeId.toString())   // 필수
                         .param("page", "0")
-                        .param("size", "10"))
+                        .param("size", "10")
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].productId").value(productId.toString()))
                 .andExpect(jsonPath("$.data.content[0].productName").value("상품"))
@@ -258,7 +284,8 @@ class ProductControllerTest extends ControllerTestSupport {
                         .param("storeId", storeId.toString())   // 반드시 전달
                         .param("name", searchName)
                         .param("page", "0")
-                        .param("size", "10"))
+                        .param("size", "10")
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].productName").value("피자"))
                 .andExpect(jsonPath("$.data.content[0].productDetail").value("맛있는 피자"))
@@ -304,7 +331,8 @@ class ProductControllerTest extends ControllerTestSupport {
                         .param("minPrice", String.valueOf(minPrice))
                         .param("maxPrice", String.valueOf(maxPrice))
                         .param("page", "0")
-                        .param("size", "10"))
+                        .param("size", "10")
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].productName").value("햄버거"))
                 .andExpect(jsonPath("$.data.content[0].productDetail").value("맛있는 햄버거"))
@@ -339,7 +367,8 @@ class ProductControllerTest extends ControllerTestSupport {
 
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.productId").value(productId.toString()))
                 .andExpect(jsonPath("$.data.productName").value("치킨"))
@@ -420,7 +449,8 @@ class ProductControllerTest extends ControllerTestSupport {
 
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isBadRequest());
     }
 
@@ -439,7 +469,8 @@ class ProductControllerTest extends ControllerTestSupport {
 
         mockMvc.perform(patch("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(document("product-update",
                         preprocessRequest(prettyPrint()),
@@ -474,7 +505,8 @@ class ProductControllerTest extends ControllerTestSupport {
 
         given(productService.readById(productId)).willReturn(response);
 
-        mockMvc.perform(get("/api/products/{id}", productId))
+        mockMvc.perform(get("/api/products/{id}", productId)
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(document("product-read",
                         preprocessRequest(prettyPrint()),
@@ -502,12 +534,14 @@ class ProductControllerTest extends ControllerTestSupport {
         given(productService.deleteById(productId))
                 .willReturn(productId);
 
-        mockMvc.perform(delete("/api/products/{id}", productId))
+        mockMvc.perform(delete("/api/products/{id}", productId)
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result").value("SUCCESS"))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.data").value(productId.toString()));
     }
+
     @Test
     @DisplayName("상품 숨김 처리 성공")
     void hideById() throws Exception {
@@ -515,9 +549,10 @@ class ProductControllerTest extends ControllerTestSupport {
 
         ProductResponse response = new ProductResponse(productId, "상품", "설명", 10000);
 
-        given(productService.hideById(productId)).willReturn(response);
+        given(productService.hideById(productId, String.valueOf(principal.getAuthUserDto().userId()))).willReturn(response);
 
-        mockMvc.perform(patch("/api/products/{id}", productId))
+        mockMvc.perform(patch("/api/products/{id}", productId)
+                        .with(user(principal)).with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(document("product-hide",
                         preprocessRequest(prettyPrint()),

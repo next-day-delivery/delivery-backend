@@ -17,6 +17,7 @@ public enum UserErrorCode implements ErrorCode {
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "U008", "사용자 주소를 찾을 수 없습니다."),
     DUPLICATE_PROFILE_INFO(HttpStatus.CONFLICT, "U009", "이미 존재하는 프로필 정보입니다.");
 
+
     private final HttpStatus status;
     private final String code;
     private final String message;

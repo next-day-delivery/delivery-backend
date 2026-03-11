@@ -21,4 +21,6 @@ public interface OrderRepository {
     Slice<OrderSlice> searchOrders(OrderSearchCritera request, int size);
 
     Optional<Order> findById(UUID orderId);
+
+    Order save(Order order);
 }

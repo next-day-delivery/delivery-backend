@@ -88,7 +88,7 @@ Local profile 설정으로 Spring Boot 애플리케이션을 실행합니다. (�
 
 ### CI/CD Pipeline
 
-<img width="1190" height="436" alt="Screenshot 2026-03-10 at 13 03 48" src="https://github.com/user-attachments/assets/44b87e3d-ae68-464a-bf9d-6a66bffccaf8" />
+<img width="854" height="560" alt="Screenshot 2026-03-11 at 10 59 26" src="https://github.com/user-attachments/assets/f4b7fd54-f038-481b-be64-34d4a0241e83" />
 
 ## 📚 API 문서
 

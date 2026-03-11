@@ -23,4 +23,6 @@ public interface StoreRepository {
 
     // 추가: 검색 및 페이징을 위한 메서드
     Page<Store> searchStores(StoreSearchCondition condition, Pageable pageable);
+
+    boolean existsByIdAndUserId(UUID storeId, Long userId);
 }
